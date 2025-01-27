@@ -6,6 +6,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.List;
+
 @Getter
 @Builder
 @ToString
@@ -15,6 +17,7 @@ import lombok.*;
 @AllArgsConstructor
 public class User extends BaseEntity {
     @Id
+    @Column(name="user_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
@@ -27,7 +30,7 @@ public class User extends BaseEntity {
     @Column(name = "name")
     private String name;
 
-    @Column(name = "user_id", unique = true)
+    @Column(name = "login_id", unique = true)
     private String userId;
 
     @Column(name = "password")
@@ -43,6 +46,14 @@ public class User extends BaseEntity {
         this.name = updateDTO.getName();
         this.password = updateDTO.getNewPassword();
         return this;
+    }
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    private UserDetail userDetail;
+
+    public void setUserDetail(UserDetail userDetail) {
+        this.userDetail = userDetail;
+        userDetail.setUser(this); // 양방향 관계 설정
     }
 
 }
