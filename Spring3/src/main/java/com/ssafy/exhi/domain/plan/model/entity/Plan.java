@@ -3,13 +3,11 @@ package com.ssafy.exhi.domain.plan.model.entity;
 import com.ssafy.exhi.base.BaseEntity;
 import com.ssafy.exhi.domain.ServiceType;
 import com.ssafy.exhi.domain.todo.model.entity.Todo;
-import com.ssafy.exhi.domain.user.model.entity.User;
-import io.swagger.v3.oas.annotations.media.Schema;
+import com.ssafy.exhi.domain.virginroad.model.entity.VirginRoad;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -45,4 +43,7 @@ public class Plan extends BaseEntity {
     @OneToMany(mappedBy = "plan")
     private List<Todo> todos;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "virgin_road_id")
+    private VirginRoad virginRoad;
 }
