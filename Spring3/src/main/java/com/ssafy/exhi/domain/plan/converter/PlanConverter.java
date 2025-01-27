@@ -1,7 +1,6 @@
 package com.ssafy.exhi.domain.plan.converter;
 
 import com.ssafy.exhi.domain.plan.model.dto.PlanRequest;
-import com.ssafy.exhi.domain.plan.model.dto.PlanRequest.CreateListDTO;
 import com.ssafy.exhi.domain.plan.model.entity.Plan;
 import com.ssafy.exhi.domain.plan.model.entity.PlanStatus;
 import org.springframework.stereotype.Component;
@@ -11,13 +10,12 @@ import java.util.stream.Collectors;
 
 import static com.ssafy.exhi.domain.plan.model.dto.PlanResponse.*;
 
-@Component
 public class PlanConverter {
-    public List<SimpleResultDTO> toDTO(List<Plan> plans) {
-        return plans.stream().map(this::toDTO).collect(Collectors.toList());
+    public static List<SimpleResultDTO> toDTO(List<Plan> plans) {
+        return plans.stream().map(PlanConverter::toDTO).collect(Collectors.toList());
     }
 
-    public SimpleResultDTO toDTO(Plan plan) {
+    public static SimpleResultDTO toDTO(Plan plan) {
         return SimpleResultDTO.builder()
                 .planId(plan.getId())
                 .planStatus(plan.getPlanStatus())
@@ -26,7 +24,7 @@ public class PlanConverter {
                 .build();
     }
 
-    public Plan toEntity(PlanRequest.CreateDTO createDTO) {
+    public static Plan toEntity(PlanRequest.CreateDTO createDTO) {
         return Plan.builder()
                 .shopName(createDTO.getShopName())
                 .serviceType(createDTO.getServiceType())
@@ -36,9 +34,9 @@ public class PlanConverter {
                 .build();
     }
 
-    public List<Plan> toEntity(CreateListDTO createListDTO) {
-        return createListDTO.getCreateDTO().stream()
-                .map(this::toEntity)
+    public static List<Plan> toEntity(List<PlanRequest.CreateDTO> plans) {
+        return plans.stream()
+                .map(PlanConverter::toEntity)
                 .collect(Collectors.toList());
     }
 }

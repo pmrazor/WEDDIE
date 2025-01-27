@@ -6,8 +6,7 @@ import com.ssafy.exhi.domain.plan.model.dto.PlanResponse;
 import com.ssafy.exhi.domain.plan.service.PlanService;
 import com.ssafy.exhi.exception.ExceptionHandler;
 import com.ssafy.exhi.util.JWTUtil;
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -21,7 +20,7 @@ import static com.ssafy.exhi.domain.plan.model.dto.PlanResponse.*;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/plan")
+@RequestMapping("/api/plan")
 public class PlanController {
 
     private final JWTUtil jwtUtil;
@@ -30,26 +29,20 @@ public class PlanController {
     /**
      * 온보딩에 사용되는 API
      * 결혼 과정에 필요한 모든 row를 생성한다.
-     * @param createListDTO
+     * @param planDTO
      * @return
      */
     @PostMapping
     public ResponseEntity<?> createPlan(
             @RequestHeader("Authorization") String accessToken,
-            @RequestBody PlanRequest.CreateListDTO createListDTO
+            @RequestBody @Valid PlanRequest.CreateDTO planDTO
     ) {
-        if (accessToken == null || accessToken.isEmpty()) {
-            throw new ExceptionHandler(ErrorStatus.TOKEN_NOT_FOUND);
-        }
-        if (createListDTO == null) {
-            throw new ExceptionHandler(ErrorStatus.NOT_ENOUGH_REQUEST_BODY_ERROR);
-        }
 
         Integer userId = jwtUtil.getUserId(accessToken);
-        createListDTO.setUserId(userId);
+        planDTO.setUserId(userId);
         log.info("createPlan userId: {}", userId);
 
-        List<SimpleResultDTO> response = planService.createPlan(createListDTO);
+        SimpleResultDTO response = planService.createPlan(planDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 

@@ -46,4 +46,12 @@ public class Plan extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "virgin_road_id")
     private VirginRoad virginRoad;
+
+    public void updateVirginRoad(VirginRoad virginRoad) {
+        if (this.virginRoad != null) {
+            this.virginRoad.getPlans().remove(this);
+        }
+
+        this.virginRoad = virginRoad;
+    }
 }

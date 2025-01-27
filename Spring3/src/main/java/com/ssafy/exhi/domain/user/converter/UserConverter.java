@@ -10,9 +10,7 @@ public class UserConverter {
     public static UserResponse.DetailResultDTO toDetailResultDTO(User user) {
         return UserResponse.DetailResultDTO.builder()
                 .id(user.getId())
-                .userId(user.getUserId())
-                .department(user.getDepartment())
-                .position(user.getPosition())
+                .loginId(user.getLoginId())
                 .name(user.getName())
                 .createdAt(user.getCreatedAt())
                 .updatedAt(user.getUpdatedAt())
@@ -23,7 +21,7 @@ public class UserConverter {
         return UserResponse.SimpleResultDTO.builder()
                 .id(user.getId())
                 .id(user.getId())
-                .userId(user.getUserId())
+                .loginId(user.getLoginId())
                 .name(user.getName())
                 .createdAt(user.getCreatedAt())
                 .updatedAt(user.getUpdatedAt())
@@ -45,11 +43,10 @@ public class UserConverter {
 
     public static User toEntity(UserRequest.SignUpDTO signUpDTO) {
         return User.builder()
-                .userId(signUpDTO.getUserId())
+                .loginId(signUpDTO.getLoginId())
                 .password(signUpDTO.getPassword())
                 .name(signUpDTO.getName())
-                .department(signUpDTO.getDepartment())
-                .position(signUpDTO.getPosition())
+                .gender(signUpDTO.getGender())
                 .build();
     }
 

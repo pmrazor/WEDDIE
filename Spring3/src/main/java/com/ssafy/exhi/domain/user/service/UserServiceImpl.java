@@ -27,7 +27,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserResponse.TokenDTO login(UserRequest.LoginDTO memberDto) {
         // 로그인 아이디 확인
-        User loginUser = getUserByUserId(memberDto.getUserId());
+        User loginUser = getUserByLoginId(memberDto.getLoginId());
         validatePassword(isMatches(loginUser, memberDto), ErrorStatus.USER_LOGIN_FAILED);
 
         // 토큰 생성
@@ -43,7 +43,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserResponse.SimpleResultDTO register(UserRequest.SignUpDTO memberDto) {
-        if (userRepository.existsUserByUserId(memberDto.getUserId())) {
+        if (userRepository.existsUserByLoginId(memberDto.getLoginId())) {
             throw new ExceptionHandler(ErrorStatus.USER_DUPLICATED_LOGIN_ID);
         }
 
@@ -74,7 +74,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public boolean checkUser(String userId) {
-        return userRepository.existsUserByUserId(userId);
+        return userRepository.existsUserByLoginId(userId);
     }
 
     @Override
@@ -83,8 +83,8 @@ public class UserServiceImpl implements UserService {
         userRepository.delete(user);
     }
 
-    private User getUserByUserId(String userId) {
-        return userRepository.findUserByUserId(userId).orElseThrow(
+    private User getUserByLoginId(String userId) {
+        return userRepository.findUserByLoginId(userId).orElseThrow(
                 () -> new ExceptionHandler(ErrorStatus.USER_NOT_FOUND)
         );
     }

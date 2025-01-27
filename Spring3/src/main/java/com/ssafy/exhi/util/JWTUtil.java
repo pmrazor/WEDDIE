@@ -103,7 +103,7 @@ public class JWTUtil {
                 .add(headers)
                 .and()
                 .subject(subject)
-                .claim("userId", user.getUserId())
+                .claim("userId", user.getLoginId())
                 .claim("name", user.getName())
                 .claim("id", user.getId())
                 .issuedAt(new Date())
