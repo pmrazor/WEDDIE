@@ -9,6 +9,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -18,20 +19,14 @@ import java.util.List;
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor
-@Schema(name = "plan", description = "플랜 엔티티")
 public class Plan extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "plan_id")
     private Integer id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
-    private User user;
-
-    // 업체 이름
-    @Column(name = "name")
-    private String name;
+    @Column(name = "shop_name", nullable = true)
+    private String shopName;
 
     @Column(name = "service_type")
     @Enumerated(EnumType.STRING)
@@ -40,7 +35,6 @@ public class Plan extends BaseEntity {
     @Column(name = "visible")
     private boolean visible;
 
-    // 예약한 날짜
     @Column(name = "plan_time")
     private LocalDateTime planTime;
 

@@ -1,6 +1,7 @@
 package com.ssafy.exhi.domain.user.model.entity;
 
 import com.ssafy.exhi.base.BaseEntity;
+import com.ssafy.exhi.domain.plan.model.entity.Plan;
 import com.ssafy.exhi.domain.user.model.dto.UserRequest;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
@@ -20,6 +21,10 @@ public class User extends BaseEntity {
     @Column(name="user_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "plan_id")
+    private Plan plan;
 
     @Column(name = "department")
     private String department;
@@ -45,6 +50,7 @@ public class User extends BaseEntity {
         this.position = updateDTO.getPosition();
         this.name = updateDTO.getName();
         this.password = updateDTO.getNewPassword();
+
         return this;
     }
 
