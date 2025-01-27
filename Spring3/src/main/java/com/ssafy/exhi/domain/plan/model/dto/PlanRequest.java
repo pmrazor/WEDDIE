@@ -1,27 +1,15 @@
 package com.ssafy.exhi.domain.plan.model.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.ssafy.exhi.domain.ServiceType;
-import com.ssafy.exhi.domain.plan.model.entity.PlanStatus;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
 import java.time.LocalDateTime;
-import java.util.List;
 
 public class PlanRequest {
-
-    @Data
-    @Builder
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class CreateListDTO {
-        private Integer userId;
-
-        private List<CreateDTO> createDTO;
-    }
 
     @Data
     @Builder
@@ -37,6 +25,7 @@ public class PlanRequest {
 
         private boolean visible;
 
+        @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
         private LocalDateTime planTime;
     }
 

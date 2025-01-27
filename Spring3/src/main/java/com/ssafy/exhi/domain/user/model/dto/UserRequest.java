@@ -1,5 +1,6 @@
 package com.ssafy.exhi.domain.user.model.dto;
 
+import com.ssafy.exhi.domain.user.model.entity.Gender;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.Column;
 import jakarta.validation.constraints.NotBlank;
@@ -24,7 +25,7 @@ public class UserRequest {
                 required = true
         )
         @NotNull(message = "Login ID cannot be null")
-        private String userId;
+        private String loginId;
 
         @Schema(
                 title = "비밀번호",
@@ -59,7 +60,7 @@ public class UserRequest {
         )
         @NotNull(message = "Login ID cannot be null")
         @Size(min = 4, max = 16, message = "Login ID must be between 4 and 16 characters")
-        private String userId;
+        private String loginId;
 
         @Schema(
                 title = "비밀번호",
@@ -87,29 +88,13 @@ public class UserRequest {
         @Size(max = 30, message = "name 30 characters")
         private String name;
 
-        @Schema(
-                title = "부서",
-                description = "소속 부서 (최대 30자)",
-                example = "개발팀",
-                maxLength = 30
-        )
-        @Column(name = "department")
-        @Size(max = 30, message = "department 30 characters")
-        private String department;
+        private Gender gender;
 
-        @Schema(
-                title = "직급",
-                description = "직급 정보",
-                example = "선임연구원"
-        )
-        @Column(name = "position")
-        private String position;
     }
 
     @Data
     @Builder
     @ToString
-    @Schema(name = "회원정보 수정 DTO", description = "회원정보 수정 요청 객체")
     @NoArgsConstructor
     @AllArgsConstructor
     public static class UpdateDTO {

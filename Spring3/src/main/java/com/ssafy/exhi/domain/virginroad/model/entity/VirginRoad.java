@@ -28,6 +28,20 @@ public class VirginRoad {
     private Couple couple;
 
     @OneToMany(mappedBy = "virginRoad")
-    private List<Plan> planList = new ArrayList<>();
+    private List<Plan> plans = new ArrayList<>();
 
+    public VirginRoad addPlans(List<Plan> plans) {
+        for (Plan plan : plans) {
+            addPlan(plan);
+        }
+        return this;
+    }
+
+    public void addPlan(Plan plan) {
+        plan.updateVirginRoad(this);
+
+        if (!plans.contains(plan)) {
+            plans.add(plan);
+        }
+    }
 }

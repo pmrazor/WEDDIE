@@ -29,7 +29,7 @@ public class UserResponse {
         private String name;
 
         @Schema(description = "사용자의 아이디", example = "john123")
-        private String userId;
+        private String loginId;
 
         @Schema(description = "사용자 생성 시간", example = "2023-01-01T12:00:00")
         private LocalDateTime createdAt;
@@ -51,7 +51,7 @@ public class UserResponse {
         private String name;
 
         @Schema(description = "사용자의 아이디", example = "john123")
-        private String userId;
+        private String loginId;
 
         @Schema(description = "사용자 생성 시간", example = "2023-01-01T12:00:00")
         private LocalDateTime createdAt;
