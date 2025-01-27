@@ -2,8 +2,6 @@ package com.ssafy.exhi.domain.plan.model.dto;
 
 import com.ssafy.exhi.domain.ServiceType;
 import com.ssafy.exhi.domain.plan.model.entity.PlanStatus;
-import com.ssafy.exhi.domain.todo.model.entity.Todo;
-import com.ssafy.exhi.domain.user.model.entity.User;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -14,6 +12,16 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public class PlanRequest {
+
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class CreateListDTO {
+        private Integer userId;
+
+        private List<CreateDTO> createDTO;
+    }
 
     @Data
     @Builder
@@ -30,8 +38,6 @@ public class PlanRequest {
         private boolean visible;
 
         private LocalDateTime planTime;
-
-        private PlanStatus planStatus;
     }
 
     @Data
@@ -50,7 +56,5 @@ public class PlanRequest {
         private boolean visible;
 
         private LocalDateTime planTime;
-
-        private PlanStatus planStatus;
     }
 }
