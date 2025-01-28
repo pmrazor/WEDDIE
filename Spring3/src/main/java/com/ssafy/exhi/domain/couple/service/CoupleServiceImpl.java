@@ -36,6 +36,11 @@ public class CoupleServiceImpl implements CoupleService {
         return CoupleConverter.toDetailDTO(couple);
     }
 
+    @Override
+    public void deleteCouple(Integer userId) {
+        coupleRepository.delete(findCoupleByUserId(userId));
+    }
+
     private User findUserByUserId(Integer userId) {
         return userRepository.findById(userId)
                 .orElseThrow(

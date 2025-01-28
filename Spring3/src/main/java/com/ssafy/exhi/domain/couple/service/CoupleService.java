@@ -7,4 +7,6 @@ public interface CoupleService {
     CoupleResponse.SimpleResultDTO createCouple(CoupleRequest.CreateDTO coupleDTO);
 
     CoupleResponse.DetailResultDTO getCouple(Integer userId);
+
+    void deleteCouple(Integer userId);
 }

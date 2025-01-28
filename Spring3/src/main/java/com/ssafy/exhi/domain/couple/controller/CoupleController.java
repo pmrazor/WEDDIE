@@ -21,6 +21,7 @@ public class CoupleController {
     private final JWTUtil jwtUtil;
     private final CoupleService coupleService;
 
+
     @PostMapping
     public ResponseEntity<?> createCouple(
             @RequestHeader("Authorization") String accessToken,
@@ -36,7 +37,9 @@ public class CoupleController {
     }
 
     /**
-     * 커플
+     * 커플 조회
+     * 오류
+     *      - 커플을 아직 맺지 않은 경우
      * @param accessToken
      * @return
      */
@@ -49,5 +52,13 @@ public class CoupleController {
         return ResponseEntity.ok().body(response);
     }
 
+    @DeleteMapping
+    public ResponseEntity<?> deleteCouple(@RequestHeader("Authorization") String accessToken) {
+        Integer userId = jwtUtil.getUserId(accessToken);
+        log.info("deleteCouple: userId={}", userId);
+
+        coupleService.deleteCouple(userId);
+        return ResponseEntity.noContent().build();
+    }
 
 }
