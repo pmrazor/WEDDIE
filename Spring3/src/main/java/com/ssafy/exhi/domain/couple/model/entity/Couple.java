@@ -32,7 +32,6 @@ public class Couple {
     @JoinColumn(name = "male_id", unique = true)
     private User male;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "virgin_road_id")
+    @OneToOne(mappedBy = "couple")
     private VirginRoad virginRoad;
 }

@@ -1,7 +1,9 @@
 package com.ssafy.exhi.domain.virginroad.controller;
 
+import com.ssafy.exhi.domain.plan.model.dto.PlanResponse;
 import com.ssafy.exhi.domain.virginroad.model.dto.VirginRoadRequest;
 import com.ssafy.exhi.domain.virginroad.model.dto.VirginRoadResponse;
+import com.ssafy.exhi.domain.virginroad.model.entity.VirginRoad;
 import com.ssafy.exhi.domain.virginroad.service.VirginRoadService;
 import com.ssafy.exhi.util.JWTUtil;
 import lombok.RequiredArgsConstructor;
@@ -29,6 +31,23 @@ public class VirginRoadController {
 
         VirginRoadResponse.SimpleResultDTO response = virginRoadService.createVirginRoad(createDTO);
         log.info("createPlan userId: {}", userId);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    /**
+     * 버진로드 최초 화면에 사용되는 API
+     * 결혼 과정의 상태를 전체적으로 보여준다.
+     * @return
+     */
+    @GetMapping
+    public ResponseEntity<?> getVirginRoad(
+            @RequestHeader("Authorization") String accessToken
+    ) {
+        Integer userId = jwtUtil.getUserId(accessToken);
+        log.info("getPlan userId: {}", userId);
+
+        VirginRoadResponse.SimpleResultDTO response = virginRoadService.getVirginRoad(userId);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }

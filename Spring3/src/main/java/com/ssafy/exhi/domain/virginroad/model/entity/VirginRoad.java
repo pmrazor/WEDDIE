@@ -23,8 +23,8 @@ public class VirginRoad {
     @Column(name = "virgin_road_id")
     private Integer id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "couple_id")
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "couple_id", unique = true)
     private Couple couple;
 
     @OneToMany(mappedBy = "virginRoad")

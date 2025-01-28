@@ -4,6 +4,7 @@ import com.ssafy.exhi.base.status.ErrorStatus;
 import com.ssafy.exhi.domain.couple.model.entity.Couple;
 import com.ssafy.exhi.domain.couple.repository.CoupleRepository;
 import com.ssafy.exhi.domain.plan.converter.PlanConverter;
+import com.ssafy.exhi.domain.plan.model.dto.PlanResponse;
 import com.ssafy.exhi.domain.plan.model.entity.Plan;
 import com.ssafy.exhi.domain.plan.repository.PlanRepository;
 import com.ssafy.exhi.domain.user.model.entity.User;
@@ -31,29 +32,56 @@ public class VirginRoadServiceImpl implements VirginRoadService {
 
     /**
      * 플랜과 버진로드를 동시에 생성하기
+     *
      * @param createDTO
      * @return
      */
     @Override
     public VirginRoadResponse.SimpleResultDTO createVirginRoad(VirginRoadRequest.CreateDTO createDTO) {
         Couple couple = getCoupleByUserId(createDTO.getUserId());
-
+        existVirginRoad(couple);
         // 플랜을 저장
         List<Plan> plans = PlanConverter.toEntity(createDTO.getPlans());
         planRepository.saveAll(plans);
 
         // 버진로드를 저장
         VirginRoad virginRoad = VirginRoadConverter.toEntity(plans, couple);
-
         VirginRoad saved = virginRoadRepository.save(virginRoad);
 
         return VirginRoadConverter.toDTO(saved);
 
     }
 
+    /**
+     * 버진로드를 한번에 보여준다.
+     * 중요한 것은 모둔 결혼 단계의 상태를 보여주기
+     * @param userId
+     * @return
+     */
+    @Override
+    public VirginRoadResponse.SimpleResultDTO getVirginRoad(Integer userId) {
+        Couple couple = getCoupleByUserId(userId);
+        VirginRoad virginRoad = getVirginRoadByCouple(couple);
+
+        return VirginRoadConverter.toDTO(virginRoad);
+    }
+
     private Couple getCoupleByUserId(Integer userId) {
         return coupleRepository.findCoupleByUserId(userId).orElseThrow(
-                () -> new ExceptionHandler(ErrorStatus.USER_NOT_FOUND)
+                () -> new ExceptionHandler(ErrorStatus.COUPLE_NOT_FOUND)
         );
+    }
+
+    private VirginRoad getVirginRoadByCouple(Couple couple) {
+
+        return virginRoadRepository.getVirginRoadByCouple(couple).orElseThrow(
+                () -> new ExceptionHandler(ErrorStatus.VIRGIN_ROAD_NOT_FOUND)
+        );
+    }
+
+    private void existVirginRoad(Couple couple) {
+        if (virginRoadRepository.existsVirginRoadByCouple(couple)) {
+            throw new ExceptionHandler(ErrorStatus.VIRGIN_ROAD_EXISTS);
+        }
     }
 }

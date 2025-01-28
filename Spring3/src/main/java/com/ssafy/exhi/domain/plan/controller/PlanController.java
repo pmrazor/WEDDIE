@@ -1,10 +1,7 @@
 package com.ssafy.exhi.domain.plan.controller;
 
-import com.ssafy.exhi.base.status.ErrorStatus;
 import com.ssafy.exhi.domain.plan.model.dto.PlanRequest;
-import com.ssafy.exhi.domain.plan.model.dto.PlanResponse;
 import com.ssafy.exhi.domain.plan.service.PlanService;
-import com.ssafy.exhi.exception.ExceptionHandler;
 import com.ssafy.exhi.util.JWTUtil;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -12,8 +9,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 import static com.ssafy.exhi.domain.plan.model.dto.PlanResponse.*;
 
