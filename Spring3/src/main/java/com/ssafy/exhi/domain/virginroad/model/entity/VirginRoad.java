@@ -1,5 +1,6 @@
 package com.ssafy.exhi.domain.virginroad.model.entity;
 
+import com.ssafy.exhi.domain.ServiceType;
 import com.ssafy.exhi.domain.couple.model.entity.Couple;
 import com.ssafy.exhi.domain.plan.model.entity.Plan;
 import jakarta.persistence.*;
@@ -10,6 +11,7 @@ import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Entity
 @Getter
@@ -27,8 +29,10 @@ public class VirginRoad {
     @JoinColumn(name = "couple_id", unique = true)
     private Couple couple;
 
-    @OneToMany(mappedBy = "virginRoad")
+    @OneToMany(mappedBy = "virginRoad", cascade = CascadeType.ALL)
     private List<Plan> plans = new ArrayList<>();
+
+    /* 비즈니스 로직 */
 
     public VirginRoad addPlans(List<Plan> plans) {
         for (Plan plan : plans) {
@@ -44,4 +48,23 @@ public class VirginRoad {
             plans.add(plan);
         }
     }
+
+    public void setDefaultPlans() {
+        for (ServiceType serviceType : ServiceType.values()) {
+            Plan plan = Optional.ofNullable(this.findPlanByServiceType(serviceType))
+                    .orElse(Plan.createDefault(serviceType, this));
+
+            addPlan(plan);
+        }
+    }
+
+    private Plan findPlanByServiceType(ServiceType serviceType) {
+        return plans.stream()
+                .filter(plan -> plan.getServiceType() == serviceType)
+                .findFirst()
+                .orElse(null);
+    }
+
+    /* 비즈니스 로직 */
+
 }

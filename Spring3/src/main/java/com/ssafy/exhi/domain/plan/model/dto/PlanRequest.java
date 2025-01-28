@@ -2,6 +2,7 @@ package com.ssafy.exhi.domain.plan.model.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.ssafy.exhi.domain.ServiceType;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -22,19 +23,15 @@ public class PlanRequest {
         @Size(max = 20, message = "20자 이상 입력 불가능")
         private String shopName;
 
+        @NotNull(message = "서비스 타입은 필수 입니다.")
         private ServiceType serviceType;
 
+        @NotNull(message = "가시성 타입은 필수 입니다.")
         private boolean visible;
 
         @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
         private LocalDateTime planTime;
 
-        public static CreateDTO createDefaultDTO(ServiceType serviceType) {
-            return PlanRequest.CreateDTO.builder()
-                    .serviceType(serviceType)
-                    .visible(false) // 디폴트 값 설정 (예: isVisible = false)
-                    .build();
-        }
     }
 
     @Data

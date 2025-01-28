@@ -68,6 +68,15 @@ public class Plan extends BaseEntity {
         this.visible = updateDTO.isVisible();
     }
 
+    public static Plan createDefault(ServiceType serviceType, VirginRoad virginRoad) {
+        return Plan.builder()
+                .virginRoad(virginRoad)
+                .serviceType(serviceType)
+                .visible(false) // 디폴트 값 설정 (예: isVisible = false)
+                .planStatus(PlanStatus.BEFORE_START)
+                .build();
+    }
+
     /* 비즈니스 로직 */
 
 }

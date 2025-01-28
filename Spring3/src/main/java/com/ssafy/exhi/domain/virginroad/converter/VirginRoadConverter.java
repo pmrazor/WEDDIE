@@ -6,18 +6,22 @@ import com.ssafy.exhi.domain.couple.model.entity.Couple;
 import com.ssafy.exhi.domain.plan.converter.PlanConverter;
 import com.ssafy.exhi.domain.plan.model.dto.PlanResponse;
 import com.ssafy.exhi.domain.plan.model.entity.Plan;
+import com.ssafy.exhi.domain.virginroad.model.dto.VirginRoadRequest;
 import com.ssafy.exhi.domain.virginroad.model.dto.VirginRoadResponse;
 import com.ssafy.exhi.domain.virginroad.model.entity.VirginRoad;
 
 import java.util.List;
 
 public class VirginRoadConverter {
-    public static VirginRoad toEntity(List<Plan> plans, Couple couple) {
+
+    public static VirginRoad toEntity(VirginRoadRequest.CreateDTO dto, Couple couple) {
+
+        List<Plan> plans = PlanConverter.toEntity(dto.getPlans());
         return VirginRoad.builder()
+                .id(dto.getUserId())
                 .couple(couple)
                 .plans(plans)
-                .build()
-                .addPlans(plans);
+                .build();
     }
 
     public static VirginRoadResponse.SimpleResultDTO toDTO(VirginRoad virginRoad) {
