@@ -51,4 +51,16 @@ public class VirginRoadController {
 
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
+
+    @DeleteMapping
+    public ResponseEntity<?> deleteVirginRoad(
+            @RequestHeader("Authorization") String accessToken
+    ) {
+        Integer userId = jwtUtil.getUserId(accessToken);
+        log.info("deleteVirginRoad userId: {}", userId);
+
+        virginRoadService.deleteVirginRoad(userId);
+
+        return ResponseEntity.noContent().build();
+    }
 }
