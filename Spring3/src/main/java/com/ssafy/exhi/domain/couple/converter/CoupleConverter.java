@@ -10,11 +10,23 @@ import com.ssafy.exhi.domain.user.model.entity.User;
 
 public class CoupleConverter {
 
-    public static CoupleResponse.SimpleResultDTO toDTO(Couple couple) {
+    public static CoupleResponse.SimpleResultDTO toSimpleDTO(Couple couple) {
         UserResponse.SimpleResultDTO female = UserConverter.toSimpleResultDTO(couple.getFemale());
         UserResponse.SimpleResultDTO male = UserConverter.toSimpleResultDTO(couple.getMale());
 
         return CoupleResponse.SimpleResultDTO.builder()
+                .id(couple.getId())
+                .coupleName(couple.getCoupleName())
+                .male(male)
+                .female(female)
+                .build();
+    }
+
+    public static CoupleResponse.DetailResultDTO toDetailDTO(Couple couple) {
+        UserResponse.DetailResultDTO female = UserConverter.toDetailResultDTO(couple.getFemale());
+        UserResponse.DetailResultDTO male = UserConverter.toDetailResultDTO(couple.getMale());
+
+        return CoupleResponse.DetailResultDTO.builder()
                 .id(couple.getId())
                 .coupleName(couple.getCoupleName())
                 .male(male)

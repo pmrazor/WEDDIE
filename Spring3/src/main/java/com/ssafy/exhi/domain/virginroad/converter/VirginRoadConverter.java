@@ -21,7 +21,7 @@ public class VirginRoadConverter {
     }
 
     public static VirginRoadResponse.SimpleResultDTO toDTO(VirginRoad virginRoad) {
-        CoupleResponse.SimpleResultDTO couple = CoupleConverter.toDTO(virginRoad.getCouple());
+        CoupleResponse.SimpleResultDTO couple = CoupleConverter.toSimpleDTO(virginRoad.getCouple());
         List<PlanResponse.SimpleResultDTO> plans = PlanConverter.toDTO(virginRoad.getPlans());
 
         return VirginRoadResponse.SimpleResultDTO.builder()

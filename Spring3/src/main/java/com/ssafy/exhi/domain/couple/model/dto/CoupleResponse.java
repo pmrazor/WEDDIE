@@ -19,4 +19,16 @@ public class CoupleResponse {
         private UserResponse.SimpleResultDTO male;
 
     }
+
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class DetailResultDTO {
+        private Integer id;
+        private String coupleName;
+        private UserResponse.DetailResultDTO female;
+        private UserResponse.DetailResultDTO male;
+
+    }
 }
