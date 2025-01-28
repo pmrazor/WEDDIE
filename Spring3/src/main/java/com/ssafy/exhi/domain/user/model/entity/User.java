@@ -1,8 +1,6 @@
 package com.ssafy.exhi.domain.user.model.entity;
 
 import com.ssafy.exhi.base.BaseEntity;
-import com.ssafy.exhi.domain.couple.model.entity.Couple;
-import com.ssafy.exhi.domain.plan.model.entity.Plan;
 import com.ssafy.exhi.domain.user.model.dto.UserRequest;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;

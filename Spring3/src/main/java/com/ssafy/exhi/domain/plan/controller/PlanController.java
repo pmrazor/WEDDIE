@@ -10,7 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import static com.ssafy.exhi.domain.plan.model.dto.PlanResponse.*;
+import static com.ssafy.exhi.domain.plan.model.dto.PlanResponse.SimpleResultDTO;
 
 @Slf4j
 @RestController

@@ -6,7 +6,6 @@ import com.ssafy.exhi.domain.couple.model.entity.Couple;
 import com.ssafy.exhi.domain.plan.converter.PlanConverter;
 import com.ssafy.exhi.domain.plan.model.dto.PlanResponse;
 import com.ssafy.exhi.domain.plan.model.entity.Plan;
-import com.ssafy.exhi.domain.virginroad.model.dto.VirginRoadRequest;
 import com.ssafy.exhi.domain.virginroad.model.dto.VirginRoadResponse;
 import com.ssafy.exhi.domain.virginroad.model.entity.VirginRoad;
 

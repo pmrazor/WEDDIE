@@ -3,12 +3,11 @@ package com.ssafy.exhi.domain.plan.converter;
 import com.ssafy.exhi.domain.plan.model.dto.PlanRequest;
 import com.ssafy.exhi.domain.plan.model.entity.Plan;
 import com.ssafy.exhi.domain.plan.model.entity.PlanStatus;
-import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static com.ssafy.exhi.domain.plan.model.dto.PlanResponse.*;
+import static com.ssafy.exhi.domain.plan.model.dto.PlanResponse.SimpleResultDTO;
 
 public class PlanConverter {
     public static List<SimpleResultDTO> toDTO(List<Plan> plans) {

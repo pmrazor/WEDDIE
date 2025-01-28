@@ -1,6 +1,5 @@
 package com.ssafy.exhi.domain.virginroad.model.dto;
 
-import com.ssafy.exhi.domain.couple.model.dto.CoupleRequest;
 import com.ssafy.exhi.domain.plan.model.dto.PlanRequest;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

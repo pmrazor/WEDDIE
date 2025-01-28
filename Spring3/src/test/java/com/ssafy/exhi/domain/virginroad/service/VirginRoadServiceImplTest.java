@@ -7,19 +7,17 @@ import com.ssafy.exhi.domain.plan.model.dto.PlanRequest;
 import com.ssafy.exhi.domain.plan.model.entity.Plan;
 import com.ssafy.exhi.domain.plan.repository.PlanRepository;
 import com.ssafy.exhi.domain.user.model.entity.User;
-import com.ssafy.exhi.domain.virginroad.controller.VirginRoadController;
 import com.ssafy.exhi.domain.virginroad.model.dto.VirginRoadRequest;
 import com.ssafy.exhi.domain.virginroad.model.dto.VirginRoadResponse;
 import com.ssafy.exhi.domain.virginroad.model.entity.VirginRoad;
 import com.ssafy.exhi.domain.virginroad.repository.VirginRoadRepository;
-import com.ssafy.exhi.util.JWTUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -51,7 +49,7 @@ public class VirginRoadServiceImplTest {
         // Given
         VirginRoadRequest.UpdateDTO updateDTO = new VirginRoadRequest.UpdateDTO();
         updateDTO.setUserId(1);
-        updateDTO.setPlans(Arrays.asList(
+        updateDTO.setPlans(Collections.singletonList(
                 PlanRequest.UpdateDTO.builder()
                         .planId(1)
                         .serviceType(ServiceType.DRESS_SHOP)
@@ -77,7 +75,7 @@ public class VirginRoadServiceImplTest {
         VirginRoad virginRoad = VirginRoad.builder()
                 .id(1)
                 .couple(couple)
-                .plans(Arrays.asList(plan))
+                .plans(Collections.singletonList(plan))
                 .build();
 
 
@@ -111,7 +109,7 @@ public class VirginRoadServiceImplTest {
                 .male(male)
                 .build();
 
-        List<Plan> plans = Arrays.asList(new Plan());
+        List<Plan> plans = List.of(new Plan());
         VirginRoad virginRoad = VirginRoad.builder()
                 .id(1)
                 .couple(couple)
@@ -145,7 +143,7 @@ public class VirginRoadServiceImplTest {
                 .male(male)
                 .build();
 
-        List<Plan> plans = Arrays.asList(new Plan());
+        List<Plan> plans = List.of(new Plan());
         VirginRoad virginRoad = VirginRoad.builder()
                 .id(1)
                 .couple(couple)
