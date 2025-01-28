@@ -28,6 +28,13 @@ public class PlanRequest {
 
         @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
         private LocalDateTime planTime;
+
+        public static CreateDTO createDefaultDTO(ServiceType serviceType) {
+            return PlanRequest.CreateDTO.builder()
+                    .serviceType(serviceType)
+                    .visible(false) // 디폴트 값 설정 (예: isVisible = false)
+                    .build();
+        }
     }
 
     @Data

@@ -43,6 +43,7 @@ public enum ErrorStatus implements BaseErrorCode {
     VIRGIN_ROAD_DUPLICATE_DATE(HttpStatus.BAD_REQUEST, "VIRGIN_ROAD4005", "해당 날짜에 이미 플래너가 존재합니다."),
     VIRGIN_ROAD_DATE_PAST(HttpStatus.BAD_REQUEST, "VIRGIN_ROAD4006", "과거 날짜는 선택할 수 없습니다."),
     VIRGIN_ROAD_EXISTS(HttpStatus.BAD_REQUEST, "VIRGIN_ROAD4007", "버진로드는 두 개 이상 생성할 수 없습니다."),
+    VIRGIN_ROAD_SERVICE_TYPE_NOT_VALID(HttpStatus.BAD_REQUEST, "VIRGIN_ROAD4008", "버진로드의 서비스 타입이 중복됩니다."),
 
     // 토큰 관련 에러
     TOKEN_EXPIRED_ERROR(HttpStatus.UNAUTHORIZED, "TOKEN4001", "토큰의 유효기간이 만료되었습니다."),

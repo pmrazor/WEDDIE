@@ -1,6 +1,7 @@
 package com.ssafy.exhi.domain.virginroad.service;
 
 import com.ssafy.exhi.base.status.ErrorStatus;
+import com.ssafy.exhi.domain.ServiceType;
 import com.ssafy.exhi.domain.couple.model.entity.Couple;
 import com.ssafy.exhi.domain.couple.repository.CoupleRepository;
 import com.ssafy.exhi.domain.plan.converter.PlanConverter;
@@ -31,14 +32,17 @@ public class VirginRoadServiceImpl implements VirginRoadService {
 
     /**
      * 플랜과 버진로드를 동시에 생성하기
-     *
+     * 버진로드가 비어있는 값은 디폴트로 생성 (visible이 false로 설정)
      * @param createDTO
      * @return
      */
     @Override
     public VirginRoadResponse.SimpleResultDTO createVirginRoad(VirginRoadRequest.CreateDTO createDTO) {
         Couple couple = getCoupleByUserId(createDTO.getUserId());
+
         existVirginRoad(couple);
+        setDefaultPlans(createDTO);
+
         // 플랜을 저장
         List<Plan> plans = PlanConverter.toEntity(createDTO.getPlans());
         planRepository.saveAll(plans);
@@ -48,7 +52,18 @@ public class VirginRoadServiceImpl implements VirginRoadService {
         VirginRoad saved = virginRoadRepository.save(virginRoad);
 
         return VirginRoadConverter.toDTO(saved);
+    }
 
+    private static void setDefaultPlans(VirginRoadRequest.CreateDTO createDTO) {
+        createDTO.sortPlan();
+        for (ServiceType serviceType : ServiceType.values()) {
+            boolean exists = createDTO.hasServiceType(serviceType);
+
+            if (!exists) {
+                PlanRequest.CreateDTO defaultPlan = PlanRequest.CreateDTO.createDefaultDTO(serviceType);
+                createDTO.addPlan(defaultPlan);
+            }
+        }
     }
 
     /**

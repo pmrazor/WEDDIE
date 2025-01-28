@@ -19,12 +19,24 @@ public class VirginRoadController {
     private final JWTUtil jwtUtil;
     private final VirginRoadService virginRoadService;
 
+    /**
+     * 버진로드 디폴트 생성 API
+     * 오류
+     *      - 서비스 타입이 중복
+     *      - 사용자가 없는 경우
+     *      - 사용자의 커플이 없는 경우 (짝이 없어도 커플은 생성해야댐)
+     *      - 사용자가 이미 버진로드를 생성한 경우
+     *
+     * @param accessToken
+     * @param createDTO
+     * @return
+     */
     @PostMapping
     public ResponseEntity<?> createVirginRoad(
             @RequestHeader("Authorization") String accessToken,
             @RequestBody VirginRoadRequest.CreateDTO createDTO
             ) {
-
+        createDTO.validateNoDuplicateServiceTypes();
         Integer userId = jwtUtil.getUserId(accessToken);
         createDTO.setUserId(userId);
 
