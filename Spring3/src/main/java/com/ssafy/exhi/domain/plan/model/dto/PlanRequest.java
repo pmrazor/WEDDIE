@@ -38,12 +38,8 @@ public class PlanRequest {
 
         private Integer planId;
 
-        private String shopName;
-
         private ServiceType serviceType;
 
         private boolean visible;
-
-        private LocalDateTime planTime;
     }
 }

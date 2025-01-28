@@ -24,4 +24,17 @@ public class VirginRoadRequest {
             return plans == null || plans.isEmpty();
         }
     }
+
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class UpdateDTO {
+        private Integer userId;
+        private List<PlanRequest.UpdateDTO> plans = new ArrayList<>();
+
+        public boolean isEmpty() {
+            return plans == null || plans.isEmpty();
+        }
+    }
 }

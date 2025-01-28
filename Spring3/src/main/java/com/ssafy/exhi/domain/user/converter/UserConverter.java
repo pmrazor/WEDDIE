@@ -20,7 +20,6 @@ public class UserConverter {
     public static UserResponse.SimpleResultDTO toSimpleResultDTO(User user) {
         return UserResponse.SimpleResultDTO.builder()
                 .id(user.getId())
-                .id(user.getId())
                 .loginId(user.getLoginId())
                 .name(user.getName())
                 .createdAt(user.getCreatedAt())

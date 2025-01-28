@@ -1,18 +1,21 @@
 package com.ssafy.exhi.domain.plan.model.entity;
 
 import com.ssafy.exhi.base.BaseEntity;
+import com.ssafy.exhi.base.status.ErrorStatus;
 import com.ssafy.exhi.domain.ServiceType;
+import com.ssafy.exhi.domain.plan.model.dto.PlanRequest;
 import com.ssafy.exhi.domain.todo.model.entity.Todo;
 import com.ssafy.exhi.domain.virginroad.model.entity.VirginRoad;
+import com.ssafy.exhi.exception.ExceptionHandler;
 import jakarta.persistence.*;
 import lombok.*;
+import lombok.extern.slf4j.Slf4j;
 
 import java.time.LocalDateTime;
 import java.util.List;
-
+@Slf4j
 @Entity
 @Getter
-@Setter
 @Builder
 @ToString
 @NoArgsConstructor
@@ -47,6 +50,8 @@ public class Plan extends BaseEntity {
     @JoinColumn(name = "virgin_road_id")
     private VirginRoad virginRoad;
 
+    /* 비즈니스 로직 */
+
     public void updateVirginRoad(VirginRoad virginRoad) {
         if (this.virginRoad != null) {
             this.virginRoad.getPlans().remove(this);
@@ -54,4 +59,15 @@ public class Plan extends BaseEntity {
 
         this.virginRoad = virginRoad;
     }
+
+    public void updateVisibility(PlanRequest.UpdateDTO updateDTO) {
+        if (!this.serviceType.equals(updateDTO.getServiceType())) {
+            log.error("버진로드 서비스 타입 불일치!!!");
+            throw new ExceptionHandler(ErrorStatus.VIRGIN_ROAD_NOT_FOUND);
+        }
+        this.visible = updateDTO.isVisible();
+    }
+
+    /* 비즈니스 로직 */
+
 }
