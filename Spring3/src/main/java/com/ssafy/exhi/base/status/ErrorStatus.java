@@ -45,6 +45,9 @@ public enum ErrorStatus implements BaseErrorCode {
     VIRGIN_ROAD_EXISTS(HttpStatus.BAD_REQUEST, "VIRGIN_ROAD4007", "버진로드는 두 개 이상 생성할 수 없습니다."),
     VIRGIN_ROAD_SERVICE_TYPE_NOT_VALID(HttpStatus.BAD_REQUEST, "VIRGIN_ROAD4008", "버진로드의 서비스 타입이 중복됩니다."),
 
+    // 알림 관련 에러
+    NOTIFICATION_NOT_FOUND(HttpStatus.NOT_FOUND, "NOTIFICATION4001", "존재하지 않는 알람입니다.."),
+
     // 토큰 관련 에러
     TOKEN_EXPIRED_ERROR(HttpStatus.UNAUTHORIZED, "TOKEN4001", "토큰의 유효기간이 만료되었습니다."),
     TOKEN_MALFORMED_ERROR(HttpStatus.UNAUTHORIZED, "TOKEN4002", "토큰이 변형되었습니다."),

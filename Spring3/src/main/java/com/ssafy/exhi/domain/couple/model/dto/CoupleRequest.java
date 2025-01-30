@@ -15,4 +15,5 @@ public class CoupleRequest {
         private Integer coupleId;
         private String coupleName;
     }
+
 }
