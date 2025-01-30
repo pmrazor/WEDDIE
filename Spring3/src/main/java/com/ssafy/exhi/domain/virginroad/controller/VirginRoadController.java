@@ -75,6 +75,7 @@ public class VirginRoadController {
     ) {
         Integer userId = jwtUtil.getUserId(accessToken);
         updateDTO.setUserId(userId);
+        updateDTO.validateNoDuplicateServiceTypes();
         log.info("updateVirginRoad userId: {}", userId);
 
         VirginRoadResponse.SimpleResultDTO response = virginRoadService.updateVirginRoad(updateDTO);

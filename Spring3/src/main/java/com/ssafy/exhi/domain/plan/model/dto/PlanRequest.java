@@ -41,8 +41,6 @@ public class PlanRequest {
     public static class UpdateDTO {
         private Integer userId;
 
-        private Integer planId;
-
         private ServiceType serviceType;
 
         private boolean visible;

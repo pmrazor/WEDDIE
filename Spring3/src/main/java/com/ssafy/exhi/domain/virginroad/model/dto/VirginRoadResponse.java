@@ -1,5 +1,6 @@
 package com.ssafy.exhi.domain.virginroad.model.dto;
 
+import com.ssafy.exhi.domain.ServiceType;
 import com.ssafy.exhi.domain.couple.model.dto.CoupleResponse;
 import com.ssafy.exhi.domain.plan.model.dto.PlanResponse;
 import lombok.AllArgsConstructor;
@@ -22,6 +23,13 @@ public class VirginRoadResponse {
         private CoupleResponse.SimpleResultDTO couple;
 
         private List<PlanResponse.SimpleResultDTO> plans = new ArrayList<>();
+
+        public PlanResponse.SimpleResultDTO findPlanByServiceType(ServiceType serviceType) {
+            return plans.stream()
+                    .filter(plan -> plan.getServiceType() == serviceType)
+                    .findFirst()
+                    .orElse(null);
+        }
     }
 
 }

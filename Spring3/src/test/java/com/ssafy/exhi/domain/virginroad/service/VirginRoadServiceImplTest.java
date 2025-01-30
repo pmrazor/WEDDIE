@@ -22,8 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -41,7 +40,7 @@ class VirginRoadServiceImplTest {
 
     private Couple couple;
     private VirginRoad virginRoad;
-    private Plan plan;
+    private List<Plan> plans;
 
     @BeforeEach
     void setUp() {
@@ -49,8 +48,8 @@ class VirginRoadServiceImplTest {
 
         // 공통으로 사용할 테스트 데이터 생성
         couple = createTestCouple();
-        plan = createTestPlan();
-        virginRoad = createTestVirginRoad(couple, plan);
+        plans = createTestPlans();
+        virginRoad = createTestVirginRoad(couple, plans);
 
         // 기본 Mock 설정
         when(coupleRepository.findCoupleByUserId(1)).thenReturn(Optional.of(couple));
@@ -61,13 +60,19 @@ class VirginRoadServiceImplTest {
     @DisplayName("버진로드 업데이트")
     void updateVirginRoad_성공() {
         // Given
-        VirginRoadRequest.UpdateDTO updateDTO = createUpdateDTO();
+        VirginRoadRequest.UpdateDTO updateDTO = createUpdateDTO(ServiceType.DRESS_SHOP);
 
         // When
         VirginRoadResponse.SimpleResultDTO result = virginRoadService.updateVirginRoad(updateDTO);
 
         // Then
+        System.out.println(result);
         assertNotNull(result);
+        assertEquals(virginRoad.getPlans().size(), ServiceType.values().length);
+        assertEquals(
+                virginRoad.findPlanByServiceType(ServiceType.DRESS_SHOP).isVisible(),
+                result.findPlanByServiceType(ServiceType.DRESS_SHOP).isVisible()
+        );
         assertEquals(1, result.getId());
     }
 
@@ -117,18 +122,22 @@ class VirginRoadServiceImplTest {
                 .build();
     }
 
-    private Plan createTestPlan() {
-        return Plan.builder()
-                .id(1)
-                .serviceType(ServiceType.DRESS_SHOP)
-                .visible(false)
-                .build();
+    private List<Plan> createTestPlans() {
+        List<Plan> plans = new ArrayList<>();
+        int id = 1;
+        for (ServiceType serviceType : ServiceType.values()) {
+            plans.add(Plan.builder()
+                    .id(id++)
+                    .serviceType(serviceType)
+                    .visible(true)
+                    .build()
+            );
+        }
+
+        return plans;
     }
 
-    private VirginRoad createTestVirginRoad(Couple couple, Plan plan) {
-        List<Plan> plans = new ArrayList<>();
-        plans.add(plan);
-
+    private VirginRoad createTestVirginRoad(Couple couple, List<Plan> plans) {
         return VirginRoad.builder()
                 .id(1)
                 .couple(couple)
@@ -136,13 +145,13 @@ class VirginRoadServiceImplTest {
                 .build();
     }
 
-    private VirginRoadRequest.UpdateDTO createUpdateDTO() {
+    private VirginRoadRequest.UpdateDTO createUpdateDTO(ServiceType serviceType) {
         List<PlanRequest.UpdateDTO> plans = new ArrayList<>();
+
         plans.add(
                 PlanRequest.UpdateDTO.builder()
-                        .planId(1)
-                        .serviceType(ServiceType.DRESS_SHOP)
-                        .visible(true)
+                        .serviceType(serviceType)
+                        .visible(false)
                         .build()
         );
 

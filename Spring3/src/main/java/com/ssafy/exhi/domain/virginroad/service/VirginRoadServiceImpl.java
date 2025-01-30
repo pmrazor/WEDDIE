@@ -16,8 +16,6 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.Comparator;
-
 @Service
 @Transactional
 @RequiredArgsConstructor
@@ -73,16 +71,10 @@ public class VirginRoadServiceImpl implements VirginRoadService {
         Couple couple = getCoupleByUserId(updateDTO.getUserId());
         VirginRoad virginRoad = getVirginRoadByCouple(couple);
 
-        // 2. 버진로드의 서비스 타입을 일치 시키기
-        virginRoad.getPlans().sort(Comparator.comparingInt(plan -> plan.getServiceType().ordinal()));
-        updateDTO.getPlans().sort(Comparator.comparingInt(plan -> plan.getServiceType().ordinal()));
-
-        // 3. 각 Plan 엔티티 업데이트
-        for (int i = 0; i < virginRoad.getPlans().size(); i++) {
-            Plan plan = virginRoad.getPlans().get(i);
-            PlanRequest.UpdateDTO dto = updateDTO.getPlans().get(i);
-
-            plan.updateVisibility(dto);
+        // 2. 업데이트
+        for (PlanRequest.UpdateDTO planDTO : updateDTO.getPlans()) {
+            Plan plan = virginRoad.findPlanByServiceType(planDTO.getServiceType());
+            plan.updateVisibility(planDTO);
         }
 
         return VirginRoadConverter.toDTO(virginRoad);

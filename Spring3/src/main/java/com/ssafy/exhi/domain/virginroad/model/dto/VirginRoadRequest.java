@@ -41,8 +41,15 @@ public class VirginRoadRequest {
         private Integer userId;
         private List<PlanRequest.UpdateDTO> plans = new ArrayList<>();
 
-        public boolean isEmpty() {
-            return plans == null || plans.isEmpty();
+        public void validateNoDuplicateServiceTypes() {
+            long uniqueCount = plans.stream()
+                    .map(PlanRequest.UpdateDTO::getServiceType)
+                    .distinct()
+                    .count();
+
+            if (uniqueCount < plans.size()) {
+                throw new ExceptionHandler(ErrorStatus.VIRGIN_ROAD_SERVICE_TYPE_NOT_VALID);
+            }
         }
     }
 }

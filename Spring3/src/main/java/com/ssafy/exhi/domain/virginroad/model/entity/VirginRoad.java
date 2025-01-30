@@ -58,7 +58,7 @@ public class VirginRoad {
         }
     }
 
-    private Plan findPlanByServiceType(ServiceType serviceType) {
+    public Plan findPlanByServiceType(ServiceType serviceType) {
         return plans.stream()
                 .filter(plan -> plan.getServiceType() == serviceType)
                 .findFirst()
