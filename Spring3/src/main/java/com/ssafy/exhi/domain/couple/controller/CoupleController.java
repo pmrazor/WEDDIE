@@ -59,14 +59,14 @@ public class CoupleController {
     }
 
     /**
-     * 커플 알람 기능이 완성되면 사용할 커플 요청 수락 API
+     * TODO: 커플 알람 기능이 완성되면 사용할 커플 요청 수락 API
      * @param accessToken
      * @param requestId
      * @param coupleDTO
      * @return
      */
-    @PostMapping("/request/{requestId}")
-    public ResponseEntity<?> requestCoupleResult(
+    @PostMapping("/request/{requestId}/approved")
+    public ResponseEntity<?> approveCoupleRequest(
             @RequestHeader("Authorization") String accessToken,
             @PathVariable(name = "requestId") Integer requestId,
             @RequestBody @Valid CoupleRequest.CreateDTO coupleDTO
@@ -79,6 +79,31 @@ public class CoupleController {
 
         SimpleResultDTO response = coupleService.createCouple(requestId, coupleDTO);
         return ResponseEntity.ok().body(response);
+    }
+
+    /**
+     * TODO: 커플 알람 기능이 완성되면 사용할 커플 요청 거절 API
+     *
+     * @param accessToken
+     * @param requestId
+     * @param coupleDTO
+     * @return
+     */
+    @PostMapping("/request/{requestId}/reject")
+    public ResponseEntity<?> rejectCoupleRequest(
+            @RequestHeader("Authorization") String accessToken,
+            @PathVariable(name = "requestId") Integer requestId,
+            @RequestBody @Valid CoupleRequest.CreateDTO coupleDTO
+
+    ) {
+//        Integer userId = jwtUtil.getUserId(accessToken);
+//        log.info("createCouple: userId={}", userId);
+//
+//        coupleDTO.setUserId(userId);
+//
+//        SimpleResultDTO response = coupleService.createCouple(requestId, coupleDTO);
+//        return ResponseEntity.ok().body(response);
+        return null;
     }
 
     /**

@@ -23,10 +23,10 @@ public class NotificationResponse {
         private String rejectedUrl;
 
         public static String getApprovedUrl(Integer id) {
-            return "/" + url + "/" + id + "/approved";
+            return url + "/" + id + "/approved";
         }
         public static String getRejectedUrl(Integer id) {
-            return "/" + url + "/" + id + "/rejected";
+            return url + "/" + id + "/rejected";
         }
     }
 }

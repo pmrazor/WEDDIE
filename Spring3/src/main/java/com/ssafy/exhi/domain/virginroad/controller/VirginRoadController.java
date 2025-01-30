@@ -60,7 +60,7 @@ public class VirginRoadController {
 
         VirginRoadResponse.SimpleResultDTO response = virginRoadService.getVirginRoad(userId);
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
     /**
