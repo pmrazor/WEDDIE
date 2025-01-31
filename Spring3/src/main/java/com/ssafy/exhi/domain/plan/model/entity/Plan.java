@@ -1,37 +1,33 @@
 package com.ssafy.exhi.domain.plan.model.entity;
 
 import com.ssafy.exhi.base.BaseEntity;
+import com.ssafy.exhi.base.status.ErrorStatus;
 import com.ssafy.exhi.domain.ServiceType;
+import com.ssafy.exhi.domain.plan.model.dto.PlanRequest;
 import com.ssafy.exhi.domain.todo.model.entity.Todo;
-import com.ssafy.exhi.domain.user.model.entity.User;
-import io.swagger.v3.oas.annotations.media.Schema;
+import com.ssafy.exhi.domain.virginroad.model.entity.VirginRoad;
+import com.ssafy.exhi.exception.ExceptionHandler;
 import jakarta.persistence.*;
 import lombok.*;
+import lombok.extern.slf4j.Slf4j;
 
 import java.time.LocalDateTime;
 import java.util.List;
-
+@Slf4j
 @Entity
 @Getter
-@Setter
 @Builder
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor
-@Schema(name = "plan", description = "플랜 엔티티")
 public class Plan extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "plan_id")
     private Integer id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
-    private User user;
-
-    // 업체 이름
-    @Column(name = "name")
-    private String name;
+    @Column(name = "shop_name", nullable = true)
+    private String shopName;
 
     @Column(name = "service_type")
     @Enumerated(EnumType.STRING)
@@ -40,7 +36,6 @@ public class Plan extends BaseEntity {
     @Column(name = "visible")
     private boolean visible;
 
-    // 예약한 날짜
     @Column(name = "plan_time")
     private LocalDateTime planTime;
 
@@ -50,5 +45,38 @@ public class Plan extends BaseEntity {
 
     @OneToMany(mappedBy = "plan")
     private List<Todo> todos;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "virgin_road_id")
+    private VirginRoad virginRoad;
+
+    /* 비즈니스 로직 */
+
+    public void updateVirginRoad(VirginRoad virginRoad) {
+        if (this.virginRoad != null) {
+            this.virginRoad.getPlans().remove(this);
+        }
+
+        this.virginRoad = virginRoad;
+    }
+
+    public void updateVisibility(PlanRequest.UpdateDTO updateDTO) {
+        if (!this.serviceType.equals(updateDTO.getServiceType())) {
+            log.error("버진로드 서비스 타입 불일치!!!");
+            throw new ExceptionHandler(ErrorStatus.VIRGIN_ROAD_NOT_FOUND);
+        }
+        this.visible = updateDTO.isVisible();
+    }
+
+    public static Plan createDefault(ServiceType serviceType, VirginRoad virginRoad) {
+        return Plan.builder()
+                .virginRoad(virginRoad)
+                .serviceType(serviceType)
+                .visible(false) // 디폴트 값 설정 (예: isVisible = false)
+                .planStatus(PlanStatus.BEFORE_START)
+                .build();
+    }
+
+    /* 비즈니스 로직 */
 
 }

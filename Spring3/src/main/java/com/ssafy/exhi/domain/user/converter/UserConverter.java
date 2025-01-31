@@ -9,10 +9,8 @@ import com.ssafy.exhi.domain.user.model.entity.User;
 public class UserConverter {
     public static UserResponse.DetailResultDTO toDetailResultDTO(User user) {
         return UserResponse.DetailResultDTO.builder()
-                .userId(user.getUserId())
+                .id(user.getId())
                 .loginId(user.getLoginId())
-                .department(user.getDepartment())
-                .position(user.getPosition())
                 .name(user.getName())
                 .createdAt(user.getCreatedAt())
                 .updatedAt(user.getUpdatedAt())
@@ -23,7 +21,7 @@ public class UserConverter {
 
     public static UserResponse.SimpleResultDTO toSimpleResultDTO(User user) {
         return UserResponse.SimpleResultDTO.builder()
-                .userId(user.getUserId())
+                .id(user.getId())
                 .loginId(user.getLoginId())
                 .name(user.getName())
                 .createdAt(user.getCreatedAt())
@@ -51,10 +49,9 @@ public class UserConverter {
                 .loginId(signUpDTO.getLoginId())
                 .password(signUpDTO.getPassword())
                 .name(signUpDTO.getName())
-                .department(signUpDTO.getDepartment())
-                .position(signUpDTO.getPosition())
                 .provider(signUpDTO.getProvider())
                 .profileImg(signUpDTO.getProfileImg())
+                .gender(signUpDTO.getGender())
                 .build();
     }
 

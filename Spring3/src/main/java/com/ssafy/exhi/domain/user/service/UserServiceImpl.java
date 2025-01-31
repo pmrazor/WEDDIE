@@ -1,7 +1,6 @@
 package com.ssafy.exhi.domain.user.service;
 
 import com.ssafy.exhi.base.status.ErrorStatus;
-import com.ssafy.exhi.domain.oauth.AuthProvider;
 import com.ssafy.exhi.domain.user.converter.UserConverter;
 import com.ssafy.exhi.domain.user.model.dto.UserRequest;
 import com.ssafy.exhi.domain.user.model.dto.UserResponse;
@@ -28,7 +27,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserResponse.TokenDTO login(UserRequest.LoginDTO memberDto) {
         // 로그인 아이디 확인
-        User loginUser = getUserByUserId(memberDto.getLoginId());
+        User loginUser = getUserByUserId(memberDto.getUserId());
         validatePassword(isMatches(loginUser, memberDto), ErrorStatus.USER_LOGIN_FAILED);
 
         // 토큰 생성
@@ -39,6 +38,8 @@ public class UserServiceImpl implements UserService {
 
         return UserConverter.toTokenDTO(jwtToken);
     }
+
+
 
     @Override
     public UserResponse.SimpleResultDTO register(UserRequest.SignUpDTO memberDto) {
@@ -51,6 +52,7 @@ public class UserServiceImpl implements UserService {
 
         log.info("savedUser: {}", user);
         User savedUser = userRepository.save(user);
+
         return UserConverter.toSimpleResultDTO(savedUser);
     }
 
@@ -88,14 +90,14 @@ public class UserServiceImpl implements UserService {
         userRepository.delete(user);
     }
 
-    private User getUserByUserId(String loginId) {
-        return userRepository.findUserByLoginId(loginId).orElseThrow(
+    private User getUserByLoginId(String userId) {
+        return userRepository.findUserByLoginId(userId).orElseThrow(
                 () -> new ExceptionHandler(ErrorStatus.USER_NOT_FOUND)
         );
     }
 
     private User getUserById(Integer userId) {
-        return userRepository.findUserByUserId(userId).orElseThrow(
+        return userRepository.findUserById(userId).orElseThrow(
                 () -> new ExceptionHandler(ErrorStatus.USER_NOT_FOUND)
         );
     }

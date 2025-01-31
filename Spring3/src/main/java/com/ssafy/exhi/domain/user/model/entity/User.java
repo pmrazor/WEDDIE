@@ -7,6 +7,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.List;
+
 @Getter
 @Setter
 @Builder
@@ -19,16 +21,13 @@ public class User extends BaseEntity {
     @Id
     @Column(name="user_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer userId;
-
-    @Column(name = "department")
-    private String department;
-
-    @Column(name = "position")
-    private String position;
+    private Integer id;
 
     @Column(name = "name")
     private String name;
+
+    @Column(name = "gender")
+    private Gender gender;
 
     @Column(name = "login_id", unique = true)
     private String loginId;
@@ -39,6 +38,9 @@ public class User extends BaseEntity {
     @Column(name = "token")
     @Setter
     private String token;
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private UserDetail userDetail;
 
     @Column(name = "profile_img")
     private String profileImg;
@@ -54,15 +56,11 @@ public class User extends BaseEntity {
     /* OAuth 필드 끝 */
 
     public User update(UserRequest.UpdateDTO updateDTO) {
-        this.department = updateDTO.getDepartment();
-        this.position = updateDTO.getPosition();
         this.name = updateDTO.getName();
+        this.password = updateDTO.getNewPassword();
         this.profileImg = updateDTO.getProfileImg();
         return this;
     }
-
-    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
-    private UserDetail userDetail;
 
     public void setUserDetail(UserDetail userDetail) {
         this.userDetail = userDetail;

@@ -20,7 +20,7 @@ import java.util.List;
 @EnableAspectJAutoProxy
 public class WebMvcConfiguration implements WebMvcConfigurer {
 	
-	private final List<String> patterns = Arrays.asList("");
+	private final List<String> patterns = List.of("");
 
 	@Autowired
 	private JWTInterceptor jwtInterceptor;

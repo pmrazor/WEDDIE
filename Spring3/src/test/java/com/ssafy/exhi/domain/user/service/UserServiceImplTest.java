@@ -25,13 +25,13 @@ class UserServiceImplTest {
     void login() {
         // given
         UserRequest.SignUpDTO user = UserRequest.SignUpDTO.builder()
-                .userId("wnsgh712")
+                .loginId("wnsgh712")
                 .password("q!w2e3r4t5")
                 .build();
         userService.register(user);
 
         UserRequest.LoginDTO member = UserRequest.LoginDTO.builder()
-                .userId("wnsgh712")
+                .loginId("wnsgh712")
                 .password("q!w2e3r4t5")
                 .build();
         // when
@@ -45,7 +45,7 @@ class UserServiceImplTest {
     void register() {
         // given
         UserRequest.SignUpDTO user = UserRequest.SignUpDTO.builder()
-                .userId("wnsgh712")
+                .loginId("wnsgh712")
                 .password("q!w2e3r4t5")
                 .build();
 
@@ -60,7 +60,7 @@ class UserServiceImplTest {
     void getMyInfo() {
         // given
         UserRequest.SignUpDTO user = UserRequest.SignUpDTO.builder()
-                .userId("wnsgh712")
+                .loginId("wnsgh712")
                 .password("q!w2e3r4t5")
                 .build();
         UserResponse.SimpleResultDTO register = userService.register(user);
@@ -77,10 +77,8 @@ class UserServiceImplTest {
         // given
         UserRequest.SignUpDTO register = UserRequest.SignUpDTO.builder()
                 .name("parkjunho")
-                .userId("wnsgh712")
+                .loginId("wnsgh712")
                 .password("q!w2e3r4t5")
-                .department("department")
-                .position("position")
                 .build();
 
         UserResponse.SimpleResultDTO user = userService.register(register);
@@ -88,8 +86,6 @@ class UserServiceImplTest {
         UserRequest.UpdateDTO dest = UserRequest.UpdateDTO.builder()
                 .oldPassword("q!w2e3r4t5")
                 .newPassword("q!w2e3r4t5y6")
-                .position("update position")
-                .department("update department")
                 .build();
 
         // when
@@ -105,10 +101,8 @@ class UserServiceImplTest {
         // given
         UserRequest.SignUpDTO register = UserRequest.SignUpDTO.builder()
                 .name("parkjunho")
-                .userId("wnsgh712")
+                .loginId("wnsgh712")
                 .password("q!w2e3r4t5")
-                .department("department")
-                .position("position")
                 .build();
 
         UserResponse.SimpleResultDTO user = userService.register(register);
@@ -123,10 +117,8 @@ class UserServiceImplTest {
         // given
         UserRequest.SignUpDTO register = UserRequest.SignUpDTO.builder()
                 .name("parkjunho")
-                .userId("wnsgh712")
+                .loginId("wnsgh712")
                 .password("q!w2e3r4t5")
-                .department("department")
-                .position("position")
                 .build();
 
         UserResponse.SimpleResultDTO user = userService.register(register);

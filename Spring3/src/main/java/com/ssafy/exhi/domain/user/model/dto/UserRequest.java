@@ -1,6 +1,7 @@
 package com.ssafy.exhi.domain.user.model.dto;
 
 import com.ssafy.exhi.domain.oauth.AuthProvider;
+import com.ssafy.exhi.domain.user.model.entity.Gender;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.Column;
 import jakarta.validation.constraints.NotBlank;
@@ -88,23 +89,7 @@ public class UserRequest {
         @Size(max = 30, message = "name 30 characters")
         private String name;
 
-        @Schema(
-                title = "부서",
-                description = "소속 부서 (최대 30자)",
-                example = "개발팀",
-                maxLength = 30
-        )
-        @Column(name = "department")
-        @Size(max = 30, message = "department 30 characters")
-        private String department;
-
-        @Schema(
-                title = "직급",
-                description = "직급 정보",
-                example = "선임연구원"
-        )
-        @Column(name = "position")
-        private String position;
+        private Gender gender;
 
         @Column(name = "provider")
         private AuthProvider provider;
@@ -116,7 +101,6 @@ public class UserRequest {
     @Data
     @Builder
     @ToString
-    @Schema(name = "회원정보 수정 DTO", description = "회원정보 수정 요청 객체")
     @NoArgsConstructor
     @AllArgsConstructor
     public static class UpdateDTO {
@@ -125,7 +109,7 @@ public class UserRequest {
                 description = "수정할 사용자의 고유 식별자",
                 example = "1"
         )
-        private Integer userId;
+        private Integer id;
 
         @Schema(
                 title = "현재 비밀번호",

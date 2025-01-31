@@ -27,6 +27,27 @@ public enum ErrorStatus implements BaseErrorCode {
     USER_LOGIN_FAILED(HttpStatus.UNAUTHORIZED, "MEMBER4005", "잘못된 비밀번호입니다."),
     USER_BAD_REQUEST(HttpStatus.BAD_REQUEST, "MEMBER4006", "토큰 값과 요청한 아이디가 일치하지않습니다."),
 
+    // 커플 관련 에러
+    COUPLE_NOT_FOUND(HttpStatus.NOT_FOUND, "COUPLE4001", "존재하지 않는 커플입니다."),
+    COUPLE_ALREADY_EXIST(HttpStatus.BAD_REQUEST, "COUPLE4002", "이미 커플 관계가 존재합니다."),
+    COUPLE_REQUEST_NOT_FOUND(HttpStatus.NOT_FOUND, "COUPLE4003", "존재하지 않는 커플 요청입니다."),
+    COUPLE_REQUEST_ALREADY_SENT(HttpStatus.BAD_REQUEST, "COUPLE4004", "이미 커플 요청을 보냈습니다."),
+    COUPLE_REQUEST_TO_SELF(HttpStatus.BAD_REQUEST, "COUPLE4005", "자신에게 커플 요청을 보낼 수 없습니다."),
+    COUPLE_UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "COUPLE4006", "커플 관계가 아닙니다."),
+
+    // 버진로드 관련 에러
+    VIRGIN_ROAD_NOT_FOUND(HttpStatus.NOT_FOUND, "VIRGIN_ROAD4001", "존재하지 않는 플래너입니다."),
+    VIRGIN_ROAD_DATE_INVALID(HttpStatus.BAD_REQUEST, "VIRGIN_ROAD4002", "잘못된 날짜 형식입니다."),
+    VIRGIN_ROAD_TITLE_NOT_EXIST(HttpStatus.BAD_REQUEST, "VIRGIN_ROAD4003", "제목은 필수입니다."),
+    VIRGIN_ROAD_UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "VIRGIN_ROAD4004", "플래너에 대한 권한이 없습니다."),
+    VIRGIN_ROAD_DUPLICATE_DATE(HttpStatus.BAD_REQUEST, "VIRGIN_ROAD4005", "해당 날짜에 이미 플래너가 존재합니다."),
+    VIRGIN_ROAD_DATE_PAST(HttpStatus.BAD_REQUEST, "VIRGIN_ROAD4006", "과거 날짜는 선택할 수 없습니다."),
+    VIRGIN_ROAD_EXISTS(HttpStatus.BAD_REQUEST, "VIRGIN_ROAD4007", "버진로드는 두 개 이상 생성할 수 없습니다."),
+    VIRGIN_ROAD_SERVICE_TYPE_NOT_VALID(HttpStatus.BAD_REQUEST, "VIRGIN_ROAD4008", "버진로드의 서비스 타입이 중복됩니다."),
+
+    // 알림 관련 에러
+    NOTIFICATION_NOT_FOUND(HttpStatus.NOT_FOUND, "NOTIFICATION4001", "존재하지 않는 알람입니다.."),
+
     // 토큰 관련 에러
     TOKEN_EXPIRED_ERROR(HttpStatus.UNAUTHORIZED, "TOKEN4001", "토큰의 유효기간이 만료되었습니다."),
     TOKEN_MALFORMED_ERROR(HttpStatus.UNAUTHORIZED, "TOKEN4002", "토큰이 변형되었습니다."),
