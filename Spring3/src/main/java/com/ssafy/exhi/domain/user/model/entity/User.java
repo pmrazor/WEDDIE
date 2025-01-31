@@ -1,14 +1,14 @@
 package com.ssafy.exhi.domain.user.model.entity;
 
 import com.ssafy.exhi.base.BaseEntity;
+import com.ssafy.exhi.domain.oauth.AuthProvider;
 import com.ssafy.exhi.domain.user.model.dto.UserRequest;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.List;
-
 @Getter
+@Setter
 @Builder
 @ToString
 @Entity
@@ -19,7 +19,7 @@ public class User extends BaseEntity {
     @Id
     @Column(name="user_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Integer userId;
 
     @Column(name = "department")
     private String department;
@@ -31,7 +31,7 @@ public class User extends BaseEntity {
     private String name;
 
     @Column(name = "login_id", unique = true)
-    private String userId;
+    private String loginId;
 
     @Column(name = "password")
     private String password;
@@ -40,11 +40,24 @@ public class User extends BaseEntity {
     @Setter
     private String token;
 
+    @Column(name = "profile_img")
+    private String profileImg;
+
+    /* OAuth 필드 */
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    @Builder.Default
+    private AuthProvider provider = AuthProvider.LOCAL;
+
+    @Column(name = "provider_id")
+    private String providerId;
+    /* OAuth 필드 끝 */
+
     public User update(UserRequest.UpdateDTO updateDTO) {
         this.department = updateDTO.getDepartment();
         this.position = updateDTO.getPosition();
         this.name = updateDTO.getName();
-        this.password = updateDTO.getNewPassword();
+        this.profileImg = updateDTO.getProfileImg();
         return this;
     }
 

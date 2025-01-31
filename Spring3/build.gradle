@@ -52,8 +52,11 @@ dependencies {
 
 	// Swagger Core (OpenAPI)
 	implementation 'org.springdoc:springdoc-openapi-starter-common:2.3.0'
-
 	/* Swagger 3 END */
+
+	/* Oauth START */
+	implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
+	/* Oauth END */
 }
 
 tasks.named('test') {

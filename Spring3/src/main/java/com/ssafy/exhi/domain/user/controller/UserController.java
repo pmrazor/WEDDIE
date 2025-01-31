@@ -1,6 +1,7 @@
 package com.ssafy.exhi.domain.user.controller;
 
 import com.ssafy.exhi.base.ApiResponse;
+import com.ssafy.exhi.domain.oauth.UserPrincipal;
 import com.ssafy.exhi.domain.user.model.dto.UserRequest;
 import com.ssafy.exhi.domain.user.model.dto.UserResponse;
 import com.ssafy.exhi.domain.user.service.UserService;
@@ -10,12 +11,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1")
+@RequestMapping("/api")
 public class UserController implements UserControllerDocs{
 
     private final JWTUtil jwtUtil;
@@ -54,10 +56,10 @@ public class UserController implements UserControllerDocs{
      */
     @Override
     @GetMapping("/users/me")
-    public ResponseEntity<?> me(@RequestHeader("Authorization") String accessToken) {
+    public ResponseEntity<?> me(@RequestHeader("Authorization") String accessToken, @AuthenticationPrincipal UserPrincipal userPrincipal) {
         Integer userId = jwtUtil.getUserId(accessToken);
-        log.info("me user : {}", userId);
 
+        log.info("me user : {}", userId);
         UserResponse.DetailResultDTO userDetail = userService.getMyInfo(userId);
         return ResponseEntity.ok(ApiResponse.onSuccess(userDetail));
     }

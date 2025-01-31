@@ -1,6 +1,7 @@
 package com.ssafy.exhi.domain.user.service;
 
 import com.ssafy.exhi.base.status.ErrorStatus;
+import com.ssafy.exhi.domain.oauth.AuthProvider;
 import com.ssafy.exhi.domain.user.converter.UserConverter;
 import com.ssafy.exhi.domain.user.model.dto.UserRequest;
 import com.ssafy.exhi.domain.user.model.dto.UserResponse;
@@ -27,7 +28,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserResponse.TokenDTO login(UserRequest.LoginDTO memberDto) {
         // 로그인 아이디 확인
-        User loginUser = getUserByUserId(memberDto.getUserId());
+        User loginUser = getUserByUserId(memberDto.getLoginId());
         validatePassword(isMatches(loginUser, memberDto), ErrorStatus.USER_LOGIN_FAILED);
 
         // 토큰 생성
@@ -39,19 +40,17 @@ public class UserServiceImpl implements UserService {
         return UserConverter.toTokenDTO(jwtToken);
     }
 
-
-
     @Override
     public UserResponse.SimpleResultDTO register(UserRequest.SignUpDTO memberDto) {
-        if (userRepository.existsUserByUserId(memberDto.getUserId())) {
+        if (userRepository.existsUserByLoginId(memberDto.getLoginId())) {
             throw new ExceptionHandler(ErrorStatus.USER_DUPLICATED_LOGIN_ID);
         }
 
         memberDto.setPassword(passwordEncoder.encode(memberDto.getPassword()));
         User user = UserConverter.toEntity(memberDto);
 
+        log.info("savedUser: {}", user);
         User savedUser = userRepository.save(user);
-
         return UserConverter.toSimpleResultDTO(savedUser);
     }
 
@@ -65,16 +64,22 @@ public class UserServiceImpl implements UserService {
     public UserResponse.DetailResultDTO update(Integer userId, UserRequest.UpdateDTO userRequest) {
         User user = getUserById(userId);
 
-        // Request의 비밀번호가 일치하는지 확인하기
-        validatePassword(isMatches(user, userRequest), ErrorStatus.USER_LOGIN_FAILED);
+        // OAuth 사용자와 로컬 사용자를 구분하여 처리
+        if (user.getProvider() == AuthProvider.LOCAL) {
+            // 로컬 사용자의 경우에만 비밀번호 검증
+            validatePassword(isMatches(user, userRequest), ErrorStatus.USER_LOGIN_FAILED);
+            // 새 비밀번호로 업데이트
+            user.setPassword(passwordEncoder.encode(userRequest.getNewPassword()));
+        }
+
         user.update(userRequest);
 
         return UserConverter.toDetailResultDTO(user);
     }
 
     @Override
-    public boolean checkUser(String userId) {
-        return userRepository.existsUserByUserId(userId);
+    public boolean checkUser(String loginId) {
+        return userRepository.existsUserByLoginId(loginId);
     }
 
     @Override
@@ -83,14 +88,14 @@ public class UserServiceImpl implements UserService {
         userRepository.delete(user);
     }
 
-    private User getUserByUserId(String userId) {
-        return userRepository.findUserByUserId(userId).orElseThrow(
+    private User getUserByUserId(String loginId) {
+        return userRepository.findUserByLoginId(loginId).orElseThrow(
                 () -> new ExceptionHandler(ErrorStatus.USER_NOT_FOUND)
         );
     }
 
     private User getUserById(Integer userId) {
-        return userRepository.findUserById(userId).orElseThrow(
+        return userRepository.findUserByUserId(userId).orElseThrow(
                 () -> new ExceptionHandler(ErrorStatus.USER_NOT_FOUND)
         );
     }

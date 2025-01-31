@@ -16,7 +16,7 @@ public interface UserService {
 
     UserResponse.DetailResultDTO update(Integer userId, UserRequest.@Valid UpdateDTO userRequest);
 
-    boolean checkUser(String userId);
+    boolean checkUser(String loginId);
 
     void delete(Integer userId);
 
