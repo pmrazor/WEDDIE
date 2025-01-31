@@ -66,7 +66,7 @@ public class JWTUtil {
         Map<String, Object> value = claims.getBody();
         log.info("value : {}", value);
 
-        return Integer.parseInt(value.get("id").toString());
+        return Integer.parseInt(value.get("userId").toString());
     }
     public String getUserLoginId(String header) {
         String token = getToken(header);
@@ -103,9 +103,9 @@ public class JWTUtil {
                 .add(headers)
                 .and()
                 .subject(subject)
-                .claim("userId", user.getUserId())
+                .claim("LoginId", user.getLoginId())
                 .claim("name", user.getName())
-                .claim("id", user.getId())
+                .claim("userId", user.getUserId())
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + expireTime))
                 .signWith(key, Jwts.SIG.HS256)

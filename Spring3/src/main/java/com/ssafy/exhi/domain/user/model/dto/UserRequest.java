@@ -1,5 +1,6 @@
 package com.ssafy.exhi.domain.user.model.dto;
 
+import com.ssafy.exhi.domain.oauth.AuthProvider;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.Column;
 import jakarta.validation.constraints.NotBlank;
@@ -24,7 +25,7 @@ public class UserRequest {
                 required = true
         )
         @NotNull(message = "Login ID cannot be null")
-        private String userId;
+        private String loginId;
 
         @Schema(
                 title = "비밀번호",
@@ -59,7 +60,7 @@ public class UserRequest {
         )
         @NotNull(message = "Login ID cannot be null")
         @Size(min = 4, max = 16, message = "Login ID must be between 4 and 16 characters")
-        private String userId;
+        private String loginId;
 
         @Schema(
                 title = "비밀번호",
@@ -104,6 +105,12 @@ public class UserRequest {
         )
         @Column(name = "position")
         private String position;
+
+        @Column(name = "provider")
+        private AuthProvider provider;
+
+        @Column(name = "profile_img")
+        private String profileImg;
     }
 
     @Data
@@ -118,7 +125,7 @@ public class UserRequest {
                 description = "수정할 사용자의 고유 식별자",
                 example = "1"
         )
-        private Integer id;
+        private Integer userId;
 
         @Schema(
                 title = "현재 비밀번호",
@@ -178,6 +185,9 @@ public class UserRequest {
         )
         @Column(name = "position")
         private String position;
+
+        @Column(name="profile_img")
+        private String profileImg;
     }
 
 

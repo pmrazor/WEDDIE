@@ -9,17 +9,17 @@ import java.util.Optional;
 
 public interface UserRepository extends JpaRepository<User, Integer> {
 
-    Optional<User> findUserById(Integer id);
+    Optional<User> findUserByUserId(Integer userId);
 
-    Optional<User> findUserByUserId(String loginId);
+    Optional<User> findUserByLoginId(String loginId);
 
-    boolean existsUserByUserId(String loginId);
+    boolean existsUserByLoginId(String loginId);
 
-    boolean existsUserById(Integer userId);
+    boolean existsUserByUserId(Integer userId);
 
     /* --------------------- TOKEN ---------------------*/
 
-    @Query(value = "SELECT u.token FROM User u WHERE u.id = :userId")
-    String getRefreshToken(Long userId);
+    @Query(value = "SELECT u.token FROM User u WHERE u.id = :loginId")
+    String getRefreshToken(Long loginId);
 
 }
