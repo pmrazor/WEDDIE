@@ -1,6 +1,7 @@
 package com.ssafy.exhi.domain.user.service;
 
 import com.ssafy.exhi.base.status.ErrorStatus;
+import com.ssafy.exhi.domain.oauth.AuthProvider;
 import com.ssafy.exhi.domain.user.converter.UserConverter;
 import com.ssafy.exhi.domain.user.model.dto.UserRequest;
 import com.ssafy.exhi.domain.user.model.dto.UserResponse;
@@ -27,7 +28,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserResponse.TokenDTO login(UserRequest.LoginDTO memberDto) {
         // 로그인 아이디 확인
-        User loginUser = getUserByUserId(memberDto.getUserId());
+        User loginUser = getUserByLoginId(memberDto.getLoginId());
         validatePassword(isMatches(loginUser, memberDto), ErrorStatus.USER_LOGIN_FAILED);
 
         // 토큰 생성

@@ -9,13 +9,13 @@ import java.util.Optional;
 
 public interface UserRepository extends JpaRepository<User, Integer> {
 
-    Optional<User> findUserByUserId(Integer userId);
+    Optional<User> findUserById(Integer userId);
 
     Optional<User> findUserByLoginId(String loginId);
 
     boolean existsUserByLoginId(String loginId);
 
-    boolean existsUserByUserId(Integer userId);
+    boolean existsUserById(Integer userId);
 
     /* --------------------- TOKEN ---------------------*/
 

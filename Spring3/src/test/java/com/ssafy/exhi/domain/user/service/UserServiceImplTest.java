@@ -91,9 +91,6 @@ class UserServiceImplTest {
         // when
         UserResponse.DetailResultDTO update = userService.update(user.getId(), dest);
 
-        // then
-        assertThat(update.getPosition()).isEqualTo(dest.getPosition());
-        assertThat(update.getDepartment()).isEqualTo(dest.getDepartment());
     }
 
     @Test

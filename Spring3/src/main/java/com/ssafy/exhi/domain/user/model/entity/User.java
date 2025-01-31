@@ -7,8 +7,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.List;
-
 @Getter
 @Setter
 @Builder
@@ -48,11 +46,18 @@ public class User extends BaseEntity {
     /* OAuth 필드 */
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    @Builder.Default
     private AuthProvider provider = AuthProvider.LOCAL;
 
     @Column(name = "provider_id")
     private String providerId;
+
+    @PrePersist
+    public void prePersist() {
+        if (this.provider == null) {
+            this.provider = AuthProvider.LOCAL;
+        }
+    }
+
     /* OAuth 필드 끝 */
 
     public User update(UserRequest.UpdateDTO updateDTO) {

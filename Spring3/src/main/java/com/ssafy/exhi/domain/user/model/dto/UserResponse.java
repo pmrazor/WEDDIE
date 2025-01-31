@@ -14,13 +14,7 @@ public class UserResponse {
     @AllArgsConstructor
     public static class DetailResultDTO {
         @Schema(description = "사용자 고유 ID", example = "1")
-        private Integer userId;
-
-        @Schema(description = "사용자가 속한 부서", example = "Development")
-        private String department;
-
-        @Schema(description = "사용자의 직책", example = "Software Engineer")
-        private String position;
+        private Integer id;
 
         @Schema(description = "사용자의 이름", example = "John Doe")
         private String name;
@@ -46,7 +40,7 @@ public class UserResponse {
     @AllArgsConstructor
     public static class SimpleResultDTO {
         @Schema(description = "사용자 고유 ID", example = "1")
-        private Integer userId;
+        private Integer id;
 
         @Schema(description = "사용자의 이름", example = "John Doe")
         private String name;
