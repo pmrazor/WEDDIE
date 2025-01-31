@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 @Transactional
 @RequiredArgsConstructor
 public class CoupleServiceImpl implements CoupleService {
+
     private final CoupleNotificationRepository coupleNotificationRepository;
     private final CoupleRepository coupleRepository;
     private final UserRepository userRepository;

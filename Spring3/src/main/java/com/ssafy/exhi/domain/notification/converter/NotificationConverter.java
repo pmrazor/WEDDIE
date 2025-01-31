@@ -3,7 +3,7 @@ package com.ssafy.exhi.domain.notification.converter;
 import com.ssafy.exhi.domain.notification.model.dto.NotificationRequest;
 import com.ssafy.exhi.domain.notification.model.dto.NotificationResponse;
 import com.ssafy.exhi.domain.notification.model.entity.CoupleMatchingNotification;
-import com.ssafy.exhi.domain.notification.model.entity.NotificationType;
+import com.ssafy.exhi.domain.notification.model.entity.MatchingStatus;
 import com.ssafy.exhi.domain.user.converter.UserConverter;
 import com.ssafy.exhi.domain.user.model.dto.UserResponse;
 import com.ssafy.exhi.domain.user.model.entity.User;
@@ -13,14 +13,15 @@ import java.util.Optional;
 
 public class NotificationConverter {
 
-    public static CoupleMatchingNotification toEntity(NotificationRequest.CoupleMatchingDTO dto, User receiver, User sender) {
+    public static CoupleMatchingNotification toEntity(NotificationRequest.CoupleMatchingDTO dto, User receiver, User sender, MatchingStatus status) {
 
         return CoupleMatchingNotification.builder()
                 .sender(sender)
                 .receiver(receiver)
                 .message("커플 신청")
                 .isRead(false)
-                .notificationType(NotificationType.COUPLE_MATCHING)
+                .matchingStatus(status)
+                .notificationType(dto.getNotificationType())
                 .build();
     }
 
@@ -41,6 +42,7 @@ public class NotificationConverter {
                 .message(notification.getMessage())
                 .isRead(notification.isRead())
                 .notificationType(notification.getNotificationType())
+                .matchingStatus(notification.getMatchingStatus())
                 .approvedUrl(NotificationResponse.CoupleMatchingDTO.getApprovedUrl(id))
                 .rejectedUrl(NotificationResponse.CoupleMatchingDTO.getRejectedUrl(id))
                 .build();

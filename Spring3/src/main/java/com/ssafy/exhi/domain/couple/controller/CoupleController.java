@@ -5,6 +5,7 @@ import com.ssafy.exhi.domain.couple.model.dto.CoupleResponse;
 import com.ssafy.exhi.domain.couple.service.CoupleService;
 import com.ssafy.exhi.domain.notification.NotificationService;
 import com.ssafy.exhi.domain.notification.model.dto.NotificationRequest;
+import com.ssafy.exhi.domain.notification.model.entity.MatchingStatus;
 import com.ssafy.exhi.util.JWTUtil;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -54,7 +55,7 @@ public class CoupleController {
         matchingDTO.setSenderId(userId);
         log.info("requestCouple: sender={}, receiver={}", userId, matchingDTO.getReceiverId());
 
-        notificationService.sendCoupleNotification(matchingDTO);
+        notificationService.sendCoupleNotification(matchingDTO, MatchingStatus.PENDING);
         return ResponseEntity.ok().body(null);
     }
 
@@ -62,23 +63,20 @@ public class CoupleController {
      * TODO: 커플 알람 기능이 완성되면 사용할 커플 요청 수락 API
      * @param accessToken
      * @param requestId
-     * @param coupleDTO
+     * @param matchingDTO
      * @return
      */
     @PostMapping("/request/{requestId}/approved")
     public ResponseEntity<?> approveCoupleRequest(
             @RequestHeader("Authorization") String accessToken,
             @PathVariable(name = "requestId") Integer requestId,
-            @RequestBody @Valid CoupleRequest.CreateDTO coupleDTO
+            @RequestBody @Valid NotificationRequest.CoupleMatchingDTO matchingDTO
 
     ) {
         Integer userId = jwtUtil.getUserId(accessToken);
         log.info("createCouple: userId={}", userId);
 
-        coupleDTO.setUserId(userId);
-
-        SimpleResultDTO response = coupleService.createCouple(requestId, coupleDTO);
-        return ResponseEntity.ok().body(response);
+        return getSimpleResultDTOResponseEntity(matchingDTO, userId, requestId, MatchingStatus.PENDING);
     }
 
     /**
@@ -86,24 +84,34 @@ public class CoupleController {
      *
      * @param accessToken
      * @param requestId
-     * @param coupleDTO
+     * @param matchingDTO
      * @return
      */
     @PostMapping("/request/{requestId}/reject")
     public ResponseEntity<?> rejectCoupleRequest(
             @RequestHeader("Authorization") String accessToken,
             @PathVariable(name = "requestId") Integer requestId,
-            @RequestBody @Valid CoupleRequest.CreateDTO coupleDTO
+            @RequestBody @Valid NotificationRequest.CoupleMatchingDTO matchingDTO
 
     ) {
-//        Integer userId = jwtUtil.getUserId(accessToken);
-//        log.info("createCouple: userId={}", userId);
-//
-//        coupleDTO.setUserId(userId);
-//
-//        SimpleResultDTO response = coupleService.createCouple(requestId, coupleDTO);
-//        return ResponseEntity.ok().body(response);
-        return null;
+        Integer userId = jwtUtil.getUserId(accessToken);
+        log.info("rejectCoupleRequest: userId={}", userId);
+
+        return getSimpleResultDTOResponseEntity(matchingDTO, userId, requestId, MatchingStatus.REJECTED);
+    }
+
+    private ResponseEntity<?> getSimpleResultDTOResponseEntity(
+            NotificationRequest.CoupleMatchingDTO matchingDTO,
+            Integer userId,
+            Integer requestId,
+            MatchingStatus status
+    ) {
+        matchingDTO.setSenderId(userId);
+
+        SimpleResultDTO response = coupleService.createCouple(requestId, matchingDTO.getPayload());
+        notificationService.sendCoupleNotification(matchingDTO, status);
+
+        return ResponseEntity.ok().body(response);
     }
 
     /**

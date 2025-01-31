@@ -5,6 +5,7 @@ import com.ssafy.exhi.domain.notification.converter.NotificationConverter;
 import com.ssafy.exhi.domain.notification.model.dto.NotificationRequest;
 import com.ssafy.exhi.domain.notification.model.dto.NotificationResponse;
 import com.ssafy.exhi.domain.notification.model.entity.CoupleMatchingNotification;
+import com.ssafy.exhi.domain.notification.model.entity.MatchingStatus;
 import com.ssafy.exhi.domain.user.model.entity.User;
 import com.ssafy.exhi.domain.user.repository.UserRepository;
 import com.ssafy.exhi.exception.ExceptionHandler;
@@ -68,7 +69,7 @@ public class NotificationService {
     }
     
     // 특정 사용자에게 알림을 보내는 메서드
-    public void sendCoupleNotification(NotificationRequest.CoupleMatchingDTO notificationDTO) {
+    public void sendCoupleNotification(NotificationRequest.CoupleMatchingDTO notificationDTO, MatchingStatus status) {
         User receiver = getUserById(notificationDTO.getReceiverId());
         User sender = getUserById(notificationDTO.getSenderId());
         log.info("emmiter size -> {}, 보낸 사람 -> {}, 받는 사람 -> {}", emitters.size(), sender.getName(), receiver.getName());
@@ -77,7 +78,7 @@ public class NotificationService {
         );
 
         // 알림 리포지토리 저장
-        CoupleMatchingNotification entity = NotificationConverter.toEntity(notificationDTO, receiver, sender);
+        CoupleMatchingNotification entity = NotificationConverter.toEntity(notificationDTO, receiver, sender, status);
         CoupleMatchingNotification saved = coupleNotificationRepository.save(entity);
 
         // 알림 전송

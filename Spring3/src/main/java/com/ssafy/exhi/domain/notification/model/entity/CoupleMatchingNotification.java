@@ -34,6 +34,10 @@ public class CoupleMatchingNotification {
 
     @Enumerated(EnumType.STRING)
     @Column(insertable = false, updatable = false)
+    private MatchingStatus matchingStatus;
+
+    @Enumerated(EnumType.STRING)
+    @Column(insertable = false, updatable = false)
     private NotificationType notificationType;
 
 
