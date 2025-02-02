@@ -1,10 +1,8 @@
 package com.ssafy.exhi.domain.todo.model.entity;
 
 import com.ssafy.exhi.base.BaseEntity;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
+import com.ssafy.exhi.domain.ServiceType;
+import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
@@ -18,6 +16,10 @@ public class DefaultTodo extends BaseEntity {
     @GeneratedValue
     @Column(name = "default_todo_id")
     private Integer id;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "service_type")
+    private ServiceType serviceType;
 
     @Column(name = "content")
     private String content;

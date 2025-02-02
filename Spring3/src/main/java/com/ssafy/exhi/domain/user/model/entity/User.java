@@ -37,6 +37,9 @@ public class User extends BaseEntity {
     @Setter
     private String token;
 
+    @Transient
+    private Integer coupleId;
+
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private UserDetail userDetail;
 

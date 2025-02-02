@@ -24,16 +24,8 @@ public class UserDetail {
     @Column(name = "age")
     private Integer age;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "gender")
-    private Gender gender;
-
     @Column(name = "phone")
     private String phone;
-
-    @OneToOne
-    @JoinColumn(name = "fiance_id")
-    private User fiance;
 
     // url
     @Column(name = "profile_image")
