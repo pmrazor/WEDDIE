@@ -45,7 +45,7 @@ public class PlanController {
     @GetMapping("/{planId}")
     public ResponseEntity<?> getPlan(
             @RequestHeader("Authorization") String accessToken,
-            @PathVariable Integer planId
+            @PathVariable("planId") Integer planId
     ) {
         Integer userId = jwtUtil.getUserId(accessToken);
         log.info("createPlan userId: {}", userId);

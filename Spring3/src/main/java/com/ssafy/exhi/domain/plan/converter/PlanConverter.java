@@ -4,6 +4,8 @@ import com.ssafy.exhi.domain.plan.model.dto.PlanRequest;
 import com.ssafy.exhi.domain.plan.model.dto.PlanResponse;
 import com.ssafy.exhi.domain.plan.model.entity.Plan;
 import com.ssafy.exhi.domain.plan.model.entity.PlanStatus;
+import com.ssafy.exhi.domain.todo.converter.TodoConverter;
+import com.ssafy.exhi.domain.todo.model.dto.TodoResponse;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,6 +28,8 @@ public class PlanConverter {
     }
 
     public static PlanResponse.DetailResultDTO toDetailDTO(Plan plan) {
+        List<TodoResponse.DetailResultDTO> todos = TodoConverter.toDTO(plan.getTodos());
+
         return PlanResponse.DetailResultDTO.builder()
                 .planId(plan.getId())
                 .shopName(plan.getShopName())
@@ -33,7 +37,7 @@ public class PlanConverter {
                 .planStatus(plan.getPlanStatus())
                 .serviceType(plan.getServiceType())
                 .visible(plan.isVisible())
-                .todos(plan.getTodos())
+                .todos(todos)
                 .build();
     }
 
