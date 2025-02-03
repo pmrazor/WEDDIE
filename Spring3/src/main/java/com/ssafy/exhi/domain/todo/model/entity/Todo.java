@@ -2,6 +2,7 @@ package com.ssafy.exhi.domain.todo.model.entity;
 
 import com.ssafy.exhi.domain.ServiceType;
 import com.ssafy.exhi.domain.plan.model.entity.Plan;
+import com.ssafy.exhi.domain.todo.model.dto.TodoRequest;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -30,4 +31,12 @@ public class Todo {
 
     @Column(name = "is_completed")
     private boolean isCompleted;
+
+    public void patch(TodoRequest.UpdateDTO updateDTO) {
+        this.content = updateDTO.getContent();
+    }
+
+    public void check(TodoRequest.CheckDTO checkDTO) {
+        this.isCompleted = checkDTO.getIsCompleted();
+    }
 }

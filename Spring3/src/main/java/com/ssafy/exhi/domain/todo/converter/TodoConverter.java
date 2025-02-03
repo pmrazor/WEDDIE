@@ -1,5 +1,7 @@
 package com.ssafy.exhi.domain.todo.converter;
 
+import com.ssafy.exhi.domain.plan.model.entity.Plan;
+import com.ssafy.exhi.domain.todo.model.dto.TodoRequest;
 import com.ssafy.exhi.domain.todo.model.dto.TodoResponse;
 import com.ssafy.exhi.domain.todo.model.entity.Todo;
 
@@ -20,5 +22,14 @@ public class TodoConverter {
         return todos.stream()
                 .map(TodoConverter::toDTO)
                 .collect(Collectors.toList());
+    }
+
+    public static Todo toEntity(Plan plan, TodoRequest.CreateDTO dto) {
+        return Todo.builder()
+                .plan(plan)
+                .content(dto.getContent())
+                .serviceType(plan.getServiceType())
+                .isCompleted(false)
+                .build();
     }
 }
