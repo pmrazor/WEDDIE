@@ -1,5 +1,6 @@
 package com.ssafy.exhi.domain.todo.model.entity;
 
+import com.ssafy.exhi.domain.ServiceType;
 import com.ssafy.exhi.domain.plan.model.entity.Plan;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -17,19 +18,18 @@ public class Todo {
     @Id
     @GeneratedValue
     @Column(name = "todo_id")
-    private Long id;
+    private Integer id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "plan_id")
     private Plan plan;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "custom_todo_id")
-    private CustomTodo customTodo;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "service_type")
+    private ServiceType serviceType;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "default_todo_id")
-    private DefaultTodo defaultTodo;
+    @Column(name = "content")
+    private String content;
 
     @Column(name = "is_completed")
     private boolean isCompleted;

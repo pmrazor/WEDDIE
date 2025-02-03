@@ -4,6 +4,7 @@ import com.ssafy.exhi.base.BaseEntity;
 import com.ssafy.exhi.base.status.ErrorStatus;
 import com.ssafy.exhi.domain.ServiceType;
 import com.ssafy.exhi.domain.plan.model.dto.PlanRequest;
+import com.ssafy.exhi.domain.todo.model.entity.DefaultTodo;
 import com.ssafy.exhi.domain.todo.model.entity.Todo;
 import com.ssafy.exhi.domain.virginroad.model.entity.VirginRoad;
 import com.ssafy.exhi.exception.ExceptionHandler;
@@ -12,7 +13,10 @@ import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+
 @Slf4j
 @Entity
 @Getter
@@ -43,8 +47,8 @@ public class Plan extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private PlanStatus planStatus;
 
-    @OneToMany(mappedBy = "plan")
-    private List<Todo> todos;
+    @OneToMany(mappedBy = "plan", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Todo> todos = new ArrayList<>();
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "virgin_road_id")
@@ -75,6 +79,18 @@ public class Plan extends BaseEntity {
                 .visible(false) // 디폴트 값 설정 (예: isVisible = false)
                 .planStatus(PlanStatus.BEFORE_START)
                 .build();
+    }
+
+    public void setDefaultTodos(ServiceType serviceType, Map<ServiceType, List<DefaultTodo>> defaultTodos) {
+        if (!defaultTodos.containsKey(serviceType)) return;
+
+        List<DefaultTodo> defaultTodoList = defaultTodos.get(serviceType);
+
+        this.todos.addAll(
+                defaultTodoList.stream().map(
+                        todo -> todo.toTodo(this)
+                ).toList()
+        );
     }
 
     /* 비즈니스 로직 */

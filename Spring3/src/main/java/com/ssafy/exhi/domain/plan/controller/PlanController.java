@@ -1,6 +1,7 @@
 package com.ssafy.exhi.domain.plan.controller;
 
 import com.ssafy.exhi.domain.plan.model.dto.PlanRequest;
+import com.ssafy.exhi.domain.plan.model.dto.PlanResponse;
 import com.ssafy.exhi.domain.plan.service.PlanService;
 import com.ssafy.exhi.util.JWTUtil;
 import jakarta.validation.Valid;
@@ -41,9 +42,15 @@ public class PlanController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    @GetMapping
-    public ResponseEntity<?> getPlan() {
+    @GetMapping("/{planId}")
+    public ResponseEntity<?> getPlan(
+            @RequestHeader("Authorization") String accessToken,
+            @PathVariable Integer planId
+    ) {
+        Integer userId = jwtUtil.getUserId(accessToken);
+        log.info("createPlan userId: {}", userId);
 
-        return ResponseEntity.ok(null);
+        PlanResponse.DetailResultDTO response = planService.getPlan(userId, planId);
+        return ResponseEntity.ok(response);
     }
 }

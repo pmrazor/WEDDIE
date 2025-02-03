@@ -1,11 +1,13 @@
 package com.ssafy.exhi.domain.virginroad.service;
 
 import com.ssafy.exhi.base.status.ErrorStatus;
+import com.ssafy.exhi.domain.ServiceType;
 import com.ssafy.exhi.domain.couple.model.entity.Couple;
 import com.ssafy.exhi.domain.couple.repository.CoupleRepository;
 import com.ssafy.exhi.domain.plan.model.dto.PlanRequest;
 import com.ssafy.exhi.domain.plan.model.entity.Plan;
-import com.ssafy.exhi.domain.plan.repository.PlanRepository;
+import com.ssafy.exhi.domain.todo.model.entity.DefaultTodo;
+import com.ssafy.exhi.domain.todo.repository.DefaultTodoRepository;
 import com.ssafy.exhi.domain.virginroad.converter.VirginRoadConverter;
 import com.ssafy.exhi.domain.virginroad.model.dto.VirginRoadRequest;
 import com.ssafy.exhi.domain.virginroad.model.dto.VirginRoadResponse;
@@ -14,8 +16,14 @@ import com.ssafy.exhi.domain.virginroad.repository.VirginRoadRepository;
 import com.ssafy.exhi.exception.ExceptionHandler;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+@Slf4j
 @Service
 @Transactional
 @RequiredArgsConstructor
@@ -23,7 +31,7 @@ public class VirginRoadServiceImpl implements VirginRoadService {
 
     private final VirginRoadRepository virginRoadRepository;
     private final CoupleRepository coupleRepository;
-    private final PlanRepository planRepository;
+    private final DefaultTodoRepository defaultTodoRepository;
 
     /**
      * 플랜과 버진로드를 동시에 생성하기
@@ -37,7 +45,11 @@ public class VirginRoadServiceImpl implements VirginRoadService {
         existVirginRoad(couple);
 
         VirginRoad virginRoad = VirginRoadConverter.toEntity(createDTO, couple);
-        virginRoad.setDefaultPlans();
+
+        Map<ServiceType, List<DefaultTodo>> defaultTodos = defaultTodoRepository.findAll().stream().collect(Collectors.groupingBy(DefaultTodo::getServiceType));
+        log.debug("default todos -> {}", defaultTodos);
+        virginRoad.setDefaultPlans(defaultTodos);
+
 
         // 버진로드 저장
         VirginRoad saved = virginRoadRepository.save(virginRoad);

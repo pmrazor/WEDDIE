@@ -2,6 +2,7 @@ package com.ssafy.exhi.domain.todo.model.entity;
 
 import com.ssafy.exhi.base.BaseEntity;
 import com.ssafy.exhi.domain.ServiceType;
+import com.ssafy.exhi.domain.plan.model.entity.Plan;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -23,4 +24,13 @@ public class DefaultTodo extends BaseEntity {
 
     @Column(name = "content")
     private String content;
+
+    public Todo toTodo(Plan plan) {
+        return Todo.builder()
+                .content(content)
+                .serviceType(serviceType)
+                .isCompleted(false)
+                .plan(plan)
+                .build();
+    }
 }

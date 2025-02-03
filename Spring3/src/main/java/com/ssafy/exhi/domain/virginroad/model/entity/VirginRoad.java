@@ -3,6 +3,7 @@ package com.ssafy.exhi.domain.virginroad.model.entity;
 import com.ssafy.exhi.domain.ServiceType;
 import com.ssafy.exhi.domain.couple.model.entity.Couple;
 import com.ssafy.exhi.domain.plan.model.entity.Plan;
+import com.ssafy.exhi.domain.todo.model.entity.DefaultTodo;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -11,6 +12,7 @@ import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Entity
@@ -49,11 +51,12 @@ public class VirginRoad {
         }
     }
 
-    public void setDefaultPlans() {
+    public void setDefaultPlans(Map<ServiceType, List<DefaultTodo>> defaultTodos) {
         for (ServiceType serviceType : ServiceType.values()) {
             Plan plan = Optional.ofNullable(this.findPlanByServiceType(serviceType))
                     .orElse(Plan.createDefault(serviceType, this));
 
+            plan.setDefaultTodos(serviceType, defaultTodos);
             addPlan(plan);
         }
     }
@@ -63,6 +66,9 @@ public class VirginRoad {
                 .filter(plan -> plan.getServiceType() == serviceType)
                 .findFirst()
                 .orElse(null);
+    }
+
+    public void setDefaultTodos() {
     }
 
     /* 비즈니스 로직 */

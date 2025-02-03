@@ -2,6 +2,7 @@ package com.ssafy.exhi.domain.plan.model.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.ssafy.exhi.domain.ServiceType;
+import com.ssafy.exhi.domain.todo.model.dto.TodoRequest;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
@@ -10,6 +11,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 public class PlanRequest {
 
@@ -28,6 +31,8 @@ public class PlanRequest {
 
         @NotNull(message = "가시성 타입은 필수 입니다.")
         private boolean visible;
+
+        private List<TodoRequest.CreateDTO> todos = new ArrayList<>();
 
         @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
         private LocalDateTime planTime;

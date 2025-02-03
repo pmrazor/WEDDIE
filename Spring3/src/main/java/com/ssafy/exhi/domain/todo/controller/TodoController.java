@@ -34,6 +34,8 @@ public class TodoController {
     public ResponseEntity<?> createTodo(
             @RequestHeader(name = "Authorization") String accessToken
     ) {
+        Integer userId = jwtUtil.getUserId(accessToken);
+        todoService.createTodo(userId);
         return ResponseEntity.ok(null);
     }
 
