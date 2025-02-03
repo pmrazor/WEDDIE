@@ -66,8 +66,14 @@ public enum ErrorStatus implements BaseErrorCode {
     DATABASE_DATA_TRUNCATION_ERROR(HttpStatus.BAD_REQUEST, "DB5006", "데이터 길이가 초과되었거나 타입이 일치하지 않습니다"),
     DATABASE_DEADLOCK_OCCURRED(HttpStatus.CONFLICT, "DB5007", "데드락이 발생했습니다"),
     DATABASE_LOCK_TIMEOUT(HttpStatus.REQUEST_TIMEOUT, "DB5008", "락 획득 대기 시간이 초과되었습니다"),
-    DATABASE_INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "DB5999", "내부 서버 오류가 발생했습니다");
+    DATABASE_INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "DB5999", "내부 서버 오류가 발생했습니다"),
 
+    // 플랜 관련 에러
+    PLAN_NOT_FOUND(HttpStatus.NOT_FOUND, "PLAN_4001", "존재하지 않는 플랜입니다"),
+    INVALID_PLAN_STATUS(HttpStatus.BAD_REQUEST, "PLAN_4002", "아직 타임캡슐을 작성할 수 없는 플랜입니다"),
+
+    // 타임캡슐 관련 에러
+    TIMECAPSULE_ALREADY_EXIST(HttpStatus.BAD_REQUEST, "TIME_CAPSULE_4001", "이미 작성된 타임캡슐입니다");
 
     private final HttpStatus httpStatus;
     private final String code;

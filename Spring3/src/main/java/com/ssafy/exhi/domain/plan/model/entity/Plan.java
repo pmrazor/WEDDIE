@@ -4,6 +4,7 @@ import com.ssafy.exhi.base.BaseEntity;
 import com.ssafy.exhi.base.status.ErrorStatus;
 import com.ssafy.exhi.domain.ServiceType;
 import com.ssafy.exhi.domain.plan.model.dto.PlanRequest;
+import com.ssafy.exhi.domain.timecapsule.model.entity.TimeCapsule;
 import com.ssafy.exhi.domain.todo.model.entity.Todo;
 import com.ssafy.exhi.domain.virginroad.model.entity.VirginRoad;
 import com.ssafy.exhi.exception.ExceptionHandler;
@@ -12,6 +13,7 @@ import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 @Slf4j
 @Entity
@@ -50,6 +52,10 @@ public class Plan extends BaseEntity {
     @JoinColumn(name = "virgin_road_id")
     private VirginRoad virginRoad;
 
+
+    @OneToMany(mappedBy="plan", cascade = CascadeType.ALL)
+    private List<TimeCapsule> timeCapsules = new ArrayList<>();
+
     /* 비즈니스 로직 */
 
     public void updateVirginRoad(VirginRoad virginRoad) {
@@ -77,6 +83,12 @@ public class Plan extends BaseEntity {
                 .build();
     }
 
+    public void updateTimeCapsuleStatus() {
+        long count = this.timeCapsules.size();
+        if(count == 2) {
+            this.planStatus = PlanStatus.FINISHED;
+        }
+    }
     /* 비즈니스 로직 */
 
 }
