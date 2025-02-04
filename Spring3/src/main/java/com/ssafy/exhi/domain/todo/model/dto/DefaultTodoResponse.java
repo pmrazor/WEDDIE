@@ -1,6 +1,7 @@
 package com.ssafy.exhi.domain.todo.model.dto;
 
 import com.ssafy.exhi.domain.ServiceType;
+import com.ssafy.exhi.domain.user.model.entity.Gender;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -16,6 +17,8 @@ public class DefaultTodoResponse {
         private Integer defaultTodoId;
 
         private ServiceType serviceType;
+
+        private Gender gender;
 
         private String content;
     }

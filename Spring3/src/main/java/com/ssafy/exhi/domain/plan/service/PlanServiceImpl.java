@@ -6,7 +6,6 @@ import com.ssafy.exhi.domain.couple.repository.CoupleRepository;
 import com.ssafy.exhi.domain.plan.converter.PlanConverter;
 import com.ssafy.exhi.domain.plan.model.entity.Plan;
 import com.ssafy.exhi.domain.plan.repository.PlanRepository;
-import com.ssafy.exhi.domain.user.repository.UserRepository;
 import com.ssafy.exhi.domain.virginroad.model.entity.VirginRoad;
 import com.ssafy.exhi.exception.ExceptionHandler;
 import jakarta.transaction.Transactional;
@@ -24,7 +23,6 @@ import static com.ssafy.exhi.domain.plan.model.dto.PlanResponse.DetailResultDTO;
 public class PlanServiceImpl implements PlanService {
 
     private final PlanRepository planRepository;
-    private final UserRepository userRepository;
     private final CoupleRepository coupleRepository;
 
     @Override

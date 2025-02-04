@@ -1,5 +1,6 @@
 package com.ssafy.exhi.domain.plan.controller;
 
+import com.ssafy.exhi.base.ApiResponse;
 import com.ssafy.exhi.domain.plan.model.dto.PlanResponse;
 import com.ssafy.exhi.domain.plan.service.PlanService;
 import com.ssafy.exhi.util.JWTUtil;
@@ -26,7 +27,7 @@ public class PlanController {
         log.info("createPlan userId: {}", userId);
 
         PlanResponse.DetailResultDTO response = planService.getPlan(userId, planId);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(ApiResponse.onSuccess(response));
     }
 
     // TODO Plan의 상태를 변경하는 메서드 

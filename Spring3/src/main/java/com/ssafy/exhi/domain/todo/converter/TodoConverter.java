@@ -40,14 +40,22 @@ public class TodoConverter {
         return DefaultTodo.builder()
                 .content(dto.getContent())
                 .serviceType(dto.getServiceType())
+                .gender(dto.getGender())
                 .build();
     }
 
     public static DefaultTodoResponse.DetailResultDTO toDefaultDTO(DefaultTodo entity) {
         return DefaultTodoResponse.DetailResultDTO.builder()
                 .defaultTodoId(entity.getId())
+                .gender(entity.getGender())
                 .content(entity.getContent())
                 .serviceType(entity.getServiceType())
                 .build();
+    }
+
+    public static List<DefaultTodoResponse.DetailResultDTO> toDefaultDTOList(List<DefaultTodo> defaultTodos) {
+        return defaultTodos.stream()
+                .map(TodoConverter::toDefaultDTO)
+                .toList();
     }
 }

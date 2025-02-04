@@ -1,7 +1,9 @@
 package com.ssafy.exhi.domain.todo.model.dto;
 
 import com.ssafy.exhi.domain.ServiceType;
+import com.ssafy.exhi.domain.user.model.entity.Gender;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -18,7 +20,10 @@ public class DefaultTodoRequest {
         @NotBlank
         private String content;
 
-        @NotBlank
+        @NotNull
+        private Gender gender;
+
+        @NotNull
         private ServiceType serviceType;
 
     }

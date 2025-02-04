@@ -1,5 +1,6 @@
 package com.ssafy.exhi.domain.virginroad.controller;
 
+import com.ssafy.exhi.base.ApiResponse;
 import com.ssafy.exhi.domain.virginroad.model.dto.VirginRoadRequest;
 import com.ssafy.exhi.domain.virginroad.model.dto.VirginRoadResponse;
 import com.ssafy.exhi.domain.virginroad.service.VirginRoadService;
@@ -43,7 +44,7 @@ public class VirginRoadController {
         VirginRoadResponse.SimpleResultDTO response = virginRoadService.createVirginRoad(createDTO);
         log.info("createVirginRoad userId: {}", userId);
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        return ResponseEntity.status(HttpStatus.CREATED).body(ResponseEntity.ok(ApiResponse.onSuccess(response)));
     }
 
     /**
@@ -60,7 +61,7 @@ public class VirginRoadController {
 
         VirginRoadResponse.SimpleResultDTO response = virginRoadService.getVirginRoad(userId);
 
-        return ResponseEntity.status(HttpStatus.OK).body(response);
+        return ResponseEntity.status(HttpStatus.OK).body(ResponseEntity.ok(ApiResponse.onSuccess(response)));
     }
 
     /**
@@ -80,7 +81,7 @@ public class VirginRoadController {
 
         VirginRoadResponse.SimpleResultDTO response = virginRoadService.updateVirginRoad(updateDTO);
 
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(ResponseEntity.ok(ApiResponse.onSuccess(response)));
     }
 
 
