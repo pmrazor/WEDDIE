@@ -4,6 +4,7 @@ import com.ssafy.exhi.base.BaseEntity;
 import com.ssafy.exhi.domain.plan.model.entity.Plan;
 import com.ssafy.exhi.domain.plan.model.entity.PlanStatus;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Size;
 import lombok.*;
 
 @Entity
@@ -28,12 +29,14 @@ public class TimeCapsule extends BaseEntity {
     @Column(name = "couple_id")
     private Integer coupleId;
 
+    @Size(max = 255, message = "좋았던 점은 최대 100자까지 입력 가능합니다.")
     @Column(name="good_content")
     private String goodContent;
 
     @Column(name="good_image")
     private String goodImage;
 
+    @Size(max = 255, message = "다퉜던 내용은 최대 100자까지 입력 가능합니다.")
     @Column(name="bad_content")
     private String badContent;
 

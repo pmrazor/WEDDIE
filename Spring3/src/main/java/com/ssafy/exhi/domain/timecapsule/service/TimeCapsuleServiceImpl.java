@@ -32,8 +32,7 @@ public class TimeCapsuleServiceImpl implements TimeCapsuleService {
 
     @Override
     public TimeCapsuleResponse.TimeCapsuleResponseDto createTimeCapsule(TimeCapsuleRequest.CreateDTO registTimeCapsule) {
-        User user = userRepository.findUserById(registTimeCapsule.getUserId()).
-                orElseThrow(() -> new ExceptionHandler(ErrorStatus.USER_NOT_FOUND));
+        User user = findUserByUserId(registTimeCapsule.getUserId());
 
         Plan plan = planRepository.findById(Long.valueOf(registTimeCapsule.getPlanId()))
                 .orElseThrow(() -> new ExceptionHandler(ErrorStatus.PLAN_NOT_FOUND));
@@ -43,9 +42,7 @@ public class TimeCapsuleServiceImpl implements TimeCapsuleService {
             throw new ExceptionHandler(ErrorStatus.INVALID_PLAN_STATUS);
         }
 
-        // 커플 아이디 세팅
-        Couple couple = coupleRepository.findCoupleByUserId(user.getId())
-                .orElseThrow(() -> new ExceptionHandler(ErrorStatus.COUPLE_NOT_FOUND));
+        Couple couple = findCoupleByUserId(user.getId());
 
         registTimeCapsule.setCoupleId(couple.getId());
 
@@ -74,11 +71,9 @@ public class TimeCapsuleServiceImpl implements TimeCapsuleService {
     // 커플 당 하나의 버진로드 가지니까 커플 아이디로 조회한 모든 캡슐 가져오면 되겠지?
     @Override
     public List<TimeCapsuleResponse.TimeCapsuleResponseDto> findTimeCapsulesByCoupleId(Integer userId) {
-        User user = userRepository.findUserById(userId).
-                orElseThrow(() -> new ExceptionHandler(ErrorStatus.USER_NOT_FOUND));
+        User user = findUserByUserId(userId);
 
-        Couple couple = coupleRepository.findCoupleByUserId(userId)
-                .orElseThrow(() -> new ExceptionHandler(ErrorStatus.COUPLE_NOT_FOUND));
+        Couple couple = findCoupleByUserId(userId);
 
         List<TimeCapsule> timeCapsules = timeCapsuleRepository.findAllByCoupleId(couple.getId());
 
@@ -88,5 +83,13 @@ public class TimeCapsuleServiceImpl implements TimeCapsuleService {
                 .map(TimeCapsuleConverter::toResponse)
                 // 스트림 처리 결과를 다시 List 형태로 수집
                 .collect(Collectors.toList());
+    }
+    private User findUserByUserId(Integer userId) {
+        return userRepository.findUserById(userId).
+                orElseThrow(() -> new ExceptionHandler(ErrorStatus.USER_NOT_FOUND));
+    }
+    private Couple findCoupleByUserId(Integer userId) {
+        return coupleRepository.findCoupleByUserId(userId)
+                .orElseThrow(() -> new ExceptionHandler(ErrorStatus.COUPLE_NOT_FOUND));
     }
 }
