@@ -33,4 +33,7 @@ public class UserDetail {
 
     @Column(name = "mbti")
     private String mbti;
+
+    @Column(name = "budget")
+    private Integer budget;
 }

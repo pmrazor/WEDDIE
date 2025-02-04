@@ -1,0 +1,72 @@
+[
+    {
+      "user_id": 1,
+      "age": 28,
+      "budget": 5000,
+      "mbti": "INTJ",
+      "routine_completed": true
+    },
+    {
+      "user_id": 2,
+      "age": 33,
+      "budget": 9000,
+      "mbti": "ESFJ",
+      "routine_completed": false
+    },
+    {
+      "user_id": 3,
+      "age": 25,
+      "budget": 3000,
+      "mbti": "ENFP",
+      "routine_completed": true
+    },
+    {
+      "user_id": 4,
+      "age": 30,
+      "budget": 7000,
+      "mbti": "ISTJ",
+      "routine_completed": false
+    },
+    {
+      "user_id": 5,
+      "age": 35,
+      "budget": 12000,
+      "mbti": "ISFP",
+      "routine_completed": true
+    },
+    {
+      "user_id": 6,
+      "age": 27,
+      "budget": 4500,
+      "mbti": "ENTP",
+      "routine_completed": false
+    },
+    {
+      "user_id": 7,
+      "age": 31,
+      "budget": 8000,
+      "mbti": "INFJ",
+      "routine_completed": true
+    },
+    {
+      "user_id": 8,
+      "age": 29,
+      "budget": 6000,
+      "mbti": "ESTP",
+      "routine_completed": false
+    },
+    {
+      "user_id": 9,
+      "age": 34,
+      "budget": 10000,
+      "mbti": "ISFJ",
+      "routine_completed": true
+    },
+    {
+      "user_id": 10,
+      "age": 26,
+      "budget": 3500,
+      "mbti": "ENTJ",
+      "routine_completed": false
+    }
+  ]

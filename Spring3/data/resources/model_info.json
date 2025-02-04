@@ -1,0 +1,19 @@
+{
+  "model_type": "KMeans",
+  "n_clusters": 6,
+  "random_state": 42,
+  "feature_ranges": {
+    "age": {
+      "min": 20,
+      "max": 45
+    },
+    "budget": {
+      "min": 2000,
+      "max": 10000
+    }
+  },
+  "mbti_encoding": {
+    "method": "binary",
+    "n_components": 4
+  }
+}
