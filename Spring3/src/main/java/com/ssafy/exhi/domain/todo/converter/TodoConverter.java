@@ -1,8 +1,11 @@
 package com.ssafy.exhi.domain.todo.converter;
 
 import com.ssafy.exhi.domain.plan.model.entity.Plan;
+import com.ssafy.exhi.domain.todo.model.dto.DefaultTodoRequest;
+import com.ssafy.exhi.domain.todo.model.dto.DefaultTodoResponse;
 import com.ssafy.exhi.domain.todo.model.dto.TodoRequest;
 import com.ssafy.exhi.domain.todo.model.dto.TodoResponse;
+import com.ssafy.exhi.domain.todo.model.entity.DefaultTodo;
 import com.ssafy.exhi.domain.todo.model.entity.Todo;
 
 import java.util.List;
@@ -30,6 +33,21 @@ public class TodoConverter {
                 .content(dto.getContent())
                 .serviceType(plan.getServiceType())
                 .isCompleted(false)
+                .build();
+    }
+
+    public static DefaultTodo toDefaultTodo(DefaultTodoRequest.CreateDTO dto) {
+        return DefaultTodo.builder()
+                .content(dto.getContent())
+                .serviceType(dto.getServiceType())
+                .build();
+    }
+
+    public static DefaultTodoResponse.DetailResultDTO toDefaultDTO(DefaultTodo entity) {
+        return DefaultTodoResponse.DetailResultDTO.builder()
+                .defaultTodoId(entity.getId())
+                .content(entity.getContent())
+                .serviceType(entity.getServiceType())
                 .build();
     }
 }
