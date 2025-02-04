@@ -45,9 +45,6 @@ public enum ErrorStatus implements BaseErrorCode {
     VIRGIN_ROAD_EXISTS(HttpStatus.BAD_REQUEST, "VIRGIN_ROAD4007", "버진로드는 두 개 이상 생성할 수 없습니다."),
     VIRGIN_ROAD_SERVICE_TYPE_NOT_VALID(HttpStatus.BAD_REQUEST, "VIRGIN_ROAD4008", "버진로드의 서비스 타입이 중복됩니다."),
 
-    // 플랜 관련 에러
-    PLAN_NOT_FOUND(HttpStatus.NOT_FOUND, "PLAN4001", "존재하지 않는 플랜입니다."),
-
     // 투두 관련 에러
     TODO_NOT_FOUND(HttpStatus.NOT_FOUND, "TODO4001", "존재하지 않는 투두 계획입니다."),
 
