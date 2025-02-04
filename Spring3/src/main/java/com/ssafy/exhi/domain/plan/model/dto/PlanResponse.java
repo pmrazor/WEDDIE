@@ -2,7 +2,7 @@ package com.ssafy.exhi.domain.plan.model.dto;
 
 import com.ssafy.exhi.domain.ServiceType;
 import com.ssafy.exhi.domain.plan.model.entity.PlanStatus;
-import com.ssafy.exhi.domain.todo.model.entity.Todo;
+import com.ssafy.exhi.domain.todo.model.dto.TodoResponse;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -30,7 +30,7 @@ public class PlanResponse {
 
         private PlanStatus planStatus;
 
-        private List<Todo> todos;
+        private List<TodoResponse.DetailResultDTO> todos;
     }
 
     @Data

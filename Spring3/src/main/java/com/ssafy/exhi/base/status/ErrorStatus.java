@@ -14,7 +14,7 @@ public enum ErrorStatus implements BaseErrorCode {
     _INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "COMMON500", "서버 에러, 관리자에게 문의 바랍니다."),
     _BAD_REQUEST(HttpStatus.BAD_REQUEST, "COMMON400", "잘못된 요청입니다."),
     _UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "COMMON401", "인증이 필요합니다."),
-    _FORBIDDEN(HttpStatus.FORBIDDEN, "COMMON403", "금지된 요청입니다."),
+    _FORBIDDEN(HttpStatus.FORBIDDEN, "COMMON403", "권한이 없습니다. id를 맞게 선택하셨나요?"),
 
     // 입력 관련 에러
     NOT_ENOUGH_REQUEST_BODY_ERROR(HttpStatus.BAD_REQUEST, "COMMON404", "요청 바디가 잘못되었습니다."),
@@ -44,6 +44,12 @@ public enum ErrorStatus implements BaseErrorCode {
     VIRGIN_ROAD_DATE_PAST(HttpStatus.BAD_REQUEST, "VIRGIN_ROAD4006", "과거 날짜는 선택할 수 없습니다."),
     VIRGIN_ROAD_EXISTS(HttpStatus.BAD_REQUEST, "VIRGIN_ROAD4007", "버진로드는 두 개 이상 생성할 수 없습니다."),
     VIRGIN_ROAD_SERVICE_TYPE_NOT_VALID(HttpStatus.BAD_REQUEST, "VIRGIN_ROAD4008", "버진로드의 서비스 타입이 중복됩니다."),
+
+    // 플랜 관련 에러
+    PLAN_NOT_FOUND(HttpStatus.NOT_FOUND, "PLAN4001", "존재하지 않는 플랜입니다."),
+
+    // 투두 관련 에러
+    TODO_NOT_FOUND(HttpStatus.NOT_FOUND, "TODO4001", "존재하지 않는 투두 계획입니다."),
 
     // 알림 관련 에러
     NOTIFICATION_NOT_FOUND(HttpStatus.NOT_FOUND, "NOTIFICATION4001", "존재하지 않는 알람입니다.."),

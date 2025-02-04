@@ -68,6 +68,17 @@ public class JWTUtil {
 
         return Integer.parseInt(value.get("id").toString());
     }
+
+    public Integer getCoupleId(String header) {
+        String token = getToken(header);
+        Jws<Claims> claims = getClaimsJws(token);
+
+        Map<String, Object> value = claims.getBody();
+        log.info("value : {}", value);
+
+        return Integer.parseInt(value.get("coupleId").toString());
+    }
+
     public String getUserLoginId(String header) {
         String token = getToken(header);
         Jws<Claims> claims = getClaimsJws(token);
@@ -103,6 +114,7 @@ public class JWTUtil {
                 .add(headers)
                 .and()
                 .subject(subject)
+                .claim("coupleId", user.getCoupleId())
                 .claim("loginId", user.getLoginId())
                 .claim("name", user.getName())
                 .claim("id", user.getId())

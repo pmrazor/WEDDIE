@@ -1,10 +1,10 @@
 package com.ssafy.exhi.domain.todo.model.entity;
 
 import com.ssafy.exhi.base.BaseEntity;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
+import com.ssafy.exhi.domain.ServiceType;
+import com.ssafy.exhi.domain.plan.model.entity.Plan;
+import com.ssafy.exhi.domain.user.model.entity.Gender;
+import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
@@ -19,6 +19,22 @@ public class DefaultTodo extends BaseEntity {
     @Column(name = "default_todo_id")
     private Integer id;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "service_type")
+    private ServiceType serviceType;
+
     @Column(name = "content")
     private String content;
+
+    @Column(name = "gender")
+    private Gender gender;
+
+    public Todo toTodo(Plan plan) {
+        return Todo.builder()
+                .content(content)
+                .serviceType(serviceType)
+                .isCompleted(false)
+                .plan(plan)
+                .build();
+    }
 }

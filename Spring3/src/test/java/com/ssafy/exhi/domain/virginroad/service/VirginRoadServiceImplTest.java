@@ -6,6 +6,7 @@ import com.ssafy.exhi.domain.couple.repository.CoupleRepository;
 import com.ssafy.exhi.domain.plan.model.dto.PlanRequest;
 import com.ssafy.exhi.domain.plan.model.entity.Plan;
 import com.ssafy.exhi.domain.plan.repository.PlanRepository;
+import com.ssafy.exhi.domain.todo.model.entity.DefaultTodo;
 import com.ssafy.exhi.domain.user.model.entity.User;
 import com.ssafy.exhi.domain.virginroad.model.dto.VirginRoadRequest;
 import com.ssafy.exhi.domain.virginroad.model.dto.VirginRoadResponse;
@@ -95,7 +96,7 @@ class VirginRoadServiceImplTest {
     @DisplayName("버진로드는_항상_서비스타입과_갯수가_일치한다")
     void 버진로드는_항상_서비스타입과_갯수가_일치한다() {
         // When
-        virginRoad.setDefaultPlans();
+        virginRoad.setDefaultPlans(null);
 
         // Then
         assertEquals(ServiceType.values().length, virginRoad.getPlans().size());

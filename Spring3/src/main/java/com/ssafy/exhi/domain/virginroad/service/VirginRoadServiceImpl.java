@@ -1,11 +1,15 @@
 package com.ssafy.exhi.domain.virginroad.service;
 
 import com.ssafy.exhi.base.status.ErrorStatus;
+import com.ssafy.exhi.domain.ServiceType;
 import com.ssafy.exhi.domain.couple.model.entity.Couple;
 import com.ssafy.exhi.domain.couple.repository.CoupleRepository;
 import com.ssafy.exhi.domain.plan.model.dto.PlanRequest;
 import com.ssafy.exhi.domain.plan.model.entity.Plan;
-import com.ssafy.exhi.domain.plan.repository.PlanRepository;
+import com.ssafy.exhi.domain.todo.model.entity.DefaultTodo;
+import com.ssafy.exhi.domain.todo.repository.DefaultTodoRepository;
+import com.ssafy.exhi.domain.user.model.entity.User;
+import com.ssafy.exhi.domain.user.repository.UserRepository;
 import com.ssafy.exhi.domain.virginroad.converter.VirginRoadConverter;
 import com.ssafy.exhi.domain.virginroad.model.dto.VirginRoadRequest;
 import com.ssafy.exhi.domain.virginroad.model.dto.VirginRoadResponse;
@@ -14,35 +18,56 @@ import com.ssafy.exhi.domain.virginroad.repository.VirginRoadRepository;
 import com.ssafy.exhi.exception.ExceptionHandler;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+@Slf4j
 @Service
 @Transactional
 @RequiredArgsConstructor
 public class VirginRoadServiceImpl implements VirginRoadService {
 
-    private final VirginRoadRepository virginRoadRepository;
+    private final UserRepository userRepository;
     private final CoupleRepository coupleRepository;
-    private final PlanRepository planRepository;
+    private final VirginRoadRepository virginRoadRepository;
+    private final DefaultTodoRepository defaultTodoRepository;
 
     /**
      * 플랜과 버진로드를 동시에 생성하기
      * 버진로드가 비어있는 값은 디폴트로 생성 (visible이 false로 설정)
+     *
      * @param createDTO
      * @return
      */
     @Override
     public VirginRoadResponse.SimpleResultDTO createVirginRoad(VirginRoadRequest.CreateDTO createDTO) {
-        Couple couple = getCoupleByUserId(createDTO.getUserId());
+        User user = findUserByUserId(createDTO.getUserId());
+        Couple couple = findCoupleByUserId(createDTO.getUserId());
         existVirginRoad(couple);
 
         VirginRoad virginRoad = VirginRoadConverter.toEntity(createDTO, couple);
-        virginRoad.setDefaultPlans();
+
+        Map<ServiceType, List<DefaultTodo>> defaultTodos = getDefaultTodos(user);
+
+        log.debug("default todos -> {}", defaultTodos);
+        virginRoad.setDefaultPlans(defaultTodos);
+
 
         // 버진로드 저장
         VirginRoad saved = virginRoadRepository.save(virginRoad);
 
         return VirginRoadConverter.toDTO(saved);
+    }
+
+    private Map<ServiceType, List<DefaultTodo>> getDefaultTodos(User user) {
+        return defaultTodoRepository
+                .findDefaultTodosByGender(user.getGender())
+                .stream()
+                .collect(Collectors.groupingBy(DefaultTodo::getServiceType));
     }
 
     /**
@@ -53,8 +78,8 @@ public class VirginRoadServiceImpl implements VirginRoadService {
      */
     @Override
     public VirginRoadResponse.SimpleResultDTO getVirginRoad(Integer userId) {
-        Couple couple = getCoupleByUserId(userId);
-        VirginRoad virginRoad = getVirginRoadByCouple(couple);
+        Couple couple = findCoupleByUserId(userId);
+        VirginRoad virginRoad = findVirginRoadByCouple(couple);
 
         return VirginRoadConverter.toDTO(virginRoad);
     }
@@ -68,8 +93,8 @@ public class VirginRoadServiceImpl implements VirginRoadService {
     @Override
     public VirginRoadResponse.SimpleResultDTO updateVirginRoad(VirginRoadRequest.UpdateDTO updateDTO) {
         // 1. 사용자의 버진로드를 들고오기
-        Couple couple = getCoupleByUserId(updateDTO.getUserId());
-        VirginRoad virginRoad = getVirginRoadByCouple(couple);
+        Couple couple = findCoupleByUserId(updateDTO.getUserId());
+        VirginRoad virginRoad = findVirginRoadByCouple(couple);
 
         // 2. 업데이트
         for (PlanRequest.UpdateDTO planDTO : updateDTO.getPlans()) {
@@ -86,19 +111,26 @@ public class VirginRoadServiceImpl implements VirginRoadService {
      */
     @Override
     public void deleteVirginRoad(Integer userId) {
-        Couple couple = getCoupleByUserId(userId);
-        VirginRoad virginRoad = getVirginRoadByCouple(couple);
+        Couple couple = findCoupleByUserId(userId);
+        VirginRoad virginRoad = findVirginRoadByCouple(couple);
 
         virginRoadRepository.delete(virginRoad);
     }
 
-    private Couple getCoupleByUserId(Integer userId) {
+    private User findUserByUserId(Integer userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(
+                        () -> new ExceptionHandler(ErrorStatus.USER_NOT_FOUND)
+                );
+    }
+
+    private Couple findCoupleByUserId(Integer userId) {
         return coupleRepository.findCoupleByUserId(userId).orElseThrow(
                 () -> new ExceptionHandler(ErrorStatus.COUPLE_NOT_FOUND)
         );
     }
 
-    private VirginRoad getVirginRoadByCouple(Couple couple) {
+    private VirginRoad findVirginRoadByCouple(Couple couple) {
 
         return virginRoadRepository.getVirginRoadByCouple(couple).orElseThrow(
                 () -> new ExceptionHandler(ErrorStatus.VIRGIN_ROAD_NOT_FOUND)

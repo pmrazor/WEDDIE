@@ -1,6 +1,8 @@
 package com.ssafy.exhi.domain.user.service;
 
 import com.ssafy.exhi.base.status.ErrorStatus;
+import com.ssafy.exhi.domain.couple.model.entity.Couple;
+import com.ssafy.exhi.domain.couple.repository.CoupleRepository;
 import com.ssafy.exhi.domain.oauth.AuthProvider;
 import com.ssafy.exhi.domain.user.converter.UserConverter;
 import com.ssafy.exhi.domain.user.model.dto.UserRequest;
@@ -22,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
     private final BCryptPasswordEncoder passwordEncoder;
+    private final CoupleRepository coupleRepository;
     private final UserRepository userRepository;
     private final JWTUtil jwtUtil;
 
@@ -29,6 +32,8 @@ public class UserServiceImpl implements UserService {
     public UserResponse.TokenDTO login(UserRequest.LoginDTO memberDto) {
         // 로그인 아이디 확인
         User loginUser = getUserByLoginId(memberDto.getLoginId());
+        setUserCoupleId(loginUser);
+
         validatePassword(isMatches(loginUser, memberDto), ErrorStatus.USER_LOGIN_FAILED);
 
         // 토큰 생성
@@ -40,6 +45,9 @@ public class UserServiceImpl implements UserService {
         return UserConverter.toTokenDTO(jwtToken);
     }
 
+    private void setUserCoupleId(User user) {
+        user.setCoupleId(coupleRepository.findCoupleByUserId(user.getId()).map(Couple::getId).orElse(null));
+    }
 
 
     @Override

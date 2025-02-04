@@ -1,9 +1,13 @@
 package com.ssafy.exhi.domain.plan.converter;
 
 import com.ssafy.exhi.domain.plan.model.dto.PlanRequest;
+import com.ssafy.exhi.domain.plan.model.dto.PlanResponse;
 import com.ssafy.exhi.domain.plan.model.entity.Plan;
 import com.ssafy.exhi.domain.plan.model.entity.PlanStatus;
+import com.ssafy.exhi.domain.todo.converter.TodoConverter;
+import com.ssafy.exhi.domain.todo.model.dto.TodoResponse;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -23,11 +27,26 @@ public class PlanConverter {
                 .build();
     }
 
+    public static PlanResponse.DetailResultDTO toDetailDTO(Plan plan) {
+        List<TodoResponse.DetailResultDTO> todos = TodoConverter.toDTO(plan.getTodos());
+
+        return PlanResponse.DetailResultDTO.builder()
+                .planId(plan.getId())
+                .shopName(plan.getShopName())
+                .planTime(plan.getPlanTime())
+                .planStatus(plan.getPlanStatus())
+                .serviceType(plan.getServiceType())
+                .visible(plan.isVisible())
+                .todos(todos)
+                .build();
+    }
+
     public static Plan toEntity(PlanRequest.CreateDTO createDTO) {
         return Plan.builder()
                 .shopName(createDTO.getShopName())
                 .serviceType(createDTO.getServiceType())
                 .visible(createDTO.isVisible())
+                .todos(new ArrayList<>())
                 .planTime(createDTO.getPlanTime())
                 .planStatus(PlanStatus.BEFORE_START)
                 .build();
