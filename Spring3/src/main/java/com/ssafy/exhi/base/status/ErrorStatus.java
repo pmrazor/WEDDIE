@@ -76,7 +76,18 @@ public enum ErrorStatus implements BaseErrorCode {
     INVALID_PLAN_STATUS(HttpStatus.BAD_REQUEST, "PLAN_4002", "아직 타임캡슐을 작성할 수 없는 플랜입니다"),
 
     // 타임캡슐 관련 에러
-    TIMECAPSULE_ALREADY_EXIST(HttpStatus.BAD_REQUEST, "TIME_CAPSULE_4001", "이미 작성된 타임캡슐입니다");
+    TIMECAPSULE_ALREADY_EXIST(HttpStatus.BAD_REQUEST, "TIME_CAPSULE_4001", "이미 작성된 타임캡슐입니다"),
+    
+    // 추천 시스템 관련 에러
+    RECOMMENDATION_FILE_IO_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "RECOMMEND4001", "파일 입출력 중 오류가 발생했습니다"),
+    RECOMMENDATION_SCRIPT_TIMEOUT(HttpStatus.REQUEST_TIMEOUT, "RECOMMEND4002", "파이썬 스크립트 실행 시간이 초과되었습니다"),
+    RECOMMENDATION_SCRIPT_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "RECOMMEND4003", "파이썬 스크립트 실행 중 오류가 발생했습니다"),
+    RECOMMENDATION_PARAMS_NOT_FOUND(HttpStatus.NOT_FOUND, "RECOMMEND4004", "클러스터링 파라미터를 찾을 수 없습니다"),
+    RECOMMENDATION_CENTERS_NOT_FOUND(HttpStatus.NOT_FOUND, "RECOMMEND4005", "클러스터 중심점 정보를 찾을 수 없습니다"),
+    RECOMMENDATION_CLUSTER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "RECOMMEND4006", "클러스터 할당 중 오류가 발생했습니다"),
+    RECOMMENDATION_CLUSTER_NOT_FOUND(HttpStatus.NOT_FOUND, "RECOMMEND4007", "클러스터 정보를 찾을 수 없습니다"),
+    RECOMMENDATION_USER_DETAIL_NOT_FOUND(HttpStatus.BAD_REQUEST, "RECOMMEND4008", "사용자 상세 정보가 존재하지 않습니다");
+    
 
     private final HttpStatus httpStatus;
     private final String code;
