@@ -4,6 +4,7 @@ import com.ssafy.exhi.domain.timecapsule.model.dto.TimeCapsuleRequest;
 import com.ssafy.exhi.domain.timecapsule.model.dto.TimeCapsuleResponse;
 import com.ssafy.exhi.domain.timecapsule.service.TimeCapsuleService;
 import com.ssafy.exhi.util.JWTUtil;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,7 +21,7 @@ public class TimeCapsuleController {
     private final JWTUtil jwtUtil;
 
     @PostMapping
-    public ResponseEntity<?> createTimeCapsule(@RequestHeader("Authorization") String accessToken, @RequestBody TimeCapsuleRequest.CreateDTO timeCapsuleDto) {
+    public ResponseEntity<?> createTimeCapsule(@Valid @RequestHeader("Authorization") String accessToken, @RequestBody TimeCapsuleRequest.CreateDTO timeCapsuleDto) {
         Integer userId = jwtUtil.getUserId(accessToken);
         timeCapsuleDto.setUserId(userId);
         TimeCapsuleResponse.TimeCapsuleResponseDto response = timeCapsuleService.createTimeCapsule(timeCapsuleDto);
