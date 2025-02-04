@@ -46,7 +46,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 
         // 토큰과 사용자 정보를 함께 전달
         // URL 파라미터 인코딩
-        String redirectUrl = UriComponentsBuilder.fromUriString("http://weddie.ssafy.me:5000/oauth/callback")
+        String redirectUrl = UriComponentsBuilder.fromUriString("http://localhost:3000/oauth/callback")
                 .queryParam("token", jwtToken.getAccessToken())
                 .queryParam("email", user.getLoginId() != null ? user.getLoginId() : "")
                 .queryParam("name", user.getName() != null ? user.getName() : "")
