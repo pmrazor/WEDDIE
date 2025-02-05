@@ -27,6 +27,13 @@ public enum ErrorStatus implements BaseErrorCode {
     USER_LOGIN_FAILED(HttpStatus.UNAUTHORIZED, "MEMBER4005", "잘못된 비밀번호입니다."),
     USER_BAD_REQUEST(HttpStatus.BAD_REQUEST, "MEMBER4006", "토큰 값과 요청한 아이디가 일치하지않습니다."),
 
+    // 로컬멤버 기본정보
+    USER_INFO_NOT_FOUND(HttpStatus.BAD_REQUEST, "MEMBER_DETAIL4004", "유저 기본정보가 존재하지않습니다."),
+    // 멤버 디테일
+    USER_DETAIL_NOT_FOUND(HttpStatus.BAD_REQUEST, "MEMBER_DETAIL4004", "유저 디테일이 존재하지않습니다."),
+    // 멤버 디테일(온보딩) 정보가 이미 있는 경우
+    USER_DETAIL_ALREADY_EXISTS(HttpStatus.BAD_REQUEST, "MEMBER_DETAIL4004", "유저 디테일이 이미 존재합니다. 생성이 아닌 수정을 이용해주세요."),
+
     // 커플 관련 에러
     COUPLE_NOT_FOUND(HttpStatus.NOT_FOUND, "COUPLE4001", "존재하지 않는 커플입니다."),
     COUPLE_ALREADY_EXIST(HttpStatus.BAD_REQUEST, "COUPLE4002", "이미 커플 관계가 존재합니다."),

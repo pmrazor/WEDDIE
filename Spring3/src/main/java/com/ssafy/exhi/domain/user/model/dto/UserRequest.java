@@ -66,5 +66,75 @@ public class UserRequest {
         private String profileImg;
     }
 
+    // 유저 기본 정보 수정
+    @Data
+    @Builder
+    @ToString
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class UpdateInfoDTO {
+        @NotBlank
+        private String name;
+
+        @NotNull
+        private Gender gender;
+
+        @NotBlank
+        private String profileImg;
+    }
+
+    // 유저 상세 정보 수정
+    @Data
+    @Builder
+    @ToString
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class UpdateDetailDTO {
+        @NotNull
+        private Integer age;
+
+        @NotBlank
+        private String phone;
+
+        @NotBlank
+        private String mbti;
+    }
+
+    // 유저 상세 정보 생성
+    @Data
+    @Builder
+    @ToString
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class CreateDetailDTO {
+        @NotNull
+        private Integer age;
+
+        @NotBlank
+        private String phone;
+
+        @NotBlank
+        private String mbti;
+    }
+
+    // 유저 상세 정보 생성
+    @Data
+    @Builder
+    @ToString
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class getDetailDTO {
+        @NotNull
+        private Integer age;
+
+        @NotBlank
+        private String phone;
+
+        @NotBlank
+        private String mbti;
+    }
+
+
+
 
 }
