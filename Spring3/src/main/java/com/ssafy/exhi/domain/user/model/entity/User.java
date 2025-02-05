@@ -75,4 +75,14 @@ public class User extends BaseEntity {
         userDetail.setUser(this); // 양방향 관계 설정
     }
 
+    // 유저 기본 정보 수정 위한 저장 로직
+    public void updateInfo(UserRequest.UpdateInfoDTO dto) {
+        this.name = dto.getName();
+        this.gender = dto.getGender();
+        this.profileImg = dto.getProfileImg();
+    }
+
+
+
+
 }

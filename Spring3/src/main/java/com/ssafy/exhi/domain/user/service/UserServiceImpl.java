@@ -9,7 +9,9 @@ import com.ssafy.exhi.domain.user.model.dto.UserRequest;
 import com.ssafy.exhi.domain.user.model.dto.UserResponse;
 import com.ssafy.exhi.domain.user.model.entity.Token;
 import com.ssafy.exhi.domain.user.model.entity.User;
+import com.ssafy.exhi.domain.user.model.entity.UserDetail;
 import com.ssafy.exhi.domain.user.repository.UserRepository;
+import com.ssafy.exhi.domain.user.repository.UserDetailRepository;
 import com.ssafy.exhi.exception.ExceptionHandler;
 import com.ssafy.exhi.util.JWTUtil;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +19,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import static com.ssafy.exhi.domain.user.converter.UserConverter.toUserDetailDTO;
 
 @Slf4j
 @Service
@@ -26,6 +30,7 @@ public class UserServiceImpl implements UserService {
     private final BCryptPasswordEncoder passwordEncoder;
     private final CoupleRepository coupleRepository;
     private final UserRepository userRepository;
+    private final UserDetailRepository userDetailRepository;
     private final JWTUtil jwtUtil;
 
     @Override
@@ -71,6 +76,7 @@ public class UserServiceImpl implements UserService {
         return UserConverter.toDetailResultDTO(user);
     }
 
+    // 회원가입시 입력하는 회원 기본 정보 수정
     @Override
     public UserResponse.DetailResultDTO update(Integer userId, UserRequest.UpdateDTO userRequest) {
         User user = getUserById(userId);
@@ -88,6 +94,99 @@ public class UserServiceImpl implements UserService {
         return UserConverter.toDetailResultDTO(user);
     }
 
+
+
+    // 유저 기본 정보 수정
+    private User getUserInfoById(Integer userId) {
+        return userRepository.findUserById(userId)
+                .orElseThrow(() -> new ExceptionHandler(ErrorStatus.USER_INFO_NOT_FOUND)
+                );
+    }
+    public UserResponse.UserInfoDTO updateUserInfo(Integer userId, UserRequest.UpdateInfoDTO userInfoRequest) {
+        User user = getUserInfoById(userId);
+
+        user.updateInfo(userInfoRequest);
+        return UserConverter.toUserInfoDTO(user);
+    }
+
+    // 유저 상세 정보 수정
+    private UserDetail updateUserDetailById(Integer userId) {
+        return userDetailRepository.findByUser_Id(userId)
+                .orElseThrow(() -> new ExceptionHandler(ErrorStatus.USER_DETAIL_NOT_FOUND)
+                );
+    }
+    public UserResponse.UserDetailDTO updateUserDetail(Integer userId, UserRequest.UpdateDetailDTO userDetailRequest) {
+        UserDetail userDetail = updateUserDetailById(userId);
+
+        // 저장 후 반환
+        userDetail.updateDetail(userDetailRequest);
+        return toUserDetailDTO(userDetail);
+    }
+
+    // 유저 상세 정보 생성 (온보딩)
+    private UserDetail setUserDetailById(Integer userId) {
+        return userDetailRepository.findByUser_Id(userId)
+                .orElseThrow(() -> new ExceptionHandler(ErrorStatus.USER_NOT_FOUND));
+    }
+    public UserResponse.UserDetailDTO createUserDetail(Integer userId, UserRequest.CreateDetailDTO createDetailRequest) {
+        
+        // 기존 UserDetail을 가져와서 존재 여부 확인
+        UserDetail existingUserDetail = userDetailRepository.findByUser_Id(userId).orElse(null);
+
+        // 만약 기존 UserDetail이 있으면, 새로 생성하지 않음
+        if (existingUserDetail != null) {
+            // ErrorStatus에 정의된 'USER_DETAIL_ALREADY_EXISTS' 에러 코드 사용
+            throw new ExceptionHandler(ErrorStatus.USER_DETAIL_ALREADY_EXISTS);  // 이미 존재하면 예외 발생
+        }
+
+        UserDetail newUserDetail = new UserDetail();
+
+        // `userId`를 사용하여 `User` 객체를 가져오기
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ExceptionHandler(ErrorStatus.USER_NOT_FOUND));
+
+        // User 객체를 UserDetail 객체에 설정 (user_id 설정)
+        newUserDetail.setUser(user); // user_id 설정
+
+        newUserDetail.createDetail(createDetailRequest);
+        userDetailRepository.save(newUserDetail);
+
+        return toUserDetailDTO(newUserDetail);
+    }
+
+//    // 유저 기본 정보 수정
+//    private User getUserInfoById(Integer userId) {
+//        return userRepository.findUserById(userId)
+//                .orElseThrow(() -> new ExceptionHandler(ErrorStatus.USER_INFO_NOT_FOUND)
+//                );
+//    }
+//    public UserResponse.UserInfoDTO updateUserInfo(Integer userId, UserRequest.UpdateInfoDTO userInfoRequest) {
+//        User user = getUserInfoById(userId);
+//
+//        user.updateInfo(userInfoRequest);
+//        return UserConverter.toUserInfoDTO(user);
+//    }
+
+
+//    @Override
+//    public UserResponse.DetailResultDTO getMyInfo(Integer userId) {
+//        User user = getUserById(userId);
+//        return UserConverter.toDetailResultDTO(user);
+//    }
+
+    // 유저 상세 정보 조회 (온보딩)
+    private UserDetail getUserDetailById(Integer userId) {
+        return userDetailRepository.findByUser_Id(userId)
+                .orElseThrow(() -> new ExceptionHandler(ErrorStatus.USER_DETAIL_NOT_FOUND)
+                );
+    }
+    public UserResponse.UserDetailDTO getUserDetail(Integer userId) {
+        UserDetail userDetail = getUserDetailById(userId);
+        return UserConverter.toUserDetailDTO(userDetail);
+    }
+
+
+
     @Override
     public boolean checkUser(String loginId) {
         return userRepository.existsUserByLoginId(loginId);
@@ -97,6 +196,12 @@ public class UserServiceImpl implements UserService {
     public void delete(Integer userId) {
         User user = getUserById(userId);
         userRepository.delete(user);
+    }
+
+    @Override
+    public boolean existUserDetail(Integer userId) {
+        User user = getUserById(userId);
+        return userDetailRepository.existsByUser(user);
     }
 
     private User getUserByLoginId(String userId) {

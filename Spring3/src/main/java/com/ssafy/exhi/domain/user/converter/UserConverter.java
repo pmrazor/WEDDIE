@@ -7,6 +7,7 @@ import com.ssafy.exhi.domain.user.model.dto.UserRequest;
 import com.ssafy.exhi.domain.user.model.dto.UserResponse;
 import com.ssafy.exhi.domain.user.model.entity.Token;
 import com.ssafy.exhi.domain.user.model.entity.User;
+import com.ssafy.exhi.domain.user.model.entity.UserDetail;
 
 public class UserConverter {
     public static UserResponse.DetailResultDTO toDetailResultDTO(User user) {
@@ -56,6 +57,29 @@ public class UserConverter {
                 .gender(signUpDTO.getGender())
                 .build();
     }
+
+
+    // 유저 기본 정보 변환 (gender, profileImg 포함)
+    public static UserResponse.UserInfoDTO toUserInfoDTO(User user) {
+        return UserResponse.UserInfoDTO.builder()
+                .id(user.getId())
+                .name(user.getName())
+                .loginId(user.getLoginId())
+                .gender(user.getGender().toString())
+                .profileImg(user.getProfileImg())
+                .build();
+    }
+
+    // 유저 상세 정보 변환 (age, phone, mbti 포함)
+    public static UserResponse.UserDetailDTO toUserDetailDTO(UserDetail userDetail) {
+        return UserResponse.UserDetailDTO.builder()
+                .id(userDetail.getId())
+                .age(userDetail.getAge())
+                .phone(userDetail.getPhone())
+                .mbti(userDetail.getMbti())
+                .build();
+    }
+
 
     public static User toOAuthEntity(String providerName, OAuth2UserInfo oAuth2UserInfo) {
         return User.builder()

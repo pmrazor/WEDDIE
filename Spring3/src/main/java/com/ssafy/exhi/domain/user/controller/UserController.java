@@ -14,6 +14,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import com.ssafy.exhi.domain.user.model.entity.User;
+import com.ssafy.exhi.domain.user.model.entity.UserDetail;
+import com.ssafy.exhi.domain.user.repository.UserRepository;
+import com.ssafy.exhi.domain.user.repository.UserDetailRepository;
+
 @Slf4j
 @RestController
 @RequiredArgsConstructor
@@ -78,13 +83,17 @@ public class UserController implements UserControllerDocs{
     }
 
     /**
+     * 회원가입시 입력하는 회원 정보 수정 API
      * @param accessToken
      * @param userRequest
      * @return 권한: 로그인 한 사용자
      */
     @Override
     @PatchMapping("/users")
-    public ResponseEntity<?> updateUser(@RequestHeader("Authorization") String accessToken, @RequestBody @Valid UserRequest.UpdateDTO userRequest) {
+    public ResponseEntity<?> updateUser(
+            @RequestHeader("Authorization") String accessToken,
+            @RequestBody @Valid UserRequest.UpdateDTO userRequest) {
+
         log.info("updateUser: {}", userRequest);
         Integer userId = jwtUtil.getUserId(accessToken);
 
@@ -92,6 +101,78 @@ public class UserController implements UserControllerDocs{
 
         return ResponseEntity.ok(ApiResponse.onSuccess(user));
     }
+
+    // 회원가입 시 입력하는 유저 기본 정보 수정 (gender, profileImg)e
+    @PatchMapping("/users/info")
+    public ResponseEntity<?> updateUserInfo(
+            @RequestHeader("Authorization") String accessToken,
+            @RequestBody @Valid UserRequest.UpdateInfoDTO userRequest) { // Valid 필수
+
+        log.info("updateUserInfo: {}", userRequest);
+        Integer userId = jwtUtil.getUserId(accessToken);
+
+        UserResponse.UserInfoDTO updatedUserInfo = userService.updateUserInfo(userId, userRequest);
+
+        return ResponseEntity.ok(ApiResponse.onSuccess(updatedUserInfo));
+    }
+
+
+     // 온보딩 시 입력하는 유저 상세 정보 수정 (age, phone, mbti)
+    @PatchMapping("/users/detail")
+    public ResponseEntity<?> updateUserDetail(
+            @RequestHeader("Authorization") String accessToken,
+            @RequestBody @Valid UserRequest.UpdateDetailDTO userDetailRequest) {
+
+        log.info("updateUserDetail: {}", userDetailRequest);
+        Integer userId = jwtUtil.getUserId(accessToken);
+
+        UserResponse.UserDetailDTO updatedUserDetail = userService.updateUserDetail(userId, userDetailRequest);
+
+        return ResponseEntity.ok(ApiResponse.onSuccess(updatedUserDetail));
+    }
+
+
+    // 온보딩 시 입력하는 유저 상세 정보 생성 (age, phone, mbti)
+    @PostMapping("/users/detail")
+    public ResponseEntity<?> createUserDetail(
+            @RequestHeader("Authorization") String accessToken,
+            @RequestBody @Valid UserRequest.CreateDetailDTO createDetailRequest) {
+
+        log.info("createUserDetail: {}", createDetailRequest);
+        Integer userId = jwtUtil.getUserId(accessToken);
+
+        UserResponse.UserDetailDTO newUserDetail = userService.createUserDetail(userId, createDetailRequest);
+        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.onSuccess(newUserDetail));
+    }
+
+
+     // 온보딩 시 입력하는 유저 상세 정보 확인 (age, phone, mbti)
+    @GetMapping("/users/detail")
+    public ResponseEntity<?> getUserDetail(
+            @RequestHeader("Authorization") String accessToken)
+    {
+
+        log.info("getUserDetail: {}", accessToken);
+        Integer userId = jwtUtil.getUserId(accessToken);
+
+        UserResponse.UserDetailDTO getUserDetail = userService.getUserDetail(userId);
+        return ResponseEntity.ok(ApiResponse.onSuccess(getUserDetail));
+    }
+
+
+    // 유저 상세 정보가 없는 유저의 수정시도 시 오류 처리 API
+    @PostMapping("/users/detail/flag")
+    public ResponseEntity<?> existUserDetail(
+            @RequestHeader("Authorization") String accessToken
+    ) {
+
+        Integer userId = jwtUtil.getUserId(accessToken);
+        boolean flag = userService.existUserDetail(userId);
+
+        return ResponseEntity.ok(ApiResponse.onSuccess(flag));
+    }
+
+
 
     /**
      *

@@ -1,5 +1,6 @@
 package com.ssafy.exhi.domain.user.model.entity;
 
+import com.ssafy.exhi.domain.user.model.dto.UserRequest;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 import lombok.*;
@@ -27,13 +28,38 @@ public class UserDetail {
     @Column(name = "phone")
     private String phone;
 
-    // url
-    @Column(name = "profile_image")
-    private String profileImage;
+    @Column(name = "budget")
+    private Integer budget;
 
     @Column(name = "mbti")
     private String mbti;
 
-    @Column(name = "budget")
-    private Integer budget;
+    // 양방향 관계 설정을 위한 메서드 추가
+    public void setUser(User user) {
+        this.user = user;
+        if (user != null && user.getUserDetail() != this) {
+            user.setUserDetail(this);
+        }
+    }
+
+    // 유저 상세 정보 수정 위한 저장 로직
+    public void updateDetail(UserRequest.UpdateDetailDTO dto) {
+        this.age = dto.getAge();
+        this.phone = dto.getPhone();
+        this.mbti = dto.getMbti();
+    }
+
+    // 유저 상세 정보 생성 위한 저장 로직
+    public void createDetail(UserRequest.CreateDetailDTO dto) {
+        this.age = dto.getAge();
+        this.phone = dto.getPhone();
+        this.mbti = dto.getMbti();
+    }
+
+    public void getDetail(UserRequest.getDetailDTO dto) {
+        this.age = dto.getAge();
+        this.phone = dto.getPhone();
+        this.mbti = dto.getMbti();
+    } 
+
 }

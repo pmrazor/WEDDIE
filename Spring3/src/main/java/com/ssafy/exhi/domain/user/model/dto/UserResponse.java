@@ -58,6 +58,49 @@ public class UserResponse {
         private String profileImg;
     }
 
+    // 회원 기본 정보 수정 API 응답용 (gender, profileimg)
+    @Data
+    @Builder
+    @ToString
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class UserInfoDTO {
+        @Schema(description = "사용자 고유 ID", example = "1")
+        private Integer id;
+
+        @Schema(description = "사용자의 아이디", example = "john123") // ✅ loginId 필드 추가!
+        private String loginId;
+
+        @Schema(description = "사용자의 이름", example = "John Doe")
+        private String name;
+
+        @Schema(description = "성별", example = "MALE")
+        private String gender;
+
+        @Schema(description = "프로필 이미지", example = "https://example.com/profile.jpg")
+        private String profileImg;
+    }
+
+    // 상세 정보 수정 API 응답용 (age, phone, mbti)
+    @Data
+    @Builder
+    @ToString
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class UserDetailDTO {
+        @Schema(description = "사용자 고유 ID", example = "1")
+        private Integer id;
+
+        @Schema(description = "나이", example = "25")
+        private Integer age;
+
+        @Schema(description = "전화번호", example = "010-1234-5678")
+        private String phone;
+
+        @Schema(description = "MBTI", example = "INTJ")
+        private String mbti;
+    }
+
     @Data
     @Builder
     @ToString
@@ -70,5 +113,8 @@ public class UserResponse {
         @Schema(description = "JWT 액세스 토큰", example = "eyJhbGciOiJIUzI1...")
         private String accessToken;
     }
+
+
+
 
 }
