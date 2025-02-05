@@ -3,7 +3,6 @@ package com.ssafy.exhi.domain.recommendation.model.entity;
 import com.ssafy.exhi.base.BaseEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -12,9 +11,8 @@ import java.util.List;
 
 @Entity
 @Getter
-@Builder
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 public class ClusterCenters extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

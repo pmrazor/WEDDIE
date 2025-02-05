@@ -20,7 +20,7 @@ public class UserCluster extends BaseEntity {
 
     // User <-> UserCluster : 1:1 관계
     // User 엔티티에 있는 'userCluster' 필드와 매핑됨
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id") // 실제 FK 컬럼명
     private User user;
 

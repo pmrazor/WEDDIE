@@ -2,6 +2,7 @@ package com.ssafy.exhi.domain.user.model.entity;
 
 import com.ssafy.exhi.base.BaseEntity;
 import com.ssafy.exhi.domain.oauth.AuthProvider;
+import com.ssafy.exhi.domain.recommendation.model.entity.UserCluster;
 import com.ssafy.exhi.domain.user.model.dto.UserRequest;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
@@ -75,14 +76,23 @@ public class User extends BaseEntity {
         userDetail.setUser(this); // 양방향 관계 설정
     }
 
+
+    /* recommendation 필드 */
+    @OneToOne(mappedBy = "user", orphanRemoval = true)
+    private UserCluster userCluster;
+
+    // 양방향 편의 메서드
+    public void setUserCluster(UserCluster userCluster) {
+        this.userCluster = userCluster;
+        userCluster.setUser(this);
+    }
+    /* recommendation 필드 끝 */
+
     // 유저 기본 정보 수정 위한 저장 로직
     public void updateInfo(UserRequest.UpdateInfoDTO dto) {
         this.name = dto.getName();
         this.gender = dto.getGender();
         this.profileImg = dto.getProfileImg();
     }
-
-
-
 
 }

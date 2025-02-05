@@ -2,12 +2,21 @@ package com.ssafy.exhi.domain.recommendation.service;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ssafy.exhi.domain.ServiceType;
+import com.ssafy.exhi.domain.couple.model.entity.Couple;
+import com.ssafy.exhi.domain.couple.repository.CoupleRepository;
+import com.ssafy.exhi.domain.plan.model.dto.PlanResponse;
+import com.ssafy.exhi.domain.plan.model.entity.Plan;
+import com.ssafy.exhi.domain.plan.model.entity.PlanStatus;
 import com.ssafy.exhi.domain.recommendation.model.dto.RecommendationResponse;
 import com.ssafy.exhi.domain.recommendation.model.entity.*;
 import com.ssafy.exhi.domain.recommendation.repository.*;
+import com.ssafy.exhi.domain.user.model.entity.Gender;
 import com.ssafy.exhi.domain.user.model.entity.User;
 import com.ssafy.exhi.domain.user.model.entity.UserDetail;
 import com.ssafy.exhi.domain.user.repository.UserRepository;
+import com.ssafy.exhi.domain.virginroad.model.entity.VirginRoad;
+import com.ssafy.exhi.domain.virginroad.repository.VirginRoadRepository;
 import com.ssafy.exhi.exception.ExceptionHandler;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -44,6 +53,10 @@ class RecommendationServiceImplTest {
     private UserRepository userRepository;
     @Mock
     private Environment env;
+    @Mock
+    private CoupleRepository coupleRepository;
+    @Mock
+    private VirginRoadRepository virginRoadRepository;
 
     @TempDir
     Path tempDir;
@@ -164,7 +177,7 @@ class RecommendationServiceImplTest {
 
             // then
             verify(clusteringParameterRepository, times(1)).save(any(ClusteringParameter.class));
-            verify(clusterCentersRepository, times(2)).save(any(ClusterCenters.class));
+            verify(clusterCentersRepository, times(1)).save(any(ClusterCenters.class));
             verify(representativeRepository, times(1)).deleteAll();
             verify(userClusterRepository, times(1)).deleteAll();
             verify(userClusterRepository, times(1)).save(any(UserCluster.class));
@@ -235,14 +248,16 @@ class RecommendationServiceImplTest {
         }
 
         private User createTestUser() {
-            User user = new User();
-            user.setId(1);
-            UserDetail detail = new UserDetail();
-            detail.setAge(25);
-            detail.setBudget(3000000);
-            detail.setMbti("INTP");
-            user.setUserDetail(detail);
-            return user;
+            UserDetail detail = UserDetail.builder()
+                .age(25)
+                .mbti("INTP")
+                .budget(3000000)
+                .build();
+
+            return User.builder()
+                .id(1)
+                .userDetail(detail)
+                .build();
         }
 
         private ClusteringParameter createTestParameter() {
@@ -275,40 +290,92 @@ class RecommendationServiceImplTest {
     @DisplayName("5. getRecommendedPlans() 테스트")
     class GetRecommendedPlansTest {
         @Test
-        @DisplayName("사용자 클러스터가 존재하는 경우, 추천 DTO를 반환한다")
+        @DisplayName("정상적으로 추천 플랜 DTO를 반환한다")
         void getRecommendedPlans_Success() {
             // given
-            User user = new User();
-            user.setId(1);
+            User femaleUser = User.builder()
+                .id(1)
+                .name("여자")
+                .gender(Gender.FEMALE)
+                .userDetail(UserDetail.builder()
+                    .age(25)
+                    .mbti("INTJ")
+                    .budget(1000000)
+                    .build())
+                .build();
+
+            User maleUser = User.builder()
+                .id(2)
+                .name("남자")
+                .gender(Gender.MALE)
+                .userDetail(UserDetail.builder()
+                    .age(27)
+                    .mbti("ENFP")
+                    .budget(1500000)
+                    .build())
+                .build();
+
+            Couple couple = Couple.builder()
+                .id(1)
+                .female(femaleUser)
+                .male(maleUser)
+                .coupleName("테스트커플")
+                .build();
+
+            Plan plan = Plan.builder()
+                .id(1)
+                .serviceType(ServiceType.DRESS_SHOP)
+                .planStatus(PlanStatus.BEFORE_START)
+                .visible(false)
+                .build();
+
+            VirginRoad virginRoad = VirginRoad.builder()
+                .id(1)
+                .couple(couple)
+                .plans(List.of(plan))
+                .build();
+
             UserCluster userCluster = UserCluster.builder()
-                .user(user)
+                .user(femaleUser)
                 .clusterId(0)
                 .build();
 
-            when(userRepository.findById(1)).thenReturn(Optional.of(user));
-            when(userClusterRepository.findByUser(user))
-                .thenReturn(Optional.of(userCluster));
+            // Repository 모의 설정
+            when(userRepository.findById(1)).thenReturn(Optional.of(femaleUser));
+            when(userClusterRepository.findByUser(femaleUser)).thenReturn(Optional.of(userCluster));
+            when(coupleRepository.findCoupleByUserId(1)).thenReturn(Optional.of(couple));
+            when(virginRoadRepository.getVirginRoadByCouple(couple)).thenReturn(Optional.of(virginRoad));
+            when(virginRoadRepository.findAll()).thenReturn(List.of(virginRoad));
 
             // when
-            RecommendationResponse.RecommendedPlansDTO result = 
-                recommendationService.getRecommendedPlans(1);
+            RecommendationResponse.RecommendedPlansDTO result = recommendationService.getRecommendedPlans(1);
 
             // then
             assertNotNull(result);
+            assertEquals(virginRoad.getId(), result.getId());
+            
+            // 커플 정보 검증
+            assertNotNull(result.getCouple());
+            assertEquals(couple.getId(), result.getCouple().getId());
+            
+            // 플랜 검증
+            assertFalse(result.getPlans().isEmpty());
+            PlanResponse.SimpleResultDTO firstPlan = result.getPlans().get(0);
+            assertEquals(ServiceType.DRESS_SHOP, firstPlan.getServiceType());
+            assertEquals(PlanStatus.BEFORE_START, firstPlan.getPlanStatus());
+            assertFalse(firstPlan.isVisible());
         }
 
         @Test
-        @DisplayName("사용자 클러스터 정보가 없으면 예외 발생")
-        void getRecommendedPlans_NoCluster() {
+        @DisplayName("사용자를 찾을 수 없는 경우 예외 발생")
+        void getRecommendedPlans_UserNotFound() {
             // given
-            User user = new User();
-            user.setId(1);
-            when(userRepository.findById(1)).thenReturn(Optional.of(user));
-            when(userClusterRepository.findByUser(user)).thenReturn(Optional.empty());
+            when(userRepository.findById(anyInt())).thenReturn(Optional.empty());
 
             // when & then
-            assertThrows(ExceptionHandler.class,
-                () -> recommendationService.getRecommendedPlans(1));
+            assertThrows(ExceptionHandler.class, () -> 
+                recommendationService.getRecommendedPlans(1)
+            );
         }
     }
 }

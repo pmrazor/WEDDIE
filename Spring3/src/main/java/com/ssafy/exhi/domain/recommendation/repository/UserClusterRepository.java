@@ -9,6 +9,6 @@ import java.util.Optional;
 public interface UserClusterRepository extends JpaRepository<UserCluster, Integer> {
     // 특정 사용자의 클러스터 정보 조회
     Optional<UserCluster> findByUser(User user);
-    Optional<UserCluster> findByUser_Id(Integer userId);
+    Optional<UserCluster> findByUserId(Integer userId);
 
 } 

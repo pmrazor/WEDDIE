@@ -9,6 +9,7 @@ import lombok.*;
 @Setter
 @ToString
 @Entity
+@Builder
 @Schema(name = "UserDetail", description = "유저 디테일 엔티티")
 @NoArgsConstructor
 @AllArgsConstructor

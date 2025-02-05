@@ -1,9 +1,13 @@
 package com.ssafy.exhi.domain.recommendation.model.dto;
 
+import com.ssafy.exhi.domain.couple.model.dto.CoupleResponse;
+import com.ssafy.exhi.domain.plan.model.dto.PlanResponse;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.util.ArrayList;
 import java.util.List;
 
 public class RecommendationResponse {
@@ -13,21 +17,8 @@ public class RecommendationResponse {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class RecommendedPlansDTO {
-        private Integer clusterId;
-        private List<PlanDTO> plans;
-        private Integer similarUsersCount;
-    }
-
-    @Data
-    @Builder
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class PlanDTO {
-        private Integer planId;
-        private String title;
-        private String description;
-        private Integer estimatedBudget;
-        private Double rating;
-        private Integer completedCount;
+        private Integer id;
+        private CoupleResponse.SimpleResultDTO couple;
+        private List<PlanResponse.SimpleResultDTO> plans = new ArrayList<>();
     }
 }
