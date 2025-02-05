@@ -5,6 +5,7 @@ import com.ssafy.exhi.domain.plan.model.entity.Plan;
 import com.ssafy.exhi.domain.plan.model.entity.PlanStatus;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
+import jdk.jfr.Description;
 import lombok.*;
 
 @Entity
@@ -46,4 +47,8 @@ public class TimeCapsule extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @Column(name="time_capsule_status")
     private PlanStatus timeCapsuleStatus;
+
+    @Description("Good = 0, Bad = 1")
+    @Column(name="plan_grade")
+    private boolean planGrade;
 }

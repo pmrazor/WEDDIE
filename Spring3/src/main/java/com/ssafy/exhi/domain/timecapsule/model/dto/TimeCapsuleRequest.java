@@ -14,7 +14,6 @@ public class TimeCapsuleRequest {
     public static class CreateDTO {
 
         // 작성한 Plan 의 Id
-        // 나중에 여기서 Shop 가져와서 뿌려주면 되겠지?
         private Integer planId;
 
         // 작성한 유저 id ( 남녀 각자 적을거니까 )
@@ -36,5 +35,9 @@ public class TimeCapsuleRequest {
 
         // 다퉜던 추억 사진
         private String badImage;
+
+        // 해당 플랜에 대한 만족도 평가
+        private boolean planGrade;
+
     }
 }
