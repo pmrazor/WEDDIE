@@ -6,6 +6,7 @@ import com.ssafy.exhi.domain.couple.model.entity.Couple;
 import com.ssafy.exhi.domain.plan.converter.PlanConverter;
 import com.ssafy.exhi.domain.plan.model.dto.PlanResponse;
 import com.ssafy.exhi.domain.plan.model.entity.Plan;
+import com.ssafy.exhi.domain.plan.model.entity.PlanStatus;
 import com.ssafy.exhi.domain.virginroad.model.dto.VirginRoadRequest;
 import com.ssafy.exhi.domain.virginroad.model.dto.VirginRoadResponse;
 import com.ssafy.exhi.domain.virginroad.model.entity.VirginRoad;
@@ -21,6 +22,7 @@ public class VirginRoadConverter {
                 .id(dto.getUserId())
                 .couple(couple)
                 .plans(plans)
+                .virginRoadStatus(PlanStatus.IN_PROGRESS)
                 .build();
     }
 
@@ -30,6 +32,7 @@ public class VirginRoadConverter {
 
         return VirginRoadResponse.SimpleResultDTO.builder()
                 .id(virginRoad.getId())
+                .virginRoadStatus(virginRoad.getVirginRoadStatus())
                 .couple(couple)
                 .plans(plans)
                 .build();

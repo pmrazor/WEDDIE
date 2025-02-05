@@ -11,6 +11,8 @@ public interface VirginRoadService {
 
     VirginRoadResponse.SimpleResultDTO updateVirginRoad(VirginRoadRequest.UpdateDTO updateDTO);
 
+    void finishVirginRoad(Integer userId);
+
     void deleteVirginRoad(Integer userId);
 
 }

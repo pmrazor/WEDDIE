@@ -105,6 +105,14 @@ public class VirginRoadServiceImpl implements VirginRoadService {
         return VirginRoadConverter.toDTO(virginRoad);
     }
 
+    @Override
+    public void finishVirginRoad(Integer userId) {
+        Couple couple = findCoupleByUserId(userId);
+        VirginRoad virginRoad = findVirginRoadByCouple(couple);
+
+        virginRoad.finishVirginRoad();
+    }
+
     /**
      * 버진로드를 삭제한다.
      * @param userId

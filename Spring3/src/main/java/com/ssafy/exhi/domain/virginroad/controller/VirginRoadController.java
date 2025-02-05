@@ -81,7 +81,7 @@ public class VirginRoadController {
 
         VirginRoadResponse.SimpleResultDTO response = virginRoadService.updateVirginRoad(updateDTO);
 
-        return ResponseEntity.ok(ResponseEntity.ok(ApiResponse.onSuccess(response)));
+        return ResponseEntity.ok(ApiResponse.onSuccess(response));
     }
 
 
@@ -95,5 +95,13 @@ public class VirginRoadController {
         virginRoadService.deleteVirginRoad(userId);
 
         return ResponseEntity.noContent().build();
+    }
+
+    @PatchMapping
+    public ResponseEntity<?> finishVirginRoad(
+            @RequestHeader("Authorization") String accessToken) {
+        Integer userId = jwtUtil.getUserId(accessToken);
+        virginRoadService.finishVirginRoad(userId);
+        return ResponseEntity.ok(ApiResponse.onSuccess(null));
     }
 }

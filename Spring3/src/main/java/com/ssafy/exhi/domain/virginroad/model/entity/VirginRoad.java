@@ -3,6 +3,7 @@ package com.ssafy.exhi.domain.virginroad.model.entity;
 import com.ssafy.exhi.domain.ServiceType;
 import com.ssafy.exhi.domain.couple.model.entity.Couple;
 import com.ssafy.exhi.domain.plan.model.entity.Plan;
+import com.ssafy.exhi.domain.plan.model.entity.PlanStatus;
 import com.ssafy.exhi.domain.todo.model.entity.DefaultTodo;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -34,7 +35,15 @@ public class VirginRoad {
     @OneToMany(mappedBy = "virginRoad", cascade = CascadeType.ALL)
     private List<Plan> plans = new ArrayList<>();
 
+    @Enumerated(EnumType.STRING)
+    @Column(name="virgin_road_status")
+    private PlanStatus virginRoadStatus;
+
     /* 비즈니스 로직 */
+
+    public void finishVirginRoad() {
+        this.virginRoadStatus = PlanStatus.FINISHED;
+    }
 
     public VirginRoad addPlans(List<Plan> plans) {
         for (Plan plan : plans) {
