@@ -1,6 +1,8 @@
 package com.ssafy.exhi.domain.user.converter;
 
 
+import com.ssafy.exhi.domain.oauth.AuthProvider;
+import com.ssafy.exhi.domain.oauth.provider.OAuth2UserInfo;
 import com.ssafy.exhi.domain.user.model.dto.UserRequest;
 import com.ssafy.exhi.domain.user.model.dto.UserResponse;
 import com.ssafy.exhi.domain.user.model.entity.Token;
@@ -55,4 +57,13 @@ public class UserConverter {
                 .build();
     }
 
+    public static User toOAuthEntity(String providerName, OAuth2UserInfo oAuth2UserInfo) {
+        return User.builder()
+                .provider(AuthProvider.valueOf(providerName))
+                .providerId(oAuth2UserInfo.getProviderId())
+                .name(oAuth2UserInfo.getName())
+                .loginId(oAuth2UserInfo.getEmail())
+                .profileImg(oAuth2UserInfo.getImageUrl())
+                .build();
+    }
 }

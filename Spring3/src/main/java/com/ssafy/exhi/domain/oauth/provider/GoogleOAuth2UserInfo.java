@@ -11,23 +11,27 @@ public class GoogleOAuth2UserInfo extends OAuth2UserInfo {
         super(attributes);
     }
 
+    public String getAttribute(String code) {
+        return (String) attributes.get(code);
+    }
+
     @Override
     public String getProviderId() {
-        return (String) attributes.get("sub");
+        return getAttribute("sub");
     }
 
     @Override
     public String getName() {
-        return (String) attributes.get("name");
+        return getAttribute("name");
     }
 
     @Override
     public String getEmail() {
-        return (String) attributes.get("email");
+        return getAttribute("email");
     }
 
     @Override
     public String getImageUrl() {
-        return (String) attributes.get("picture");
+        return getAttribute("picture");
     }
 }

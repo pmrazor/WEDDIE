@@ -4,6 +4,7 @@ import com.ssafy.exhi.domain.oauth.AuthProvider;
 import com.ssafy.exhi.domain.oauth.UserPrincipal;
 import com.ssafy.exhi.domain.oauth.provider.OAuth2UserInfo;
 import com.ssafy.exhi.domain.oauth.provider.OAuth2UserInfoFactory;
+import com.ssafy.exhi.domain.user.converter.UserConverter;
 import com.ssafy.exhi.domain.user.model.entity.User;
 import com.ssafy.exhi.domain.user.repository.UserRepository;
 import com.ssafy.exhi.util.JWTUtil;
@@ -92,26 +93,13 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
     // 사용자 DB 저장
     private User registerNewUser(OAuth2UserRequest oAuth2UserRequest, OAuth2UserInfo oAuth2UserInfo) {
 
-        log.info("OAuth2UserRequest : {}", oAuth2UserRequest.toString());
-        log.info("OAuth2UserInfo : {}", oAuth2UserInfo.toString());
-
         // registrationId를 대문자로 변환하여 enum 값과 매칭
         String providerName = oAuth2UserRequest.getClientRegistration()
                 .getRegistrationId().toUpperCase();
 
-        User user = User.builder()
-                .provider(AuthProvider.valueOf(providerName))
-                .providerId(oAuth2UserInfo.getProviderId())
-                .name(oAuth2UserInfo.getName())
-                .loginId(oAuth2UserInfo.getEmail())
-                .profileImg(oAuth2UserInfo.getImageUrl())
-                .build();
+        User user = UserConverter.toOAuthEntity(providerName, oAuth2UserInfo);
 
-        User savedUser = userRepository.save(user);
-
-        log.info("New user registered: {}", savedUser);
-        userRepository.save(savedUser);
-        return savedUser;
+        return userRepository.save(user);
     }
 
     private User updateExistingUser(User existingUser, OAuth2UserInfo oAuth2UserInfo) {
