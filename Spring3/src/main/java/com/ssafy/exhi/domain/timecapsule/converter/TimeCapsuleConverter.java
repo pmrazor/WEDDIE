@@ -17,6 +17,7 @@ public class TimeCapsuleConverter {
                 .badContent(request.getBadContent())
                 .badImage(request.getBadImage())
                 .timeCapsuleStatus(timeCapeulsStatus)
+                .planGrade(request.isPlanGrade())
                 .build();
     }
 
