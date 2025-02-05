@@ -3,6 +3,11 @@ package com.ssafy.exhi.domain.recommendation.service;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ssafy.exhi.base.status.ErrorStatus;
+import com.ssafy.exhi.domain.ServiceType;
+import com.ssafy.exhi.domain.couple.model.entity.Couple;
+import com.ssafy.exhi.domain.couple.repository.CoupleRepository;
+import com.ssafy.exhi.domain.plan.model.entity.Plan;
+import com.ssafy.exhi.domain.recommendation.converter.RecommendationConverter;
 import com.ssafy.exhi.domain.recommendation.model.dto.RecommendationResponse;
 import com.ssafy.exhi.domain.recommendation.model.entity.*;
 import com.ssafy.exhi.domain.recommendation.repository.ClusterCentersRepository;
@@ -12,6 +17,8 @@ import com.ssafy.exhi.domain.recommendation.repository.UserClusterRepository;
 import com.ssafy.exhi.domain.user.model.entity.User;
 import com.ssafy.exhi.domain.user.model.entity.UserDetail;
 import com.ssafy.exhi.domain.user.repository.UserRepository;
+import com.ssafy.exhi.domain.virginroad.model.entity.VirginRoad;
+import com.ssafy.exhi.domain.virginroad.repository.VirginRoadRepository;
 import com.ssafy.exhi.exception.ExceptionHandler;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,6 +33,8 @@ import jakarta.annotation.PostConstruct;
 import java.util.stream.IntStream;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+
+import com.ssafy.exhi.domain.plan.model.entity.PlanStatus;
 
 /**
  * 추천 서비스 구현 클래스
@@ -43,6 +52,8 @@ public class RecommendationServiceImpl implements RecommendationService {
     private final ClusterCentersRepository clusterCentersRepository;
     private final ClusterRepresentativeRepository representativeRepository;
     private final UserRepository userRepository;
+    private final CoupleRepository coupleRepository;
+    private final VirginRoadRepository virginRoadRepository;
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final Environment env;
     
@@ -159,7 +170,7 @@ public class RecommendationServiceImpl implements RecommendationService {
     @Transactional
     public void processClusteringResults() {
         try {
-            // 1. scalers.json과 optimized_weights.json에서 ClusteringParameter 생성
+            // 1. ClusteringParameter 생성 및 저장
             File scalersFile = new File(jsonOutputDir, "scalers.json");
             File weightsFile = new File(jsonOutputDir, "optimized_weights.json");
             
@@ -188,12 +199,12 @@ public class RecommendationServiceImpl implements RecommendationService {
             
             clusteringParameterRepository.save(parameter);
             
-            // 2. cluster_centers.json에서 ClusterCenters와 ClusterCenter들 생성
+            // 2. ClusterCenters와 ClusterCenter 생성 및 저장
             File centersFile = new File(jsonOutputDir, "cluster_centers.json");
             List<Map<String, Object>> centersList = objectMapper.readValue(centersFile, new TypeReference<List<Map<String, Object>>>() {});
             
+            // 새로운 ClusterCenters 생성
             ClusterCenters clusterCenters = new ClusterCenters();
-            clusterCentersRepository.save(clusterCenters);  // ID 생성을 위해 먼저 저장
             
             for (Map<String, Object> centerData : centersList) {
                 @SuppressWarnings("unchecked")
@@ -214,14 +225,13 @@ public class RecommendationServiceImpl implements RecommendationService {
                 clusterCenters.addClusterCenter(center);
             }
             
-            clusterCentersRepository.save(clusterCenters);  // 변경사항 저장
+            clusterCentersRepository.save(clusterCenters);
             
-            // 3. clustering_results.json 파일 읽기
+            // 3. UserCluster 업데이트
             File resultsFile = new File(jsonOutputDir, "clustering_results.json");
             Map<String, Object> clusteringResults = objectMapper.readValue(resultsFile, new TypeReference<Map<String, Object>>() {});
             
-            // 기존 클러스터 데이터 삭제
-            representativeRepository.deleteAll();
+            // 기존 UserCluster 데이터 삭제
             userClusterRepository.deleteAll();
             
             // 사용자 클러스터 정보 저장
@@ -234,15 +244,28 @@ public class RecommendationServiceImpl implements RecommendationService {
                 User user = userRepository.findById(userId)
                     .orElseThrow(() -> new ExceptionHandler(ErrorStatus.USER_NOT_FOUND));
                 
-                UserCluster cluster = UserCluster.builder()
-                    .user(user)
-                    .clusterId(clusterId)
-                    .build();
-                    
-                userClusterRepository.save(cluster);
+                // 기존 UserCluster가 있는지 확인
+                Optional<UserCluster> existingCluster = userClusterRepository.findByUser(user);
+                if (existingCluster.isPresent()) {
+                    // 기존 클러스터 정보 업데이트
+                    UserCluster cluster = existingCluster.get();
+                    cluster.setClusterId(clusterId);
+                    userClusterRepository.save(cluster);
+                } else {
+                    // 새로운 클러스터 정보 생성
+                    UserCluster newCluster = UserCluster.builder()
+                        .user(user)
+                        .clusterId(clusterId)
+                        .build();
+                    userClusterRepository.save(newCluster);
+                }
             }
             
-            // 클러스터 대표자 정보 저장
+            // 4. ClusterRepresentative 업데이트
+            // 기존 대표자 데이터 삭제
+            representativeRepository.deleteAll();
+            
+            // 새로운 대표자 데이터 저장
             @SuppressWarnings("unchecked")
             List<Map<String, Object>> representatives = (List<Map<String, Object>>) clusteringResults.get("cluster_representatives");
             for (Map<String, Object> representative : representatives) {
@@ -252,17 +275,15 @@ public class RecommendationServiceImpl implements RecommendationService {
                 User representativeUser = userRepository.findById(representativeId)
                     .orElseThrow(() -> new ExceptionHandler(ErrorStatus.USER_NOT_FOUND));
                 
-                // 기존 클러스터 대표자 검색
-                Optional<ClusterRepresentative> existingRepresentative = 
-                    representativeRepository.findByClusterId(clusterId);
-                
-                if (existingRepresentative.isPresent()) {
-                    // 기존 데이터가 있으면 업데이트
-                    ClusterRepresentative clusterRep = existingRepresentative.get();
-                    clusterRep.setRepresentativeUser(representativeUser);
-                    representativeRepository.save(clusterRep);
+                // 기존 대표자 찾기
+                Optional<ClusterRepresentative> existingRep = representativeRepository.findByClusterId(clusterId);
+                if (existingRep.isPresent()) {
+                    // 기존 대표자 정보 업데이트
+                    ClusterRepresentative rep = existingRep.get();
+                    rep.setRepresentativeUser(representativeUser);
+                    representativeRepository.save(rep);
                 } else {
-                    // 새로운 데이터 생성
+                    // 새로운 대표자 정보 생성
                     ClusterRepresentative newClusterRep = ClusterRepresentative.builder()
                         .clusterId(clusterId)
                         .representativeUser(representativeUser)
@@ -285,7 +306,11 @@ public class RecommendationServiceImpl implements RecommendationService {
     // === 사용자 클러스터 관리 ===
 
     /**
-     * 사용자를 클러스터에 할당합니다.
+     * @category ClusteringService
+     * @method addUserToCluster
+     * @description 사용자를 클러스터에 할당합니다.
+     * @param userId 사용자 ID
+     * @throws ExceptionHandler USER_NOT_FOUND, RECOMMENDATION_CLUSTER_ERROR
      */
     @Override
     @Transactional
@@ -297,7 +322,6 @@ public class RecommendationServiceImpl implements RecommendationService {
         try {
             // 2. 최신 클러스터링 파라미터와 중심점들 조회
             ClusteringParameter params = getLatestClusteringParams();
-            
             ClusterCenters centers = getLatestClusterCenters();
 
             // 3. 사용자 데이터 정규화
@@ -340,12 +364,21 @@ public class RecommendationServiceImpl implements RecommendationService {
                 .map(Map.Entry::getKey)
                 .orElseThrow(() -> new ExceptionHandler(ErrorStatus.RECOMMENDATION_CLUSTER_ERROR));
 
-            // 7. UserCluster 엔티티 저장
-            UserCluster userCluster = UserCluster.builder()
-                .user(user)
-                .clusterId(closestCluster)
-                .build();
-            userClusterRepository.save(userCluster);
+            // 7. 기존 UserCluster 확인 및 업데이트/생성
+            Optional<UserCluster> existingCluster = userClusterRepository.findByUser(user);
+            if (existingCluster.isPresent()) {
+                // 기존 클러스터 정보 업데이트
+                UserCluster cluster = existingCluster.get();
+                cluster.setClusterId(closestCluster);
+                userClusterRepository.save(cluster);
+            } else {
+                // 새로운 클러스터 정보 생성
+                UserCluster newCluster = UserCluster.builder()
+                    .user(user)
+                    .clusterId(closestCluster)
+                    .build();
+                userClusterRepository.save(newCluster);
+            }
 
             log.info("User {} assigned to cluster {}", userId, closestCluster);
 
@@ -358,22 +391,115 @@ public class RecommendationServiceImpl implements RecommendationService {
     // === 추천 서비스 ===
 
     /**
-     * 사용자에게 맞춤형 플랜을 추천합니다.
+     * @category RecommendationService
+     * @method getRecommendedPlans
+     * @description 사용자에게 맞춤형 플랜을 추천합니다.
+     * @param userId 사용자 ID
+     * @return RecommendedPlansDTO 추천된 플랜 정보
+     * @throws ExceptionHandler USER_NOT_FOUND, COUPLE_NOT_FOUND, VIRGIN_ROAD_NOT_FOUND
      */
     @Override
     public RecommendationResponse.RecommendedPlansDTO getRecommendedPlans(Integer userId) {
         User user = getUserById(userId);
-            
         UserCluster userCluster = getUserCluster(user);
-            
-        // TODO: 실제 추천 로직 구현
-        return new RecommendationResponse.RecommendedPlansDTO();
+        Couple userCouple = getCoupleByUserId(userId);
+        VirginRoad userVirginRoad = getVirginRoadByCouple(userCouple);
+
+        // 초기 가중치 맵 생성
+        Map<ServiceType, int[]> planWeights = initializePlanWeights(userVirginRoad);
+
+        // 같은 클러스터의 사용자들의 선택 분석
+        int sameGroups = analyzeSameClusterChoices(userCluster, planWeights);
+
+        // 추천 임계값 기반으로 가중치 업데이트
+        updateWeightsBasedOnThreshold(planWeights, sameGroups);
+
+        // 검증 로직을 서비스 계층에서 수행
+        if (userVirginRoad.getPlans() == null) {
+            throw new ExceptionHandler(ErrorStatus.PLAN_NOT_FOUND);
+        }
+        if (planWeights == null || planWeights.isEmpty()) {
+            throw new ExceptionHandler(ErrorStatus.NOT_ENOUGH_REQUEST_BODY_ERROR);
+        }
+
+        // 검증이 완료된 데이터를 Converter에 전달
+        return RecommendationConverter.toRecommendedPlansDTO(userVirginRoad, planWeights);
     }
 
-    // === 유틸리티 메서드 ===
+    /**
+     * @category RecommendationHelper
+     * @method initializePlanWeights
+     * @description 버진로드의 플랜들에 대한 초기 가중치 맵을 생성합니다.
+     * @param virginRoad 버진로드 엔티티
+     * @return Map<ServiceType, int[]> 서비스 타입별 가중치 맵
+     */
+    private Map<ServiceType, int[]> initializePlanWeights(VirginRoad virginRoad) {
+        Map<ServiceType, int[]> planWeights = new HashMap<>();
+        for (Plan plan : virginRoad.getPlans()) {
+            planWeights.put(plan.getServiceType(), 
+                new int[] {plan.getPlanStatus().equals(PlanStatus.BEFORE_START) ? 0 : 1, 0});
+        }
+        return planWeights;
+    }
 
     /**
-     * 유클리드 거리 계산
+     * @category RecommendationHelper
+     * @method analyzeSameClusterChoices
+     * @description 같은 클러스터의 사용자들의 선택을 분석하고 가중치를 업데이트합니다.
+     * @param userCluster 사용자 클러스터
+     * @param planWeights 플랜 가중치 맵
+     * @return int 같은 클러스터에 속한 사용자 수
+     */
+    private int analyzeSameClusterChoices(UserCluster userCluster, Map<ServiceType, int[]> planWeights) {
+        int sameGroups = 0;
+        List<VirginRoad> virginRoads = virginRoadRepository.findAll();
+        
+        for (VirginRoad virginRoad : virginRoads) {
+            Couple couple = virginRoad.getCouple();
+            User femaleUser = couple.getFemale();
+            UserCluster currentCluster = getUserCluster(femaleUser);
+            
+            if (currentCluster.getClusterId().equals(userCluster.getClusterId())) {
+                sameGroups++;
+                updateWeightsFromPlans(virginRoad.getPlans(), planWeights);
+            }
+        }
+        return sameGroups;
+    }
+
+    /**
+     * 주어진 플랜들의 선택 현황을 기반으로 가중치를 업데이트합니다.
+     */
+    private void updateWeightsFromPlans(List<Plan> plans, Map<ServiceType, int[]> planWeights) {
+        for (Plan plan : plans) {
+            if (planWeights.containsKey(plan.getServiceType()) && 
+                plan.getPlanStatus().equals(PlanStatus.FINISHED)) {
+                planWeights.get(plan.getServiceType())[1]++;
+            }
+        }
+    }
+
+    /**
+     * 임계값을 기반으로 최종 가중치를 업데이트합니다.
+     */
+    private void updateWeightsBasedOnThreshold(Map<ServiceType, int[]> planWeights, int sameGroups) {
+        double threshold = sameGroups * 0.4;
+        for (Map.Entry<ServiceType, int[]> entry : planWeights.entrySet()) {
+            int[] weights = entry.getValue();
+            if (weights[0] == 0 && weights[1] >= threshold) {
+                weights[0] = 1;
+            }
+        }
+    }
+
+    // === 클러스터링 유틸리티 메서드 ===
+    /**
+     * @category ClusteringUtility
+     * @method calculateDistance
+     * @description 두 벡터 간의 유클리드 거리를 계산합니다.
+     * @param vector1 첫 번째 벡터
+     * @param vector2 두 번째 벡터
+     * @return double 두 벡터 간의 거리
      */
     private double calculateDistance(List<Double> vector1, List<Double> vector2) {
         return Math.sqrt(
@@ -412,7 +538,12 @@ public class RecommendationServiceImpl implements RecommendationService {
     }
 
     /**
-     * ID로 사용자 조회
+     * @category EntityHelper
+     * @method getUserById
+     * @description ID로 사용자를 조회합니다.
+     * @param userId 사용자 ID
+     * @return User 사용자 엔티티
+     * @throws ExceptionHandler USER_NOT_FOUND
      */
     private User getUserById(Integer userId) {
         return userRepository.findById(userId)
@@ -447,10 +578,31 @@ public class RecommendationServiceImpl implements RecommendationService {
     }
 
     /**
-     * 사용자의 클러스터 정보 조회
+     * @category EntityHelper
+     * @method getUserCluster
+     * @description 사용자의 클러스터 정보를 조회합니다.
+     * @param user 사용자 엔티티
+     * @return UserCluster 사용자 클러스터 정보
+     * @throws ExceptionHandler RECOMMENDATION_CLUSTER_NOT_FOUND
      */
     private UserCluster getUserCluster(User user) {
         return userClusterRepository.findByUser(user)
             .orElseThrow(() -> new ExceptionHandler(ErrorStatus.RECOMMENDATION_CLUSTER_NOT_FOUND));
+    }
+
+    /**
+     * 사용자 ID로 커플 정보 조회
+     */
+    private Couple getCoupleByUserId(Integer userId) {
+        return coupleRepository.findCoupleByUserId(userId)
+            .orElseThrow(() -> new ExceptionHandler(ErrorStatus.COUPLE_NOT_FOUND));
+    }
+
+    /**
+     * 커플 정보로 버진로드 조회
+     */
+    private VirginRoad getVirginRoadByCouple(Couple couple) {
+        return virginRoadRepository.getVirginRoadByCouple(couple)
+            .orElseThrow(() -> new ExceptionHandler(ErrorStatus.VIRGIN_ROAD_NOT_FOUND));
     }
 }

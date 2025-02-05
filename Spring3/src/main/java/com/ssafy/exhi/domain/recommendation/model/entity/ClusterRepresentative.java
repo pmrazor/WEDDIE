@@ -22,7 +22,7 @@ public class ClusterRepresentative extends BaseEntity {
     private Integer clusterId;  // 고유 클러스터 식별 값
 
     // 대표 유저
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "representative_user_id")
     private User representativeUser;
 

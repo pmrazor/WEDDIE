@@ -406,11 +406,11 @@ def optimize_weights(features_scaled):
     # 가중치 탐색 공간 정의
     space = [
         Real(2.0, 8.0, name='age_weight'),
-        Real(5.0, 12.0, name='budget_weight'),
-        Real(0.5, 5.0, name='mbti_ie_weight'),
-        Real(0.5, 5.0, name='mbti_sn_weight'),
-        Real(0.5, 5.0, name='mbti_tf_weight'),
-        Real(0.5, 5.0, name='mbti_jp_weight')
+        Real(4.0, 13.0, name='budget_weight'),
+        Real(0.5, 6.0, name='mbti_ie_weight'),
+        Real(0.5, 6.0, name='mbti_sn_weight'),
+        Real(0.5, 6.0, name='mbti_tf_weight'),
+        Real(0.5, 6.0, name='mbti_jp_weight')
     ]
     
     @use_named_args(space)

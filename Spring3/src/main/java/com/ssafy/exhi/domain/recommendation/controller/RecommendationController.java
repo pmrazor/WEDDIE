@@ -19,12 +19,12 @@ public class RecommendationController implements RecommendationControllerDocs {
     private final JWTUtil jwtUtil;
 
     @Override
-    @PostMapping("/addUser")
+    @GetMapping("/addUser")
     public ResponseEntity<?> addUser(@RequestHeader("Authorization") String accessToken) {
         Integer userId = jwtUtil.getUserId(accessToken);
         log.info("Adding user to clustering: userId={}", userId);
         recommendationService.addUserToCluster(userId);
-        return ResponseEntity.ok(ApiResponse.onSuccess(null));
+        return ResponseEntity.noContent().build();
     }
 
     @Override
