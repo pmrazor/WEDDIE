@@ -74,8 +74,8 @@ public class UserResponse {
         @Schema(description = "사용자의 이름", example = "John Doe")
         private String name;
 
-        @Schema(description = "성별", example = "MALE")
-        private String gender;
+//        @Schema(description = "성별", example = "MALE")
+//        private String gender;
 
         @Schema(description = "프로필 이미지", example = "https://example.com/profile.jpg")
         private String profileImg;
@@ -93,6 +93,9 @@ public class UserResponse {
 
         @Schema(description = "나이", example = "25")
         private Integer age;
+
+        @Schema(description = "성별", example = "MALE")
+        private String gender;
 
         @Schema(description = "전화번호", example = "010-1234-5678")
         private String phone;

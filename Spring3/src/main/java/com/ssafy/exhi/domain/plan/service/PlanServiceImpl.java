@@ -10,6 +10,7 @@ import com.ssafy.exhi.domain.virginroad.model.entity.VirginRoad;
 import com.ssafy.exhi.exception.ExceptionHandler;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.Objects;
@@ -17,6 +18,7 @@ import java.util.Optional;
 
 import static com.ssafy.exhi.domain.plan.model.dto.PlanResponse.DetailResultDTO;
 
+@Slf4j
 @Service
 @Transactional
 @RequiredArgsConstructor
@@ -29,6 +31,7 @@ public class PlanServiceImpl implements PlanService {
     public DetailResultDTO getPlan(Integer userId, Integer planId) {
         Couple couple = getCoupleByUserId(userId);
         Plan plan = getPlanById(planId);
+        log.info("{}", couple.getId());
         checkPlanOwnerShip(couple, plan);
 
         return PlanConverter.toDetailDTO(plan);

@@ -4,10 +4,7 @@ package com.ssafy.exhi.domain.couple.model.entity;
 import com.ssafy.exhi.domain.user.model.entity.User;
 import com.ssafy.exhi.domain.virginroad.model.entity.VirginRoad;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Entity
 @Getter

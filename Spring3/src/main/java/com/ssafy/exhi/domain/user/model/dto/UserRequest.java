@@ -66,7 +66,7 @@ public class UserRequest {
         private String profileImg;
     }
 
-    // 유저 기본 정보 수정
+    // 로컬 유저 기본 정보 수정
     @Data
     @Builder
     @ToString
@@ -75,9 +75,6 @@ public class UserRequest {
     public static class UpdateInfoDTO {
         @NotBlank
         private String name;
-
-        @NotNull
-        private Gender gender;
 
         @NotBlank
         private String profileImg;
@@ -92,6 +89,9 @@ public class UserRequest {
     public static class UpdateDetailDTO {
         @NotNull
         private Integer age;
+
+        @NotNull
+        private Gender gender;
 
         @NotBlank
         private String phone;
@@ -110,6 +110,9 @@ public class UserRequest {
         @NotNull
         private Integer age;
 
+        @NotNull
+        private Gender gender;
+
         @NotBlank
         private String phone;
 
@@ -117,7 +120,7 @@ public class UserRequest {
         private String mbti;
     }
 
-    // 유저 상세 정보 생성
+    // 유저 상세 정보 조회
     @Data
     @Builder
     @ToString
@@ -127,14 +130,14 @@ public class UserRequest {
         @NotNull
         private Integer age;
 
+        @NotNull
+        private Gender gender;
+
         @NotBlank
         private String phone;
 
         @NotBlank
         private String mbti;
     }
-
-
-
 
 }

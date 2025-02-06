@@ -24,7 +24,7 @@ public class PlanController {
             @PathVariable("planId") Integer planId
     ) {
         Integer userId = jwtUtil.getUserId(accessToken);
-        log.info("createPlan userId: {}", userId);
+        log.info("getPlan userId: {}", userId);
 
         PlanResponse.DetailResultDTO response = planService.getPlan(userId, planId);
         return ResponseEntity.ok(ApiResponse.onSuccess(response));
