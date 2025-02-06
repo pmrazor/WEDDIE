@@ -12,13 +12,12 @@ import Register from "./pages/auth/register/Register";
 import Callback from "@/pages/auth/oauth/callback";
 import Test from "./style/text";
 
-
 function App() {
   return (
     <>
       <Routes>
         {/* <Route path="/" element={<Home/>} /> */}
-        <Route path="/" element={<Test/>} />
+        <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/oauth/callback" element={<Callback />} />
         <Route path="/register" element={<Register />} />

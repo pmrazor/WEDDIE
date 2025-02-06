@@ -14,7 +14,8 @@ const useAuthStore = create(
           });
           return response.data;
         },
-        async checkAuth() { // login.id.response 를 넣으면 -> 추가 데이터(response.data)를 준다. 
+        async checkAuth() {
+          // login.id.response 를 넣으면 -> 추가 데이터(response.data)를 준다.
           const response = await instance.get("/api/auth/me");
           return response.data;
         },
@@ -53,8 +54,16 @@ const useAuthStore = create(
         login: async (loginId, password) => {
           try {
             const data = await apiCalls.login(loginId, password);
-            const { accessToken, user } = data;
-            get().setAuth(accessToken, user);
+            if (data && data.result) {
+              const accessToken = data.result.accessToken;
+              // 사용자 정보가 없다면 기본값으로 설정
+              const userData = {
+                email: null,
+                name: null,
+                profileImg: null,
+              };
+              get().setAuth(accessToken, userData);
+            }
             return data;
           } catch (error) {
             throw error;
