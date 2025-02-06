@@ -54,7 +54,7 @@ public class UserConverter {
                 .name(signUpDTO.getName())
                 .provider(signUpDTO.getProvider())
                 .profileImg(signUpDTO.getProfileImg())
-                .gender(signUpDTO.getGender())
+//                .gender(signUpDTO.getGender())
                 .build();
     }
 
@@ -65,7 +65,7 @@ public class UserConverter {
                 .id(user.getId())
                 .name(user.getName())
                 .loginId(user.getLoginId())
-                .gender(user.getGender().toString())
+//                .gender(user.getGender().toString())
                 .profileImg(user.getProfileImg())
                 .build();
     }
@@ -75,6 +75,7 @@ public class UserConverter {
         return UserResponse.UserDetailDTO.builder()
                 .id(userDetail.getId())
                 .age(userDetail.getAge())
+                .gender(userDetail.getGender().toString())
                 .phone(userDetail.getPhone())
                 .mbti(userDetail.getMbti())
                 .build();

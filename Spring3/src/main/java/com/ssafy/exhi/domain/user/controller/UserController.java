@@ -102,7 +102,7 @@ public class UserController implements UserControllerDocs{
         return ResponseEntity.ok(ApiResponse.onSuccess(user));
     }
 
-    // 회원가입 시 입력하는 유저 기본 정보 수정 (gender, profileImg)e
+    // 회원가입 시 입력하는 유저 기본 정보 수정 (profileImg)
     @PatchMapping("/users/info")
     public ResponseEntity<?> updateUserInfo(
             @RequestHeader("Authorization") String accessToken,
@@ -117,7 +117,7 @@ public class UserController implements UserControllerDocs{
     }
 
 
-     // 온보딩 시 입력하는 유저 상세 정보 수정 (age, phone, mbti)
+     // 온보딩 시 입력하는 유저 상세 정보 수정 (age, gender, phone, mbti)
     @PatchMapping("/users/detail")
     public ResponseEntity<?> updateUserDetail(
             @RequestHeader("Authorization") String accessToken,
@@ -132,7 +132,7 @@ public class UserController implements UserControllerDocs{
     }
 
 
-    // 온보딩 시 입력하는 유저 상세 정보 생성 (age, phone, mbti)
+    // 온보딩 시 입력하는 유저 상세 정보 생성 (age, gender, phone, mbti)
     @PostMapping("/users/detail")
     public ResponseEntity<?> createUserDetail(
             @RequestHeader("Authorization") String accessToken,
@@ -146,7 +146,7 @@ public class UserController implements UserControllerDocs{
     }
 
 
-     // 온보딩 시 입력하는 유저 상세 정보 확인 (age, phone, mbti)
+     // 온보딩 시 입력하는 유저 상세 정보 확인 (age, gender, phone, mbti)
     @GetMapping("/users/detail")
     public ResponseEntity<?> getUserDetail(
             @RequestHeader("Authorization") String accessToken)

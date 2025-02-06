@@ -26,6 +26,9 @@ public class UserDetail {
     @Column(name = "age")
     private Integer age;
 
+    @Column(name = "gender")
+    private Gender gender;
+
     @Column(name = "phone")
     private String phone;
 
@@ -46,6 +49,7 @@ public class UserDetail {
     // 유저 상세 정보 수정 위한 저장 로직
     public void updateDetail(UserRequest.UpdateDetailDTO dto) {
         this.age = dto.getAge();
+        this.gender = dto.getGender();
         this.phone = dto.getPhone();
         this.mbti = dto.getMbti();
     }
@@ -53,14 +57,17 @@ public class UserDetail {
     // 유저 상세 정보 생성 위한 저장 로직
     public void createDetail(UserRequest.CreateDetailDTO dto) {
         this.age = dto.getAge();
+        this.gender = dto.getGender();
         this.phone = dto.getPhone();
         this.mbti = dto.getMbti();
     }
 
+    // 유저 상세 정보 조회 위한 로직
     public void getDetail(UserRequest.getDetailDTO dto) {
         this.age = dto.getAge();
+        this.gender = dto.getGender();
         this.phone = dto.getPhone();
         this.mbti = dto.getMbti();
-    } 
+    }
 
 }

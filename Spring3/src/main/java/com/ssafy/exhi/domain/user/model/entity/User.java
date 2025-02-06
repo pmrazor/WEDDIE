@@ -25,8 +25,8 @@ public class User extends BaseEntity {
     @Column(name = "name")
     private String name;
 
-    @Column(name = "gender")
-    private Gender gender;
+//    @Column(name = "gender")
+//    private Gender gender;
 
     @Column(name = "login_id", unique = true)
     private String loginId;
@@ -91,7 +91,7 @@ public class User extends BaseEntity {
     // 유저 기본 정보 수정 위한 저장 로직
     public void updateInfo(UserRequest.UpdateInfoDTO dto) {
         this.name = dto.getName();
-        this.gender = dto.getGender();
+//        this.gender = dto.getGender();
         this.profileImg = dto.getProfileImg();
     }
 

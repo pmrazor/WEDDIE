@@ -65,7 +65,7 @@ public class VirginRoadServiceImpl implements VirginRoadService {
 
     private Map<ServiceType, List<DefaultTodo>> getDefaultTodos(User user) {
         return defaultTodoRepository
-                .findDefaultTodosByGender(user.getGender())
+                .findDefaultTodosByGender(user.getUserDetail().getGender())
                 .stream()
                 .collect(Collectors.groupingBy(DefaultTodo::getServiceType));
     }

@@ -7,6 +7,7 @@ import com.ssafy.exhi.domain.user.converter.UserConverter;
 import com.ssafy.exhi.domain.user.model.dto.UserResponse;
 import com.ssafy.exhi.domain.user.model.entity.Gender;
 import com.ssafy.exhi.domain.user.model.entity.User;
+import com.ssafy.exhi.domain.user.model.entity.UserDetail;
 
 public class CoupleConverter {
 
@@ -43,10 +44,10 @@ public class CoupleConverter {
     }
 
     private static User getFemaleUser(User user1, User user2) {
-        return user1.getGender() == Gender.FEMALE ? user1 : user2;
+        return user1.getUserDetail().getGender() == Gender.FEMALE ? user1 : user2;
     }
 
     private static User getMaleUser(User user1, User user2) {
-        return user1.getGender() == Gender.MALE ? user1 : user2;
+        return user1.getUserDetail().getGender() == Gender.MALE ? user1 : user2;
     }
 }

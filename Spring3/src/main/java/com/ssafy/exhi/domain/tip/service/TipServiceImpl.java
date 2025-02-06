@@ -32,7 +32,7 @@ public class TipServiceImpl implements TipService {
         Plan plan = findPlanByPlanId(planId);
         User user = findUserByUserId(userId);
         ServiceType serviceType = plan.getServiceType();
-        List<Tip> tips = tipRepository.findTipsByServiceTypeAndGender(serviceType, user.getGender());
+        List<Tip> tips = tipRepository.findTipsByServiceTypeAndGender(serviceType, user.getUserDetail().getGender());
 
         return TipConverter.toDTO(tips);
     }
