@@ -28,8 +28,11 @@ instance.interceptors.response.use(
   (error) => {
     // 401 에러 (인증 실패) 처리
     if (error.response?.status === 401) {
-      useAuthStore.getState().logout();
-      window.location.href = "/login";
+      // 현재 경로가 /login이 아닐 때만 로그아웃 및 리다이렉트 수행
+      if (!window.location.pathname.includes("/login")) {
+        useAuthStore.getState().logout();
+        window.location.href = "/login";
+      }
     }
     return Promise.reject(error);
   }

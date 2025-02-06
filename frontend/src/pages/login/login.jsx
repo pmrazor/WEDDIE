@@ -15,29 +15,14 @@ export default function Home() {
   const [password, setPassword] = useState("");
 
   const { toast } = useToast();
-  const login = useAuthStore((state) => state.login);
-
-  const setAuth = useAuthStore((state) => state.setAuth);
 
   const handleEmailLogin = async (e) => {
     e.preventDefault();
-
     try {
-      const response = await instance.post("/api/auth/login", {
-        loginId,
-        password,
-      });
+      const data = await useAuthStore.getState().login(loginId, password);
+      console.log("Login response:", data);
 
-      if (response.data && response.data.result) {
-        const accessToken = response.data.result.accessToken;
-        const userData = {
-          email: null, // 백엔드에서 저장할 공간 있는지 확인할 것
-          name: null, // 22
-          profileImg: null, // 33
-        };
-
-        setAuth(accessToken, userData);
-
+      if (data && data.result && data.result.accessToken) {
         toast({
           title: "로그인 성공",
           description: "환영합니다!",
@@ -46,10 +31,18 @@ export default function Home() {
 
         setTimeout(() => {
           window.location.href = "/";
-        }, 1500);
+        }, 500);
+      } else {
+        throw new Error("Invalid login response");
       }
     } catch (error) {
-      console.error("Login error:", error);
+      console.error("Login error details:", {
+        error,
+        response: error.response,
+        status: error.response?.status,
+        message: error.response?.data?.message,
+      });
+
       toast({
         variant: "destructive",
         title: "로그인 실패",
