@@ -105,6 +105,11 @@ public class UserServiceImpl implements UserService {
     public UserResponse.UserInfoDTO updateUserInfo(Integer userId, UserRequest.UpdateInfoDTO userInfoRequest) {
         User user = getUserInfoById(userId);
 
+        // 기존 정보와 동일한 경우 업데이트하지 않음
+        if (user.isSameInfo(userInfoRequest)) {
+            throw new ExceptionHandler(ErrorStatus.USER_INFO_NO_CHANGES);
+        }
+
         user.updateInfo(userInfoRequest);
         return UserConverter.toUserInfoDTO(user);
     }
@@ -117,6 +122,11 @@ public class UserServiceImpl implements UserService {
     }
     public UserResponse.UserDetailDTO updateUserDetail(Integer userId, UserRequest.UpdateDetailDTO userDetailRequest) {
         UserDetail userDetail = updateUserDetailById(userId);
+
+        // 기존 정보와 비교하여 변경 사항이 없으면 예외 발생
+        if (userDetail.isSameDetail(userDetailRequest)) {
+            throw new ExceptionHandler(ErrorStatus.USER_DETAIL_NO_CHANGES);
+        }
 
         // 저장 후 반환
         userDetail.updateDetail(userDetailRequest);
@@ -154,25 +164,7 @@ public class UserServiceImpl implements UserService {
         return toUserDetailDTO(newUserDetail);
     }
 
-//    // 유저 기본 정보 수정
-//    private User getUserInfoById(Integer userId) {
-//        return userRepository.findUserById(userId)
-//                .orElseThrow(() -> new ExceptionHandler(ErrorStatus.USER_INFO_NOT_FOUND)
-//                );
-//    }
-//    public UserResponse.UserInfoDTO updateUserInfo(Integer userId, UserRequest.UpdateInfoDTO userInfoRequest) {
-//        User user = getUserInfoById(userId);
-//
-//        user.updateInfo(userInfoRequest);
-//        return UserConverter.toUserInfoDTO(user);
-//    }
 
-
-//    @Override
-//    public UserResponse.DetailResultDTO getMyInfo(Integer userId) {
-//        User user = getUserById(userId);
-//        return UserConverter.toDetailResultDTO(user);
-//    }
 
     // 유저 상세 정보 조회 (온보딩)
     private UserDetail getUserDetailById(Integer userId) {

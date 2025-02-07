@@ -7,6 +7,7 @@ import com.ssafy.exhi.domain.user.model.dto.UserRequest;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 import lombok.*;
+import java.util.Objects;
 
 @Getter
 @Setter
@@ -91,8 +92,13 @@ public class User extends BaseEntity {
     // 유저 기본 정보 수정 위한 저장 로직
     public void updateInfo(UserRequest.UpdateInfoDTO dto) {
         this.name = dto.getName();
-//        this.gender = dto.getGender();
         this.profileImg = dto.getProfileImg();
+    }
+
+    // 유저 기존 정보 수정 시 새로운 요청 정보를 비교하는 메서드
+    public boolean isSameInfo(UserRequest.UpdateInfoDTO dto) {
+        return Objects.equals(this.name, dto.getName()) &&
+                Objects.equals(this.profileImg, dto.getProfileImg());
     }
 
 }
