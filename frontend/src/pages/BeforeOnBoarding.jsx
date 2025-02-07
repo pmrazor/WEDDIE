@@ -6,6 +6,9 @@ import Card from "@/components/common/Card"
 import Button from "@/components/common/Button"
 import { colors } from "@/constants/colors"
 import { useTheme } from "@/contexts/theme"
+import man from "@/assets/BeforeOnBoarding/man.svg"
+import heartwithribbon from "@/assets/BeforeOnBoarding/heartwithribbon.svg"
+import flowerbouquet from "@/assets/BeforeOnBoarding/flower-bouquet.png"
 
 const BeforeOnBoarding = () => {
 
@@ -46,7 +49,7 @@ const BeforeOnBoarding = () => {
           head_text2={"정말 잘 하셨어요!"}
           sub_text1={"우리 부부만의 AI 비서가"}
           sub_text2={"결혼과 이후 과정까지 책임질게요"}
-          icon={<img src="/src/assets/BeforeOnBoarding/man.svg" alt="man icon" />}
+          icon={<img src= {man} alt="man icon" />}
           style={{backgroundColor: colors.M_PRIMARY_EXTRALIGHT}}
           />  
         <Card 
@@ -55,7 +58,7 @@ const BeforeOnBoarding = () => {
           head_text2={"우리 부부만의 버진 로드"}
           sub_text1={"AI 비서가 우리 부부의 상황을 분석해"}
           sub_text2={"최적의 로드를 설계해 드릴게요"}
-          icon={<img src="/src/assets/BeforeOnBoarding/flower-bouquet.png" alt="flower-bouquet icon" />}
+          icon={<img src={flowerbouquet} alt="flower-bouquet icon" />}
           style={{backgroundColor: colors.W_PRIMARY_EXTRALIGHT}}
           />  
         <Card 
@@ -64,7 +67,7 @@ const BeforeOnBoarding = () => {
           head_text2={"서로를 조금 더 생각해요"}
           sub_text1={"귀찮고 어려운 건 Weddie가 도와 드릴게요"}
           sub_text2={"아름다운 버진 로드, 서로 사랑만 하며 만들어가요"}
-          icon={<img src="/src/assets/BeforeOnBoarding/heartwithribbon.svg" alt="heartwithribbon icon" />}
+          icon={<img src={heartwithribbon} alt="heartwithribbon icon" />}
           style={{backgroundColor: colors.PRIMARY_EXTRALIGHT}}
           />  
       </div>
