@@ -28,9 +28,14 @@ public enum ErrorStatus implements BaseErrorCode {
     USER_BAD_REQUEST(HttpStatus.BAD_REQUEST, "MEMBER4006", "토큰 값과 요청한 아이디가 일치하지않습니다."),
 
     // 로컬멤버 기본정보
-    USER_INFO_NOT_FOUND(HttpStatus.BAD_REQUEST, "MEMBER_DETAIL4004", "유저 기본정보가 존재하지않습니다."),
+    USER_INFO_NOT_FOUND(HttpStatus.BAD_REQUEST, "USERINFO4001", "유저 기본정보가 존재하지않습니다."),
+    USER_INFO_NO_CHANGES(HttpStatus.BAD_REQUEST, "USERINFO4002", "변경된 사항이 없습니다."),
+
+
     // 멤버 디테일
-    USER_DETAIL_NOT_FOUND(HttpStatus.BAD_REQUEST, "MEMBER_DETAIL4004", "유저 디테일이 존재하지않습니다."),
+    USER_DETAIL_NOT_FOUND(HttpStatus.BAD_REQUEST, "USERDETAIL4001", "유저 디테일이 존재하지않습니다."),
+    USER_DETAIL_NO_CHANGES(HttpStatus.BAD_REQUEST, "USERDETAIL4002", "변경된 정보가 없습니다."),
+
     // 멤버 디테일(온보딩) 정보가 이미 있는 경우
     USER_DETAIL_ALREADY_EXISTS(HttpStatus.BAD_REQUEST, "MEMBER_DETAIL4004", "유저 디테일이 이미 존재합니다. 생성이 아닌 수정을 이용해주세요."),
 

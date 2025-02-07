@@ -5,6 +5,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.Objects;
+
 @Getter
 @Setter
 @ToString
@@ -68,6 +70,14 @@ public class UserDetail {
         this.gender = dto.getGender();
         this.phone = dto.getPhone();
         this.mbti = dto.getMbti();
+    }
+
+    // 유저 상세 정보 수정 시 새로운 요청 정보를 비교하는 메서드
+    public boolean isSameDetail(UserRequest.UpdateDetailDTO dto) {
+        return Objects.equals(this.age, dto.getAge()) &&
+                Objects.equals(this.gender, dto.getGender()) &&
+                Objects.equals(this.phone, dto.getPhone()) &&
+                Objects.equals(this.mbti, dto.getMbti());
     }
 
 }
