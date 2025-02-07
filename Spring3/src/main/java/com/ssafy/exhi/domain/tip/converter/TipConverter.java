@@ -11,7 +11,6 @@ public class TipConverter {
     public static TipResponse.DetailResultDTO toDTO(Tip tip) {
         return TipResponse.DetailResultDTO.builder()
                 .tipId(tip.getId())
-                .gender(tip.getGender())
                 .serviceType(tip.getServiceType())
                 .tip(tip.getTip())
                 .build();
@@ -23,7 +22,6 @@ public class TipConverter {
 
     public static Tip toEntity(TipRequest.CreateDTO createDTO) {
         return Tip.builder()
-                .gender(createDTO.getGender())
                 .serviceType(createDTO.getServiceType())
                 .tip(createDTO.getTip())
                 .build();

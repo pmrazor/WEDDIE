@@ -1,11 +1,14 @@
 package com.ssafy.exhi.domain.tip.model.model;
 
-
 import com.ssafy.exhi.domain.ServiceType;
-import com.ssafy.exhi.domain.user.model.entity.Gender;
-import jakarta.persistence.*;
-import lombok.*;
-
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Data
@@ -21,10 +24,6 @@ public class Tip {
     @Column(name = "service_type")
     private ServiceType serviceType;
 
-    @Column(name = "gender")
-    private Gender gender;
-
-    @Column(name = "tip")
+    @Column(name = "tip", length = 2000)
     private String tip;
-
 }

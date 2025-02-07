@@ -32,7 +32,7 @@ public class TipServiceImpl implements TipService {
         Plan plan = findPlanByPlanId(planId);
         User user = findUserByUserId(userId);
         ServiceType serviceType = plan.getServiceType();
-        List<Tip> tips = tipRepository.findTipsByServiceTypeAndGender(serviceType, user.getUserDetail().getGender());
+        List<Tip> tips = tipRepository.findTipsByServiceType(serviceType);
 
         return TipConverter.toDTO(tips);
     }
@@ -47,14 +47,14 @@ public class TipServiceImpl implements TipService {
 
     private User findUserByUserId(Integer userId) {
         return userRepository.findById(userId)
-                .orElseThrow(
-                        () -> new ExceptionHandler(ErrorStatus.USER_NOT_FOUND)
-                );
+            .orElseThrow(
+                () -> new ExceptionHandler(ErrorStatus.USER_NOT_FOUND)
+            );
     }
 
     private Plan findPlanByPlanId(Integer planId) {
         return planRepository.findPlanById(planId).orElseThrow(
-                () -> new ExceptionHandler(ErrorStatus.PLAN_NOT_FOUND)
+            () -> new ExceptionHandler(ErrorStatus.PLAN_NOT_FOUND)
         );
     }
 
