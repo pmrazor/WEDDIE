@@ -11,13 +11,21 @@ import AfterOnBoarding from "./pages/AfterOnBoarding";
 import Register from "./pages/auth/register/Register";
 import Callback from "@/pages/auth/oauth/callback";
 import Test from "./style/text";
+import { useEffect } from "react";
+import { injectColors } from "./constants/colors";
+import { ThemeProvider } from "./contexts/theme";
 
 function App() {
+  // 색상 설정 함수 호출 
+  useEffect(() => {
+    injectColors()
+  }, [])
+  
   return (
     <>
+    <ThemeProvider>
       <Routes>
-        {/* <Route path="/" element={<Home/>} /> */}
-        <Route path="/" element={<Home />} />
+        <Route path="/" element={<Home/>} />
         <Route path="/login" element={<Login />} />
         <Route path="/oauth/callback" element={<Callback />} />
         <Route path="/register" element={<Register />} />
@@ -28,8 +36,10 @@ function App() {
         <Route path="/timecapsule/:nodeId" element={<TimeCapsule />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
+    </ThemeProvider>
     </>
   );
 }
+
 
 export default App;
