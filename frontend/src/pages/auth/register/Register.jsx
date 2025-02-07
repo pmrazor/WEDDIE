@@ -1,11 +1,11 @@
 import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import Id from "./level/id";
 import Password from "./level/password";
 import PasswordConfirm from "./level/password-check";
 import Name from "./level/name";
-import Gender from "./level/gender";
 import useRegisterStore from "@/store/register";
 
 export default function Register() {
@@ -15,9 +15,9 @@ export default function Register() {
     password: "",
     passwordConfirm: "",
     name: "",
-    gender: "",
   });
   const [step, setStep] = useState(1);
+  const [direction, setDirection] = useState(0);
   const [idValidated, setIdValidated] = useState(false); // ID 검증 상태 추가
   const [passwordValidated, setPasswordValidated] = useState(false);
   const register = useRegisterStore((state) => state.register); // store에서 register 함수 가져오기
@@ -42,13 +42,15 @@ export default function Register() {
     if (step === 3 && !passwordConfirmValidated) {
       return;
     }
-    if (step < 5) {
+    setDirection(1);
+    if (step < 4) {
       setStep((prev) => prev + 1);
     }
   };
 
   const handleBack = () => {
     if (step > 1) {
+      setDirection(-1);
       setStep((prev) => prev - 1);
     }
   };
@@ -86,59 +88,96 @@ export default function Register() {
   };
 
   const renderStep = () => {
-    switch (step) {
-      case 1:
-        return (
-          <Id
-            loginId={formData.loginId}
-            setLoginId={(value) => updateFormData("loginId", value)}
-            setIdValidated={setIdValidated} // ID 검증 상태 설정 함수 전달
-          />
-        );
-      case 2:
-        return (
-          <Password
-            password={formData.password}
-            setPassword={(value) => updateFormData("password", value)}
-            setPasswordValidated={setPasswordValidated}
-          />
-        );
-      case 3:
-        return (
-          <PasswordConfirm
-            password={formData.password}
-            passwordConfirm={formData.passwordConfirm}
-            setPasswordConfirm={(value) =>
-              updateFormData("passwordConfirm", value)
-            }
-            setPasswordConfirmValidated={setPasswordConfirmValidated}
-          />
-        );
-      case 4:
-        return (
-          <Name
-            name={formData.name}
-            setName={(value) => updateFormData("name", value)}
-          />
-        );
-      case 5:
-        return (
-          <Gender
-            gender={formData.gender}
-            setGender={(value) => updateFormData("gender", value)}
-          />
-        );
-      default:
-        return null;
-    }
+    const variants = {
+      enter: (direction) => ({
+        x: direction > 0 ? 500 : -500,
+        opacity: 0,
+      }),
+      center: {
+        x: 0,
+        opacity: 1,
+      },
+      exit: (direction) => ({
+        x: direction < 0 ? 500 : -500,
+        opacity: 0,
+      }),
+    };
+
+    const getStepComponent = () => {
+      switch (step) {
+        case 1:
+          return (
+            <Id
+              loginId={formData.loginId}
+              setLoginId={(value) => updateFormData("loginId", value)}
+              setIdValidated={setIdValidated}
+            />
+          );
+        case 2:
+          return (
+            <Password
+              password={formData.password}
+              setPassword={(value) => updateFormData("password", value)}
+              setPasswordValidated={setPasswordValidated}
+            />
+          );
+        case 3:
+          return (
+            <PasswordConfirm
+              password={formData.password}
+              passwordConfirm={formData.passwordConfirm}
+              setPasswordConfirm={(value) =>
+                updateFormData("passwordConfirm", value)
+              }
+              setPasswordConfirmValidated={setPasswordConfirmValidated}
+            />
+          );
+        case 4:
+          return (
+            <Name
+              name={formData.name}
+              setName={(value) => updateFormData("name", value)}
+            />
+          );
+        default:
+          return null;
+      }
+    };
+    return (
+      <div className="flex-1 relative overflow-hidden">
+        <AnimatePresence initial={false} mode="wait" custom={direction}>
+          <motion.div
+            key={step}
+            custom={direction}
+            variants={variants}
+            initial="enter"
+            animate="center"
+            exit="exit"
+            transition={{
+              x: {
+                type: "tween",
+                duration: 0.2, // 매우 짧은 시간
+                ease: "easeInOut", // 빠르게 시작하고 천천히 끝남
+              },
+              opacity: {
+                duration: 0.2,
+              },
+            }}
+            className="absolute w-full h-full"
+          >
+            {getStepComponent()}
+          </motion.div>
+        </AnimatePresence>
+      </div>
+    );
   };
 
   return (
-    <div className="fixed inset-0 flex flex-col h-screen pt-16">
+    <div className="fixed inset-x-0 bottom-0 top-[64px] flex flex-col">
       {renderStep()}
       <div className="px-4 mb-4">
         <div className="flex justify-between">
-          {[1, 2, 3, 4, 5].map((item) => (
+          {[1, 2, 3, 4].map((item) => (
             <div
               key={item}
               className={`h-2 flex-1 mx-1 rounded-full ${
@@ -159,7 +198,7 @@ export default function Register() {
           </button>
         )}
         <button
-          onClick={step === 5 ? handleSubmit : handleNext}
+          onClick={step === 4 ? handleSubmit : handleNext}
           type="button"
           disabled={
             (step === 1 && !idValidated) ||
@@ -175,7 +214,7 @@ export default function Register() {
                 : "bg-primary text-background hover:bg-primary/90 active:scale-[0.98]"
             }`}
         >
-          {step === 5 ? "완료" : "다음"}
+          {step === 4 ? "완료" : "다음"}
         </button>
       </div>
     </div>
