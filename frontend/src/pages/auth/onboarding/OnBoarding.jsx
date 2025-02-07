@@ -7,7 +7,10 @@ import Gender from "./level/gender";
 import Phone from "./level/phone";
 import Mbti from "./level/mbti";
 import useOnboardingStore from "@/store/onboarding";
+
 export default function OnBoarding() {
+  const [phoneValidated, setPhoneValidated] = useState(false);
+
   const { toast } = useToast();
   const [formData, setFormData] = useState({
     age: "20",
