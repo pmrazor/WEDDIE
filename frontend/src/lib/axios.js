@@ -2,7 +2,7 @@ import axios from "axios";
 import useAuthStore from "@/store/auth";
 
 const instance = axios.create({
-  baseURL: "http://weddie.ssafy.me:5000",
+  baseURL: "https://weddie.ssafy.me",
   timeout: 5000,
 });
 

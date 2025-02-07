@@ -6,11 +6,8 @@ import Age from "./level/age";
 import Gender from "./level/gender";
 import Phone from "./level/phone";
 import Mbti from "./level/mbti";
-import useRegisterStore from "@/store/register";
-
+import useOnboardingStore from "@/store/onboarding";
 export default function OnBoarding() {
-  const [phoneValidated, setPhoneValidated] = useState(false);
-
   const { toast } = useToast();
   const [formData, setFormData] = useState({
     age: "20",
@@ -20,7 +17,6 @@ export default function OnBoarding() {
   });
   const [step, setStep] = useState(1);
   const [direction, setDirection] = useState(0);
-  const register = useRegisterStore((state) => state.register); // store에서 register 함수 가져오기
 
   const updateFormData = (field, value) => {
     setFormData((prev) => ({
@@ -43,10 +39,14 @@ export default function OnBoarding() {
     }
   };
 
+  const submitOnboarding = useOnboardingStore(
+    (state) => state.submitOnboarding
+  );
+
   const handleSubmit = async () => {
     console.log("최종 제출된 데이터:", formData);
     try {
-      const response = await register(formData);
+      const response = await submitOnboarding(formData);
       if (response.success) {
         toast({
           title: "온보딩 정보입력 성공",
@@ -56,7 +56,7 @@ export default function OnBoarding() {
         // 잠시 후 메인 페이지로 리다이렉트
         setTimeout(() => {
           window.location.href = "/";
-        }, 1500); // 1.5초 후 리다이렉트
+        }, 1500);
       } else {
         toast({
           title: "온보딩 정보 입력 실패",
@@ -65,7 +65,7 @@ export default function OnBoarding() {
         });
       }
     } catch (error) {
-      console.error("Registration error:", error);
+      console.error("Onboarding error:", error);
       toast({
         title: "오류 발생",
         description: "온보딩 중 오류가 발생했습니다.",
