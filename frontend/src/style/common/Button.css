@@ -5,19 +5,33 @@
   cursor: pointer;
   font-size: 16px;
   white-space: nowrap;
-}
-
-.DEFAULT {
   background-color: lightgrey;
 }
 
-.POSITIVE {
-  background-color: deepskyblue;
-  color: white;
-}
- 
-.NEGATIVE {
-  background-color: crimson;
-  color: white;
+.M_PRIMARY_DEEP {
+  background-color: var(--M_PRIMARY_DEEP);
+  color: var(--WHITE);
 }
 
+.W_PRIMARY_DEEP {
+  background-color: var(--W_PRIMARY_DEEP);
+  color: var(--WHITE);
+}
+
+.PRIMARY_DEEP {
+  background-color: var(--PRIMARY_DEEP);
+  color: var(--WHITE);
+}
+
+.sticky-UNDER {
+  font-weight: bold;
+  font-size: large;
+  position: fixed;
+  padding: 20px 30px;
+  border-radius: 20px;
+  top: 85vh;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+  box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.15);
+}

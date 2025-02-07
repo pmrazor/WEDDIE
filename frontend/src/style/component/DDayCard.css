@@ -1,0 +1,11 @@
+
+
+.DDayCard {
+  padding: 5% 10%;
+  /* border: 5px solid; */
+  border-radius: 5px;
+}
+
+.head_text {
+  font-weight: bold;
+}
