@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
@@ -7,6 +7,7 @@ import Password from "./level/password";
 import PasswordConfirm from "./level/password-check";
 import Name from "./level/name";
 import useRegisterStore from "@/store/register";
+import Splash from "./level/splash";
 
 export default function Register() {
   const { toast } = useToast();
@@ -21,8 +22,17 @@ export default function Register() {
   const [idValidated, setIdValidated] = useState(false); // ID 검증 상태 추가
   const [passwordValidated, setPasswordValidated] = useState(false);
   const register = useRegisterStore((state) => state.register); // store에서 register 함수 가져오기
+  const [showSplash, setShowSplash] = useState(true);
   const [passwordConfirmValidated, setPasswordConfirmValidated] =
     useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowSplash(false);
+    }, 5000); // 5초 후에 스플래시 화면 숨김
+
+    return () => clearTimeout(timer);
+  }, []);
 
   const updateFormData = (field, value) => {
     setFormData((prev) => ({
@@ -173,39 +183,41 @@ export default function Register() {
   };
 
   return (
-    <div className="fixed inset-x-0 bottom-0 top-[64px] flex flex-col">
-      {renderStep()}
-      <div className="px-4 mb-4">
-        <div className="flex justify-between">
-          {[1, 2, 3, 4].map((item) => (
-            <div
-              key={item}
-              className={`h-2 flex-1 mx-1 rounded-full ${
-                item <= step ? "bg-primary" : "bg-gray-200"
-              }`}
-            />
-          ))}
+    <>
+      <AnimatePresence>{showSplash && <Splash />}</AnimatePresence>
+      <div className="fixed inset-x-0 bottom-0 top-[64px] flex flex-col">
+        {renderStep()}
+        <div className="px-4 mb-4">
+          <div className="flex justify-between">
+            {[1, 2, 3, 4].map((item) => (
+              <div
+                key={item}
+                className={`h-2 flex-1 mx-1 rounded-full ${
+                  item <= step ? "bg-primary" : "bg-gray-200"
+                }`}
+              />
+            ))}
+          </div>
         </div>
-      </div>
-      <div className="flex mt-auto">
-        {step > 1 && (
+        <div className="flex mt-auto">
+          {step > 1 && (
+            <button
+              onClick={handleBack}
+              type="button"
+              className="w-full h-12 bg-gray-200 text-gray-800 transition-all duration-300 hover:bg-gray-300 active:scale-[0.98]"
+            >
+              이전
+            </button>
+          )}
           <button
-            onClick={handleBack}
+            onClick={step === 4 ? handleSubmit : handleNext}
             type="button"
-            className="w-full h-12 bg-gray-200 text-gray-800 transition-all duration-300 hover:bg-gray-300 active:scale-[0.98]"
-          >
-            이전
-          </button>
-        )}
-        <button
-          onClick={step === 4 ? handleSubmit : handleNext}
-          type="button"
-          disabled={
-            (step === 1 && !idValidated) ||
-            (step === 2 && !passwordValidated) ||
-            (step === 3 && !passwordConfirmValidated)
-          }
-          className={`w-full h-12 transition-all duration-300
+            disabled={
+              (step === 1 && !idValidated) ||
+              (step === 2 && !passwordValidated) ||
+              (step === 3 && !passwordConfirmValidated)
+            }
+            className={`w-full h-12 transition-all duration-300
             ${
               (step === 1 && !idValidated) ||
               (step === 2 && !passwordValidated) ||
@@ -213,10 +225,11 @@ export default function Register() {
                 ? "bg-gray-300 text-gray-500 cursor-not-allowed"
                 : "bg-primary text-background hover:bg-primary/90 active:scale-[0.98]"
             }`}
-        >
-          {step === 4 ? "완료" : "다음"}
-        </button>
+          >
+            {step === 4 ? "완료" : "다음"}
+          </button>
+        </div>
       </div>
-    </div>
+    </>
   );
 }

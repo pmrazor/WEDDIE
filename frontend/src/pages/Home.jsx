@@ -1,26 +1,30 @@
-// Home : 로고 스플래시 화면으로 구현 
+// Home : 로고 스플래시 화면으로 구현
 
-import "../style/Home.css"
-import { useNavigate } from "react-router-dom"
-import useOnBoardingStore from "@/store/onboarding"
-import { useEffect } from "react"
+import "../style/Home.css";
+import { useNavigate } from "react-router-dom";
+import useOnBoardingStore from "@/store/onboarding";
+import { useEffect } from "react";
+import splash from "@/assets/logo.webp";
 
 const Home = () => {
-
-  const nav = useNavigate()
-  const { isOnBoarded } = useOnBoardingStore()
+  const nav = useNavigate();
+  const { isOnBoarded } = useOnBoardingStore();
 
   useEffect(() => {
     setTimeout(() => {
-      nav(isOnBoarded ? "/after_onboarding" : "/before_onboarding")
-    }, 2000); // 2초
-  }, [isOnBoarded, nav])
+      nav(isOnBoarded ? "/after_onboarding" : "/before_onboarding");
+    }, 2500); // 2.5초 (영상이 2.55초)
+  }, [isOnBoarded, nav]);
 
   return (
-    <div>
-      로딩 중 ...
+    <div className="flex items-center justify-center h-screen bg-background">
+      <img
+        src={splash}
+        alt="Logo"
+        className="w-[1000px] max-w-full h-auto animate-pulse -mt-32"
+      />
     </div>
-  )
-}
+  );
+};
 
-export default Home
+export default Home;
