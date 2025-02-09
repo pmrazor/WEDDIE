@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import { cn } from "../../lib/utils";
 import { useToast } from "@/hooks/use-toast";
@@ -171,6 +172,9 @@ export default function Home() {
                 로그인
               </button>
             </form>
+            <button className="w-full mt-12 rounded-full border border-solid border-black dark:border-white transition-all duration-300 flex items-center justify-center text-foreground dark:text-white gap-2 hover:bg-black hover:text-white hover:scale-[1.02] active:scale-[0.98] dark:hover:bg-white dark:hover:text-black text-sm sm:text-base h-10 sm:h-12 px-2 sm:px-10">
+              <Link to="/register">회원가입</Link>
+            </button>
             <button
               className="w-full mt-4 rounded-full border border-solid border-black dark:border-white transition-all duration-300 flex items-center justify-center text-foreground dark:text-white gap-2 hover:bg-black hover:text-white hover:scale-[1.02] active:scale-[0.98] dark:hover:bg-white dark:hover:text-black text-sm sm:text-base h-10 sm:h-12 px-2 sm:px-10"
               onClick={() => setShowEmailLogin(false)}
