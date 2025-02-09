@@ -5,36 +5,43 @@ export default function Id({ loginId, setLoginId, setIdValidated }) {
   const [isChecking, setIsChecking] = useState(false);
   const [isAvailable, setIsAvailable] = useState(null);
   const [message, setMessage] = useState("");
+  const apiUrl = import.meta.env.VITE_API_URL;
 
   const checkDuplication = async () => {
     if (!loginId) {
       setIsAvailable(false);
       setMessage("아이디를 입력해주세요.");
-      setIdValidated(false); // ID 검증 실패
+      setIdValidated(false);
       return;
     }
 
     setIsChecking(true);
     try {
       const response = await fetch(
-        `https://7bd5e385-7ad3-4453-9460-9ab5721bee57.mock.pstmn.io/api/user/checkId`
+        `${apiUrl}/api/users/checkId?loginId=${loginId}`
       );
+      if (!response.ok) {
+        throw new Error("Network response was not ok");
+      }
       const data = await response.json();
 
-      if (data.available) {
-        setIsAvailable(true);
-        setMessage("사용 가능한 아이디입니다.");
-        setIdValidated(true); // ID 검증 성공
+      if (data.isSuccess) {
+        const available = data.result.available;
+        setIsAvailable(available);
+        setMessage(
+          available
+            ? "사용 가능한 아이디입니다."
+            : "이미 사용 중인 아이디입니다."
+        );
+        setIdValidated(available);
       } else {
-        setIsAvailable(false);
-        setMessage("이미 사용 중인 아이디입니다.");
-        setIdValidated(false); // ID 검증 실패
+        throw new Error(data.message || "서버 응답 오류");
       }
     } catch (error) {
       console.error("ID 중복 체크 중 오류 발생:", error);
       setIsAvailable(false);
       setMessage("중복 체크 중 오류가 발생했습니다.");
-      setIdValidated(false); // ID 검증 실패
+      setIdValidated(false);
     } finally {
       setIsChecking(false);
     }

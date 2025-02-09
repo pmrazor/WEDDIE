@@ -13,14 +13,17 @@ public interface UserService {
     // 로그인 요청시 JWT 토큰 반환
     UserResponse.TokenDTO login(UserRequest.LoginDTO memberDto);
 
-    // 회원가입시 새 유저 저장 후 ID, 이름 반환
+    // 회원가입 시 새 유저 저장 후 ID, 이름 반환
     UserResponse.SimpleResultDTO register(UserRequest.SignUpDTO memberDto);
+
+    // 회원가입 시, 아이디 중복 검사
+    UserResponse.DuplicateLoginIdDto duplicateIdCheck(String loginId);
 
     // 유저 정보 조회 및 수정
     // 유저 기본 정보 조회
     UserResponse.DetailResultDTO getMyInfo(Integer userId);
 
-    // 비밀번호 포함한 계쩡 정보 수정 (Oauth 검증 포함)
+    // 비밀번호 포함한 계정 정보 수정 (Oauth 검증 포함)
     UserResponse.DetailResultDTO update(Integer userId, UserRequest.@Valid UpdateDTO userRequest);
 
     // 기본정보 수정 gender, profileimg
