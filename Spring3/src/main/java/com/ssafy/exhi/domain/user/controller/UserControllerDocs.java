@@ -66,6 +66,21 @@ public interface UserControllerDocs {
     );
 
     @Operation(
+            summary = "중복 ID 체크",
+            description = "특정 사용자 ID의 존재 여부를 확인합니다. 모든 사용자가 접근 가능합니다."
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "사용자 조회 성공"
+            )
+    })
+    ResponseEntity<?> checkDuplicateLoginId(
+            @Parameter(description = "조회할 사용자 ID", required = true)
+            @PathVariable String loginId
+    );
+
+    @Operation(
             summary = "사용자 정보 조회",
             description = "특정 사용자 ID의 존재 여부를 확인합니다. 모든 사용자가 접근 가능합니다."
     )

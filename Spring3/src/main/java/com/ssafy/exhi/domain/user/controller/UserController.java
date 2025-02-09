@@ -70,6 +70,18 @@ public class UserController implements UserControllerDocs{
     }
 
     /**
+     * 중복 아이디 확인용 API
+     * 권한: 모두 사용 가능
+     * @return
+     */
+    @Override
+    @GetMapping("/users/checkId")
+    public ResponseEntity<?> checkDuplicateLoginId(@RequestParam("loginId") String loginId) {
+        log.info("check for id : {}", loginId);
+        return ResponseEntity.ok(ApiResponse.onSuccess(userService.duplicateIdCheck(loginId)));
+    }
+
+    /**
      * 존재하는 회원 확인용 API
      * 권한: 모두 사용 가능
      * @param userId

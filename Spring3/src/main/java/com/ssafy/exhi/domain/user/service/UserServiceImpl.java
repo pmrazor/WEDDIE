@@ -71,6 +71,16 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public UserResponse.DuplicateLoginIdDto duplicateIdCheck(String loginId) {
+        boolean isAvailable = !userRepository.existsUserByLoginId(loginId);
+
+        UserResponse.DuplicateLoginIdDto result = new UserResponse.DuplicateLoginIdDto();
+        result.setAvailable(isAvailable);
+
+        return result;
+    }
+
+    @Override
     public UserResponse.DetailResultDTO getMyInfo(Integer userId) {
         User user = getUserById(userId);
         return UserConverter.toDetailResultDTO(user);

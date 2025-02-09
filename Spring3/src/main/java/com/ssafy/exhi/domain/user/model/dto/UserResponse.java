@@ -104,6 +104,17 @@ public class UserResponse {
         private String mbti;
     }
 
+    //아이디 중복체크용
+    @Data
+    @Builder
+    @ToString
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class DuplicateLoginIdDto {
+        @Schema(description = "로그인 아이디 중복 체크", example = "true")
+        boolean available;
+    }
+
     @Data
     @Builder
     @ToString
