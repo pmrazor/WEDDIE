@@ -1,5 +1,19 @@
 package com.ssafy.exhi.domain.recommendation.service;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ssafy.exhi.domain.ServiceType;
@@ -9,38 +23,49 @@ import com.ssafy.exhi.domain.plan.model.dto.PlanResponse;
 import com.ssafy.exhi.domain.plan.model.entity.Plan;
 import com.ssafy.exhi.domain.plan.model.entity.PlanStatus;
 import com.ssafy.exhi.domain.recommendation.model.dto.RecommendationResponse;
-import com.ssafy.exhi.domain.recommendation.model.entity.*;
-import com.ssafy.exhi.domain.recommendation.repository.*;
-import com.ssafy.exhi.domain.user.model.entity.Gender;
+import com.ssafy.exhi.domain.recommendation.model.entity.ClusterCenter;
+import com.ssafy.exhi.domain.recommendation.model.entity.ClusterCenters;
+import com.ssafy.exhi.domain.recommendation.model.entity.ClusterRepresentative;
+import com.ssafy.exhi.domain.recommendation.model.entity.ClusteringParameter;
+import com.ssafy.exhi.domain.recommendation.model.entity.UserCluster;
+import com.ssafy.exhi.domain.recommendation.repository.ClusterCentersRepository;
+import com.ssafy.exhi.domain.recommendation.repository.ClusterRepresentativeRepository;
+import com.ssafy.exhi.domain.recommendation.repository.ClusteringParameterRepository;
+import com.ssafy.exhi.domain.recommendation.repository.UserClusterRepository;
 import com.ssafy.exhi.domain.user.model.entity.User;
 import com.ssafy.exhi.domain.user.model.entity.UserDetail;
 import com.ssafy.exhi.domain.user.repository.UserRepository;
 import com.ssafy.exhi.domain.virginroad.model.entity.VirginRoad;
 import com.ssafy.exhi.domain.virginroad.repository.VirginRoadRepository;
 import com.ssafy.exhi.exception.ExceptionHandler;
-import org.junit.jupiter.api.*;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.api.io.TempDir;
-import org.mockito.*;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.core.env.Environment;
-
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.*;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.io.TempDir;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.core.env.Environment;
 
 @ExtendWith(MockitoExtension.class)
 class RecommendationServiceImplTest {
 
+    private final ObjectMapper objectMapper = new ObjectMapper();
+    @TempDir
+    Path tempDir;
     @InjectMocks
     private RecommendationServiceImpl recommendationService;
-
     @Mock
     private UserClusterRepository userClusterRepository;
     @Mock
@@ -57,11 +82,6 @@ class RecommendationServiceImplTest {
     private CoupleRepository coupleRepository;
     @Mock
     private VirginRoadRepository virginRoadRepository;
-
-    @TempDir
-    Path tempDir;
-
-    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @BeforeEach
     void setUp() {
@@ -84,12 +104,12 @@ class RecommendationServiceImplTest {
             List<User> fakeUsers = new ArrayList<>();
             for (int i = 0; i < 3; i++) {
                 User user = new User();
-                user.setId(i+1);
+                user.setId(i + 1);
 
                 UserDetail detail = new UserDetail();
-                detail.setAge(20+i);
+                detail.setAge(20 + i);
                 detail.setMbti("INTP");
-                detail.setBudget(1000000 + i*100000);
+                detail.setBudget(1000000 + i * 100000);
                 user.setUserDetail(detail);
 
                 fakeUsers.add(user);
@@ -104,8 +124,9 @@ class RecommendationServiceImplTest {
             // then
             assertTrue(expectedFile.exists(), "input_data.json 파일이 생성되어 있어야 함");
 
-            List<Map<String, Object>> userData = 
-                objectMapper.readValue(expectedFile, new TypeReference<>() {});
+            List<Map<String, Object>> userData =
+                    objectMapper.readValue(expectedFile, new TypeReference<>() {
+                    });
             assertEquals(3, userData.size());
 
             Map<String, Object> firstUserMap = userData.get(0);
@@ -132,7 +153,7 @@ class RecommendationServiceImplTest {
             userData.put("mbti", "INTJ");
             userData.put("routine_completed", true);
             testData.add(userData);
-            
+
             File inputFile = tempDir.resolve("input_data.json").toFile();
             objectMapper.writeValue(inputFile, testData);
 
@@ -155,7 +176,7 @@ class RecommendationServiceImplTest {
 
             // when & then
             assertThrows(ExceptionHandler.class,
-                () -> recommendationService.executeClusteringProcess());
+                    () -> recommendationService.executeClusteringProcess());
         }
     }
 
@@ -206,21 +227,21 @@ class RecommendationServiceImplTest {
 
             // cluster_centers.json
             List<Map<String, Object>> centerList = List.of(
-                Map.of(
-                    "center_id", 0,
-                    "coordinates", Map.of(
-                        "age", 0.1,
-                        "budget", 0.2,
-                        "mbti", List.of(0.0, 1.0, 0.5, 0.3)
+                    Map.of(
+                            "center_id", 0,
+                            "coordinates", Map.of(
+                                    "age", 0.1,
+                                    "budget", 0.2,
+                                    "mbti", List.of(0.0, 1.0, 0.5, 0.3)
+                            )
                     )
-                )
             );
             objectMapper.writeValue(tempDir.resolve("cluster_centers.json").toFile(), centerList);
 
             // clustering_results.json
             Map<String, Object> resultsMap = Map.of(
-                "user_clusters", List.of(Map.of("user_id", 1, "cluster_id", 0)),
-                "cluster_representatives", List.of(Map.of("cluster_id", 0, "representative_id", 1))
+                    "user_clusters", List.of(Map.of("user_id", 1, "cluster_id", 0)),
+                    "cluster_representatives", List.of(Map.of("cluster_id", 0, "representative_id", 1))
             );
             objectMapper.writeValue(tempDir.resolve("clustering_results.json").toFile(), resultsMap);
         }
@@ -236,9 +257,9 @@ class RecommendationServiceImplTest {
             User user = createTestUser();
             when(userRepository.findById(1)).thenReturn(Optional.of(user));
             when(clusteringParameterRepository.findFirstByOrderByCreatedAtDesc())
-                .thenReturn(Optional.of(createTestParameter()));
+                    .thenReturn(Optional.of(createTestParameter()));
             when(clusterCentersRepository.findFirstByOrderByCreatedAtDesc())
-                .thenReturn(Optional.of(createTestCenters()));
+                    .thenReturn(Optional.of(createTestCenters()));
 
             // when
             recommendationService.addUserToCluster(1);
@@ -249,38 +270,38 @@ class RecommendationServiceImplTest {
 
         private User createTestUser() {
             UserDetail detail = UserDetail.builder()
-                .age(25)
-                .mbti("INTP")
-                .budget(3000000)
-                .build();
+                    .age(25)
+                    .mbti("INTP")
+                    .budget(3000000)
+                    .build();
 
             return User.builder()
-                .id(1)
-                .userDetail(detail)
-                .build();
+                    .id(1)
+                    .userDetail(detail)
+                    .build();
         }
 
         private ClusteringParameter createTestParameter() {
             return ClusteringParameter.builder()
-                .ageMean(25.0).ageScale(5.0)
-                .budgetMin(1000000.0).budgetMax(5000000.0)
-                .ageWeight(0.5).budgetWeight(0.3)
-                .mbtiIeWeight(0.1).mbtiSnWeight(0.1)
-                .mbtiTfWeight(0.1).mbtiJpWeight(0.1)
-                .build();
+                    .ageMean(25.0).ageScale(5.0)
+                    .budgetMin(1000000.0).budgetMax(5000000.0)
+                    .ageWeight(0.5).budgetWeight(0.3)
+                    .mbtiIeWeight(0.1).mbtiSnWeight(0.1)
+                    .mbtiTfWeight(0.1).mbtiJpWeight(0.1)
+                    .build();
         }
 
         private ClusterCenters createTestCenters() {
             ClusterCenters centers = new ClusterCenters();
             ClusterCenter center = ClusterCenter.builder()
-                .clusterId(0)
-                .ageCoordinate(0.0)
-                .budgetCoordinate(0.0)
-                .mbtiIeCoordinate(0.5)
-                .mbtiSnCoordinate(0.5)
-                .mbtiTfCoordinate(0.5)
-                .mbtiJpCoordinate(0.5)
-                .build();
+                    .clusterId(0)
+                    .ageCoordinate(0.0)
+                    .budgetCoordinate(0.0)
+                    .mbtiIeCoordinate(0.5)
+                    .mbtiSnCoordinate(0.5)
+                    .mbtiTfCoordinate(0.5)
+                    .mbtiJpCoordinate(0.5)
+                    .build();
             centers.addClusterCenter(center);
             return centers;
         }
@@ -294,51 +315,49 @@ class RecommendationServiceImplTest {
         void getRecommendedPlans_Success() {
             // given
             User femaleUser = User.builder()
-                .id(1)
-                .name("여자")
-                .gender(Gender.FEMALE)
-                .userDetail(UserDetail.builder()
-                    .age(25)
-                    .mbti("INTJ")
-                    .budget(1000000)
-                    .build())
-                .build();
+                    .id(1)
+                    .name("여자")
+                    .userDetail(UserDetail.builder()
+                            .age(25)
+                            .mbti("INTJ")
+                            .budget(1000000)
+                            .build())
+                    .build();
 
             User maleUser = User.builder()
-                .id(2)
-                .name("남자")
-                .gender(Gender.MALE)
-                .userDetail(UserDetail.builder()
-                    .age(27)
-                    .mbti("ENFP")
-                    .budget(1500000)
-                    .build())
-                .build();
+                    .id(2)
+                    .name("남자")
+                    .userDetail(UserDetail.builder()
+                            .age(27)
+                            .mbti("ENFP")
+                            .budget(1500000)
+                            .build())
+                    .build();
 
             Couple couple = Couple.builder()
-                .id(1)
-                .female(femaleUser)
-                .male(maleUser)
-                .coupleName("테스트커플")
-                .build();
+                    .id(1)
+                    .female(femaleUser)
+                    .male(maleUser)
+                    .coupleName("테스트커플")
+                    .build();
 
             Plan plan = Plan.builder()
-                .id(1)
-                .serviceType(ServiceType.DRESS_SHOP)
-                .planStatus(PlanStatus.BEFORE_START)
-                .visible(false)
-                .build();
+                    .id(1)
+                    .serviceType(ServiceType.DRESS_SHOP)
+                    .planStatus(PlanStatus.BEFORE_START)
+                    .visible(false)
+                    .build();
 
             VirginRoad virginRoad = VirginRoad.builder()
-                .id(1)
-                .couple(couple)
-                .plans(List.of(plan))
-                .build();
+                    .id(1)
+                    .couple(couple)
+                    .plans(List.of(plan))
+                    .build();
 
             UserCluster userCluster = UserCluster.builder()
-                .user(femaleUser)
-                .clusterId(0)
-                .build();
+                    .user(femaleUser)
+                    .clusterId(0)
+                    .build();
 
             // Repository 모의 설정
             when(userRepository.findById(1)).thenReturn(Optional.of(femaleUser));
@@ -353,11 +372,11 @@ class RecommendationServiceImplTest {
             // then
             assertNotNull(result);
             assertEquals(virginRoad.getId(), result.getId());
-            
+
             // 커플 정보 검증
             assertNotNull(result.getCouple());
             assertEquals(couple.getId(), result.getCouple().getId());
-            
+
             // 플랜 검증
             assertFalse(result.getPlans().isEmpty());
             PlanResponse.SimpleResultDTO firstPlan = result.getPlans().get(0);
@@ -373,8 +392,8 @@ class RecommendationServiceImplTest {
             when(userRepository.findById(anyInt())).thenReturn(Optional.empty());
 
             // when & then
-            assertThrows(ExceptionHandler.class, () -> 
-                recommendationService.getRecommendedPlans(1)
+            assertThrows(ExceptionHandler.class, () ->
+                    recommendationService.getRecommendedPlans(1)
             );
         }
     }
