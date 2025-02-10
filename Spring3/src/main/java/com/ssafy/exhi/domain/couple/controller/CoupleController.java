@@ -1,5 +1,7 @@
 package com.ssafy.exhi.domain.couple.controller;
 
+import static com.ssafy.exhi.domain.couple.model.dto.CoupleResponse.SimpleResultDTO;
+
 import com.ssafy.exhi.domain.couple.model.dto.CoupleRequest;
 import com.ssafy.exhi.domain.couple.model.dto.CoupleResponse;
 import com.ssafy.exhi.domain.couple.service.CoupleService;
@@ -11,9 +13,14 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-import static com.ssafy.exhi.domain.couple.model.dto.CoupleResponse.SimpleResultDTO;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @Slf4j
 @RestController
@@ -25,9 +32,9 @@ public class CoupleController {
     private final CoupleService coupleService;
     private final NotificationService notificationService;
 
-
     /**
      * 커플 알림 기능 개발전까지 사용할 임시 API
+     *
      * @param accessToken
      * @param coupleDTO
      * @return
@@ -61,6 +68,7 @@ public class CoupleController {
 
     /**
      * TODO: 커플 알람 기능이 완성되면 사용할 커플 요청 수락 API
+     *
      * @param accessToken
      * @param requestId
      * @param matchingDTO
@@ -97,7 +105,8 @@ public class CoupleController {
         Integer userId = jwtUtil.getUserId(accessToken);
         log.info("rejectCoupleRequest: userId={}", userId);
 
-        return getSimpleResultDTOResponseEntity(matchingDTO, userId, requestId, MatchingStatus.REJECTED);
+        return getSimpleResultDTOResponseEntity(matchingDTO, userId, requestId,
+                MatchingStatus.REJECTED);
     }
 
     private ResponseEntity<?> getSimpleResultDTOResponseEntity(
@@ -115,9 +124,8 @@ public class CoupleController {
     }
 
     /**
-     * 커플 조회
-     * 오류
-     *      - 커플을 아직 맺지 않은 경우
+     * 커플 조회 오류 - 커플을 아직 맺지 않은 경우
+     *
      * @param accessToken
      * @return
      */

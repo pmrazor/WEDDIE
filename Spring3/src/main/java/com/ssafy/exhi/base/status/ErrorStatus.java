@@ -61,7 +61,10 @@ public enum ErrorStatus implements BaseErrorCode {
     TODO_NOT_FOUND(HttpStatus.NOT_FOUND, "TODO4001", "존재하지 않는 투두 계획입니다."),
 
     // 알림 관련 에러
-    NOTIFICATION_NOT_FOUND(HttpStatus.NOT_FOUND, "NOTIFICATION4001", "존재하지 않는 알람입니다.."),
+    NOTIFICATION_NOT_FOUND(HttpStatus.NOT_FOUND, "NOTIFICATION4001", "존재하지 않는 알람입니다."),
+
+    // 공지 사항 관련 에러
+    NOTICE_NOT_FOUND(HttpStatus.NOT_FOUND, "NOTICE4001", "존재하지 않는 공지입니다.."),
 
     // 토큰 관련 에러
     TOKEN_EXPIRED_ERROR(HttpStatus.UNAUTHORIZED, "TOKEN4001", "토큰의 유효기간이 만료되었습니다."),
@@ -89,7 +92,9 @@ public enum ErrorStatus implements BaseErrorCode {
 
     // 타임캡슐 관련 에러
     TIMECAPSULE_ALREADY_EXIST(HttpStatus.BAD_REQUEST, "TIME_CAPSULE_4001", "이미 작성된 타임캡슐입니다"),
-    
+
+    // 공지 관련 에러
+
     // 추천 시스템 관련 에러
     RECOMMENDATION_FILE_IO_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "RECOMMEND4001", "파일 입출력 중 오류가 발생했습니다"),
     RECOMMENDATION_SCRIPT_TIMEOUT(HttpStatus.REQUEST_TIMEOUT, "RECOMMEND4002", "파이썬 스크립트 실행 시간이 초과되었습니다"),
@@ -99,7 +104,6 @@ public enum ErrorStatus implements BaseErrorCode {
     RECOMMENDATION_CLUSTER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "RECOMMEND4006", "클러스터 할당 중 오류가 발생했습니다"),
     RECOMMENDATION_CLUSTER_NOT_FOUND(HttpStatus.NOT_FOUND, "RECOMMEND4007", "클러스터 정보를 찾을 수 없습니다"),
     RECOMMENDATION_USER_DETAIL_NOT_FOUND(HttpStatus.BAD_REQUEST, "RECOMMEND4008", "사용자 상세 정보가 존재하지 않습니다");
-    
 
     private final HttpStatus httpStatus;
     private final String code;
