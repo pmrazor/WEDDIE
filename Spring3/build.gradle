@@ -25,7 +25,7 @@ repositories {
 }
 
 dependencies {
-    /* env 파일 관리 */
+    /* .env 파일 관리 */
     implementation 'me.paulschwarz:spring-dotenv:2.5.4'
 
     /* 이미지 스토리지 */
