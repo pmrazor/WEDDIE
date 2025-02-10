@@ -7,7 +7,9 @@ import com.ssafy.exhi.domain.couple.repository.CoupleRepository;
 import com.ssafy.exhi.domain.plan.model.dto.PlanRequest;
 import com.ssafy.exhi.domain.plan.model.entity.Plan;
 import com.ssafy.exhi.domain.todo.model.entity.DefaultTodo;
+import com.ssafy.exhi.domain.todo.model.entity.Todo;
 import com.ssafy.exhi.domain.todo.repository.DefaultTodoRepository;
+import com.ssafy.exhi.domain.todo.repository.TodoRepository;
 import com.ssafy.exhi.domain.user.model.entity.User;
 import com.ssafy.exhi.domain.user.repository.UserRepository;
 import com.ssafy.exhi.domain.virginroad.converter.VirginRoadConverter;
@@ -21,6 +23,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -35,6 +38,7 @@ public class VirginRoadServiceImpl implements VirginRoadService {
     private final CoupleRepository coupleRepository;
     private final VirginRoadRepository virginRoadRepository;
     private final DefaultTodoRepository defaultTodoRepository;
+    private final TodoRepository todoRepository;
 
     /**
      * 플랜과 버진로드를 동시에 생성하기
@@ -49,13 +53,19 @@ public class VirginRoadServiceImpl implements VirginRoadService {
         Couple couple = findCoupleByUserId(createDTO.getUserId());
         existVirginRoad(couple);
 
+        log.info("{}", createDTO);
+
         VirginRoad virginRoad = VirginRoadConverter.toEntity(createDTO, couple);
 
-        Map<ServiceType, List<DefaultTodo>> defaultTodos = getDefaultTodos(user);
+        List<ServiceType> visibleServiceTypes = createDTO.getPlans().stream()
+            .filter(PlanRequest.CreateDTO::isVisible)
+            .map(PlanRequest.CreateDTO::getServiceType)
+            .collect(Collectors.toList());
+
+        Map<ServiceType, List<DefaultTodo>> defaultTodos = getDefaultTodos(user, visibleServiceTypes);
 
         log.debug("default todos -> {}", defaultTodos);
         virginRoad.setDefaultPlans(defaultTodos);
-
 
         // 버진로드 저장
         VirginRoad saved = virginRoadRepository.save(virginRoad);
@@ -63,16 +73,17 @@ public class VirginRoadServiceImpl implements VirginRoadService {
         return VirginRoadConverter.toDTO(saved);
     }
 
-    private Map<ServiceType, List<DefaultTodo>> getDefaultTodos(User user) {
+    private Map<ServiceType, List<DefaultTodo>> getDefaultTodos(User user, List<ServiceType> visibleServiceTypes) {
         return defaultTodoRepository
-                .findDefaultTodosByGender(user.getUserDetail().getGender())
-                .stream()
-                .collect(Collectors.groupingBy(DefaultTodo::getServiceType));
+            .getDefaultTodoByServiceTypeIn(visibleServiceTypes)
+            .stream()
+            .collect(Collectors.groupingBy(DefaultTodo::getServiceType));
     }
 
     /**
      * 버진로드를 한번에 보여준다.
      * 중요한 것은 모둔 결혼 단계의 상태를 보여주기
+     *
      * @param userId
      * @return
      */
@@ -96,11 +107,32 @@ public class VirginRoadServiceImpl implements VirginRoadService {
         Couple couple = findCoupleByUserId(updateDTO.getUserId());
         VirginRoad virginRoad = findVirginRoadByCouple(couple);
 
-        // 2. 업데이트
+        // 2. 플랜 업데이트 및 visible 변경 체크
+        List<Todo> toSaveTodo = new ArrayList<>();
+        List<Todo> toDeleteTodo = new ArrayList<>();
+
         for (PlanRequest.UpdateDTO planDTO : updateDTO.getPlans()) {
             Plan plan = virginRoad.findPlanByServiceType(planDTO.getServiceType());
+
+            // visible 수정됐다면
+            if (plan.isVisible() != planDTO.isVisible()) {
+
+                // 새로 들어온 plan 이 visible = true 라면 todo 에 default todo 추가해주기
+                if (planDTO.isVisible()) {
+                    List<DefaultTodo> defaultTodos = defaultTodoRepository.getDefaultTodoByServiceType(planDTO.getServiceType());
+                    toSaveTodo.addAll(defaultTodos.stream().map(
+                        todo -> todo.toTodo(plan)
+                    ).toList());
+                }
+                // 기존에 있던 플랜이 제거됐다면, todo 테이블에서 제거해주기
+                else {
+                    toDeleteTodo.addAll(todoRepository.findByPlanId(plan.getId()));
+                }
+            }
             plan.updateVisibility(planDTO);
         }
+        if (!toDeleteTodo.isEmpty()) todoRepository.deleteAll(toDeleteTodo);
+        if (!toSaveTodo.isEmpty()) todoRepository.saveAll(toSaveTodo);
 
         return VirginRoadConverter.toDTO(virginRoad);
     }
@@ -115,6 +147,7 @@ public class VirginRoadServiceImpl implements VirginRoadService {
 
     /**
      * 버진로드를 삭제한다.
+     *
      * @param userId
      */
     @Override
@@ -127,21 +160,21 @@ public class VirginRoadServiceImpl implements VirginRoadService {
 
     private User findUserByUserId(Integer userId) {
         return userRepository.findById(userId)
-                .orElseThrow(
-                        () -> new ExceptionHandler(ErrorStatus.USER_NOT_FOUND)
-                );
+            .orElseThrow(
+                () -> new ExceptionHandler(ErrorStatus.USER_NOT_FOUND)
+            );
     }
 
     private Couple findCoupleByUserId(Integer userId) {
         return coupleRepository.findCoupleByUserId(userId).orElseThrow(
-                () -> new ExceptionHandler(ErrorStatus.COUPLE_NOT_FOUND)
+            () -> new ExceptionHandler(ErrorStatus.COUPLE_NOT_FOUND)
         );
     }
 
     private VirginRoad findVirginRoadByCouple(Couple couple) {
 
         return virginRoadRepository.getVirginRoadByCouple(couple).orElseThrow(
-                () -> new ExceptionHandler(ErrorStatus.VIRGIN_ROAD_NOT_FOUND)
+            () -> new ExceptionHandler(ErrorStatus.VIRGIN_ROAD_NOT_FOUND)
         );
     }
 

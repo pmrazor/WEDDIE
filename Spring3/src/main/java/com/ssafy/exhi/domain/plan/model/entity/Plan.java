@@ -4,8 +4,8 @@ import com.ssafy.exhi.base.BaseEntity;
 import com.ssafy.exhi.base.status.ErrorStatus;
 import com.ssafy.exhi.domain.ServiceType;
 import com.ssafy.exhi.domain.plan.model.dto.PlanRequest;
-import com.ssafy.exhi.domain.todo.model.entity.DefaultTodo;
 import com.ssafy.exhi.domain.timecapsule.model.entity.TimeCapsule;
+import com.ssafy.exhi.domain.todo.model.entity.DefaultTodo;
 import com.ssafy.exhi.domain.todo.model.entity.Todo;
 import com.ssafy.exhi.domain.virginroad.model.entity.VirginRoad;
 import com.ssafy.exhi.exception.ExceptionHandler;
@@ -55,8 +55,7 @@ public class Plan extends BaseEntity {
     @JoinColumn(name = "virgin_road_id")
     private VirginRoad virginRoad;
 
-
-    @OneToMany(mappedBy="plan", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "plan", cascade = CascadeType.ALL)
     private List<TimeCapsule> timeCapsules = new ArrayList<>();
 
     /* 비즈니스 로직 */
@@ -79,28 +78,28 @@ public class Plan extends BaseEntity {
 
     public static Plan createDefault(ServiceType serviceType, VirginRoad virginRoad) {
         return Plan.builder()
-                .virginRoad(virginRoad)
-                .serviceType(serviceType)
-                .visible(false) // 디폴트 값 설정 (예: isVisible = false)
-                .planStatus(PlanStatus.BEFORE_START)
-                .build();
+            .virginRoad(virginRoad)
+            .serviceType(serviceType)
+            .visible(false) // 디폴트 값 설정 (예: isVisible = false)
+            .planStatus(PlanStatus.BEFORE_START)
+            .todos(new ArrayList<>())
+            .build();
     }
 
     public void setDefaultTodos(ServiceType serviceType, Map<ServiceType, List<DefaultTodo>> defaultTodos) {
         if (!defaultTodos.containsKey(serviceType)) return;
-
         List<DefaultTodo> defaultTodoList = defaultTodos.get(serviceType);
 
         this.todos.addAll(
-                defaultTodoList.stream().map(
-                        todo -> todo.toTodo(this)
-                ).toList()
+            defaultTodoList.stream().map(
+                todo -> todo.toTodo(this)
+            ).toList()
         );
     }
 
     public void updateTimeCapsuleStatus() {
         long count = this.timeCapsules.size();
-        if(count == 2) {
+        if (count == 2) {
             this.planStatus = PlanStatus.FINISHED;
         }
     }

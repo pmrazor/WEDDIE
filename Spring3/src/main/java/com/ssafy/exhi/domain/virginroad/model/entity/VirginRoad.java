@@ -36,7 +36,7 @@ public class VirginRoad {
     private List<Plan> plans = new ArrayList<>();
 
     @Enumerated(EnumType.STRING)
-    @Column(name="virgin_road_status")
+    @Column(name = "virgin_road_status")
     private PlanStatus virginRoadStatus;
 
     /* 비즈니스 로직 */
@@ -63,7 +63,7 @@ public class VirginRoad {
     public void setDefaultPlans(Map<ServiceType, List<DefaultTodo>> defaultTodos) {
         for (ServiceType serviceType : ServiceType.values()) {
             Plan plan = Optional.ofNullable(this.findPlanByServiceType(serviceType))
-                    .orElse(Plan.createDefault(serviceType, this));
+                .orElse(Plan.createDefault(serviceType, this));
 
             plan.setDefaultTodos(serviceType, defaultTodos);
             addPlan(plan);
@@ -72,14 +72,10 @@ public class VirginRoad {
 
     public Plan findPlanByServiceType(ServiceType serviceType) {
         return plans.stream()
-                .filter(plan -> plan.getServiceType() == serviceType)
-                .findFirst()
-                .orElse(null);
+            .filter(plan -> plan.getServiceType() == serviceType)
+            .findFirst()
+            .orElse(null);
     }
-
-    public void setDefaultTodos() {
-    }
-
     /* 비즈니스 로직 */
 
 }
