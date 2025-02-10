@@ -1,4 +1,4 @@
-import "../style/component/AdvertisementCard.css"
+import "@/style/component/AdvertisementCard.css"
 
 const AdvertisementCard = ({ onClick, head_text, sub_text, background_img }) => {
 

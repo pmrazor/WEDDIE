@@ -2,7 +2,7 @@
 import "../style/BeforeOnBoarding.css"
 import useAuthStore from "@/store/auth"
 import { useNavigate } from "react-router-dom"
-import Card from "@/components/common/Card"
+import Card from "@/components/common/cards/IconCard"
 import Button from "@/components/common/Button"
 import { colors } from "@/constants/colors"
 import { useTheme } from "@/contexts/theme"

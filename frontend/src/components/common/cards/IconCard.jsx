@@ -1,9 +1,9 @@
-import "../../style/common/Card.css"
+import "@/style/component/IconCard.css"
 
-const Card = ({ type, head_text1, head_text2, sub_text1, sub_text2, icon, style, onClick }) => {
+const IconCard = ({ type, head_text1, head_text2, sub_text1, sub_text2, icon, style, onClick }) => {
 
   return (
-    <div className="Card" style={style}
+    <div className="IconCard" style={style}
       type={type} // 카드의 타입 : onBoarding
       onClick={onClick} // 클릭 시 실행할 함수 //
     >
@@ -18,4 +18,4 @@ const Card = ({ type, head_text1, head_text2, sub_text1, sub_text2, icon, style,
   )
 }
 
-export default Card
+export default IconCard
