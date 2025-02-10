@@ -3,11 +3,11 @@ package com.ssafy.exhi.domain.couple.converter;
 import com.ssafy.exhi.domain.couple.model.dto.CoupleRequest;
 import com.ssafy.exhi.domain.couple.model.dto.CoupleResponse;
 import com.ssafy.exhi.domain.couple.model.entity.Couple;
+import com.ssafy.exhi.domain.notification.model.entity.CoupleMatchingNotification;
 import com.ssafy.exhi.domain.user.converter.UserConverter;
 import com.ssafy.exhi.domain.user.model.dto.UserResponse;
 import com.ssafy.exhi.domain.user.model.entity.Gender;
 import com.ssafy.exhi.domain.user.model.entity.User;
-import com.ssafy.exhi.domain.user.model.entity.UserDetail;
 
 public class CoupleConverter {
 
@@ -40,6 +40,17 @@ public class CoupleConverter {
                 .coupleName(request.getCoupleName())
                 .female(getFemaleUser(user1, user2))
                 .male(getMaleUser(user1, user2))
+                .build();
+    }
+
+    public static Couple toEntity(CoupleMatchingNotification notification) {
+        User sender = notification.getSender();
+        User receiver = notification.getReceiver();
+
+        return Couple.builder()
+                .coupleName("")
+                .male(getMaleUser(sender, receiver))
+                .female(getFemaleUser(sender, receiver))
                 .build();
     }
 

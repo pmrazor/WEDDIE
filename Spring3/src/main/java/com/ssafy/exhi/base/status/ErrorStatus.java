@@ -31,7 +31,6 @@ public enum ErrorStatus implements BaseErrorCode {
     USER_INFO_NOT_FOUND(HttpStatus.BAD_REQUEST, "USERINFO4001", "유저 기본정보가 존재하지않습니다."),
     USER_INFO_NO_CHANGES(HttpStatus.BAD_REQUEST, "USERINFO4002", "변경된 사항이 없습니다."),
 
-
     // 멤버 디테일
     USER_DETAIL_NOT_FOUND(HttpStatus.BAD_REQUEST, "USERDETAIL4001", "유저 디테일이 존재하지않습니다."),
     USER_DETAIL_NO_CHANGES(HttpStatus.BAD_REQUEST, "USERDETAIL4002", "변경된 정보가 없습니다."),
@@ -62,6 +61,7 @@ public enum ErrorStatus implements BaseErrorCode {
 
     // 알림 관련 에러
     NOTIFICATION_NOT_FOUND(HttpStatus.NOT_FOUND, "NOTIFICATION4001", "존재하지 않는 알람입니다."),
+    NOTIFICATION_STATUS_ERROR(HttpStatus.NOT_FOUND, "NOTIFICATION4002", "종료된 알림입니다. 수정이 불가능 합니다."),
 
     // 공지 사항 관련 에러
     NOTICE_NOT_FOUND(HttpStatus.NOT_FOUND, "NOTICE4001", "존재하지 않는 공지입니다.."),
