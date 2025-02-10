@@ -9,11 +9,14 @@ import com.ssafy.exhi.domain.todo.converter.TodoConverter;
 import com.ssafy.exhi.domain.todo.model.dto.TodoRequest;
 import com.ssafy.exhi.domain.todo.model.dto.TodoResponse;
 import com.ssafy.exhi.domain.todo.model.entity.Todo;
+import com.ssafy.exhi.domain.todo.model.entity.TodoType;
 import com.ssafy.exhi.domain.todo.repository.TodoRepository;
+import com.ssafy.exhi.domain.user.repository.UserDetailRepository;
 import com.ssafy.exhi.domain.virginroad.model.entity.VirginRoad;
 import com.ssafy.exhi.exception.ExceptionHandler;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.Objects;
@@ -22,11 +25,13 @@ import java.util.Optional;
 @Service
 @Transactional
 @RequiredArgsConstructor
+@Slf4j
 public class TodoServiceImpl implements TodoService {
 
     private final CoupleRepository coupleRepository;
     private final TodoRepository todoRepository;
     private final PlanRepository planRepository;
+    private final UserDetailRepository userDetailRepository;
 
     @Override
     public TodoResponse.DetailResultDTO createTodo(Integer userId, TodoRequest.CreateDTO createDTO) {
@@ -34,7 +39,9 @@ public class TodoServiceImpl implements TodoService {
         Plan plan = getPlanById(createDTO.getPlanId());
         checkPlanOwnerShip(couple, plan);
 
-        Todo todo = TodoConverter.toEntity(plan, createDTO);
+        TodoType todoType = getTodoType(userId, createDTO.isTogether());
+
+        Todo todo = TodoConverter.toEntity(plan, createDTO, todoType);
         Todo saved = todoRepository.save(todo);
 
         return TodoConverter.toDTO(saved);
@@ -47,6 +54,11 @@ public class TodoServiceImpl implements TodoService {
         checkPlanOwnerShip(couple, plan);
 
         Todo todo = getTodoById(updateDTO.getTodoId());
+
+        TodoType todoType = getTodoType(userId, updateDTO.isTogether());
+
+        updateDTO.setTodoType(todoType);
+        log.info("updateDTO {}", updateDTO);
         todo.patch(updateDTO);
 
         return TodoConverter.toDTO(todo);
@@ -74,12 +86,12 @@ public class TodoServiceImpl implements TodoService {
         todoRepository.delete(todo);
     }
 
-    private void checkPlanOwnerShip(Couple couple , Plan plan) {
+    private void checkPlanOwnerShip(Couple couple, Plan plan) {
         Integer coupleId = Optional.ofNullable(plan)
-                .map(Plan::getVirginRoad)
-                .map(VirginRoad::getCouple)
-                .map(Couple::getId)
-                .orElseThrow(() -> new ExceptionHandler(ErrorStatus._FORBIDDEN));
+            .map(Plan::getVirginRoad)
+            .map(VirginRoad::getCouple)
+            .map(Couple::getId)
+            .orElseThrow(() -> new ExceptionHandler(ErrorStatus._FORBIDDEN));
 
         if (!Objects.equals(couple.getId(), coupleId)) {
             throw new ExceptionHandler(ErrorStatus._FORBIDDEN);
@@ -88,19 +100,29 @@ public class TodoServiceImpl implements TodoService {
 
     private Todo getTodoById(Integer todoId) {
         return todoRepository.findTodoById(todoId).orElseThrow(
-                () -> new ExceptionHandler(ErrorStatus.TODO_NOT_FOUND)
+            () -> new ExceptionHandler(ErrorStatus.TODO_NOT_FOUND)
         );
     }
 
     private Couple getCoupleByUserId(Integer userId) {
         return coupleRepository.findCoupleByUserId(userId).orElseThrow(
-                () -> new ExceptionHandler(ErrorStatus.COUPLE_NOT_FOUND)
+            () -> new ExceptionHandler(ErrorStatus.COUPLE_NOT_FOUND)
         );
     }
 
     private Plan getPlanById(Integer planId) {
         return planRepository.findPlanById(planId).orElseThrow(
-                () -> new ExceptionHandler(ErrorStatus.PLAN_NOT_FOUND)
+            () -> new ExceptionHandler(ErrorStatus.PLAN_NOT_FOUND)
         );
+    }
+
+    private TodoType getTodoType(Integer userId, boolean isTogether) {
+        TodoType todoType;
+        if (isTogether) {
+            todoType = TodoType.COMMON;
+        } else {
+            todoType = TodoType.valueOf(userDetailRepository.findByUser_Id(userId).get().getGender().toString());
+        }
+        return todoType;
     }
 }

@@ -10,5 +10,7 @@ import java.util.List;
 public interface DefaultTodoRepository extends JpaRepository<DefaultTodo, Integer> {
     List<DefaultTodo> getDefaultTodoByServiceType(ServiceType serviceType);
 
+    List<DefaultTodo> getDefaultTodoByServiceTypeIn(List<ServiceType> serviceType);
+
     List<DefaultTodo> findDefaultTodosByGender(Gender gender);
 }

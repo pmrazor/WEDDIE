@@ -1,5 +1,6 @@
 package com.ssafy.exhi.domain.todo.model.dto;
 
+import com.ssafy.exhi.domain.todo.model.entity.TodoType;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -19,6 +20,7 @@ public class TodoRequest {
         @NotBlank
         private String content;
 
+        private boolean together;
     }
 
     @Data
@@ -33,6 +35,9 @@ public class TodoRequest {
         @NotBlank
         private String content;
 
+        private boolean together;
+
+        private TodoType todoType;
     }
 
     @Data
@@ -48,6 +53,5 @@ public class TodoRequest {
         private Boolean isCompleted;
 
     }
-
 
 }

@@ -4,7 +4,10 @@ import com.ssafy.exhi.domain.ServiceType;
 import com.ssafy.exhi.domain.plan.model.entity.Plan;
 import com.ssafy.exhi.domain.todo.model.dto.TodoRequest;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
@@ -32,8 +35,13 @@ public class Todo {
     @Column(name = "is_completed")
     private boolean isCompleted;
 
+    // 투두 타입 남자 : 0 , 여자 : 1 , 공동 : 2
+    @Column(name = "todo_type")
+    private TodoType todoType;
+
     public void patch(TodoRequest.UpdateDTO updateDTO) {
         this.content = updateDTO.getContent();
+        this.todoType = updateDTO.getTodoType();
     }
 
     public void check(TodoRequest.CheckDTO checkDTO) {

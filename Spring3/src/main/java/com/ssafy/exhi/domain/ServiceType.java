@@ -10,5 +10,6 @@ public enum ServiceType {
     SNAP, // 스냅 촬영,
     INVITATION, // 청첩장
     FACIAL_CARE, // 케어, 관리
-    HONEYMOON // 신혼여행
+    HONEYMOON, // 신혼여행
+    WEDDING_DAY
 }

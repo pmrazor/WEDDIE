@@ -31,10 +31,11 @@ public class DefaultTodo extends BaseEntity {
 
     public Todo toTodo(Plan plan) {
         return Todo.builder()
-                .content(content)
-                .serviceType(serviceType)
-                .isCompleted(false)
-                .plan(plan)
-                .build();
+            .content(content)
+            .serviceType(serviceType)
+            .todoType(TodoType.valueOf(this.gender.toString()))
+            .isCompleted(false)
+            .plan(plan)
+            .build();
     }
 }
