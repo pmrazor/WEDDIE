@@ -29,8 +29,8 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/oauth/callback" element={<Callback />} />
         <Route path="/register" element={<Register />} />
-        <Route path="/before_onboarding" element={<BeforeOnBoarding />} />
-        <Route path="/after_onboarding" element={<AfterOnBoarding />} />
+        <Route path="/beforeonboarding" element={<BeforeOnBoarding />} />
+        <Route path="/afteronboarding" element={<AfterOnBoarding />} />
         <Route path="/onboarding" element={<Onboarding />} />
         <Route path="/virginroad" element={<VirginRoad />} />
         <Route path="/timecapsule/:nodeId" element={<TimeCapsule />} />

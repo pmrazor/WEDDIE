@@ -12,9 +12,9 @@ const Home = () => {
 
   useEffect(() => {
     setTimeout(() => {
-      nav(isOnBoarded ? "/after_onboarding" : "/before_onboarding");
-    }, 2500); // 2.5초 (영상이 2.55초)
-  }, [isOnBoarded, nav]);
+      nav(isOnBoarded ? "/afteronboarding" : "/beforeonboarding")
+    }, 2000); // 2초
+  }, [isOnBoarded, nav])
 
   return (
     <div className="flex items-center justify-center h-screen bg-background">

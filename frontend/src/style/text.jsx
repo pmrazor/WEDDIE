@@ -1,5 +1,5 @@
 import Button from "@/components/common/Button"
-import Card from "@/components/common/Card"
+import Card from "@/components/common/cards/IconCard"
 
 
 const Test = () => {
