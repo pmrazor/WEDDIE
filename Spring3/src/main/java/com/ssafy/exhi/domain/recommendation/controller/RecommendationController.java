@@ -2,6 +2,7 @@ package com.ssafy.exhi.domain.recommendation.controller;
 
 import com.ssafy.exhi.base.ApiResponse;
 import com.ssafy.exhi.domain.recommendation.model.dto.RecommendationResponse;
+import com.ssafy.exhi.domain.recommendation.service.ClusteringDataService;
 import com.ssafy.exhi.domain.recommendation.service.RecommendationService;
 import com.ssafy.exhi.util.JWTUtil;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 public class RecommendationController implements RecommendationControllerDocs {
 
     private final RecommendationService recommendationService;
+    private final ClusteringDataService clusteringDataService;
     private final JWTUtil jwtUtil;
 
     @Override
@@ -41,7 +43,7 @@ public class RecommendationController implements RecommendationControllerDocs {
     @GetMapping("/runPython")
     public ResponseEntity<?> runPython() {
         log.info("실행: Python 클러스터링 스크립트");
-        recommendationService.executeClusteringProcess();
+        clusteringDataService.executeClusteringScript();
         return ResponseEntity.ok(ApiResponse.onSuccess(null));
     }
 
@@ -49,7 +51,7 @@ public class RecommendationController implements RecommendationControllerDocs {
     @GetMapping("/setJson")
     public ResponseEntity<?> setJson() {
         log.info("사용자 데이터 JSON 생성");
-        recommendationService.generateUserDataJSON();
+        clusteringDataService.generateInputDataJSON();
         return ResponseEntity.ok(ApiResponse.onSuccess(null));
     }
 
@@ -57,8 +59,9 @@ public class RecommendationController implements RecommendationControllerDocs {
     @GetMapping("/getJson")
     public ResponseEntity<?> getJson() {
         log.info("클러스터링 결과 처리");
-        recommendationService.processClusteringResults();
+        clusteringDataService.processClusteringResults();
         return ResponseEntity.ok(ApiResponse.onSuccess(null));
     }
+
 
 }

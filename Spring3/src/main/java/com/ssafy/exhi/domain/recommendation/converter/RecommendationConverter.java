@@ -18,7 +18,7 @@ public class RecommendationConverter {
     
     public static RecommendationResponse.RecommendedPlansDTO toRecommendedPlansDTO(
         VirginRoad virginRoad,
-        Map<ServiceType, int[]> planWeights) {
+        Map<ServiceType, double[]> planWeights) {
                 
         return RecommendationResponse.RecommendedPlansDTO.builder()
                 .id(virginRoad.getId())
@@ -28,15 +28,14 @@ public class RecommendationConverter {
     }
 
     private static List<PlanResponse.SimpleResultDTO> convertToRecommendedPlans(
-            List<Plan> plans, Map<ServiceType, int[]> planWeights) {
+            List<Plan> plans, Map<ServiceType, double[]> planWeights) {
         return plans.stream()
-                .map(plan -> PlanConverter.toDTO(plan))
+                .map(PlanConverter::toDTO)
                 .map(simpleDTO -> PlanResponse.SimpleResultDTO.builder()
                         .planId(simpleDTO.getPlanId())
                         .serviceType(simpleDTO.getServiceType())
                         .planStatus(simpleDTO.getPlanStatus())
-                        .visible(planWeights.containsKey(simpleDTO.getServiceType()) ?
-                                planWeights.get(simpleDTO.getServiceType())[0] == 1 : false)
+                        .visible(planWeights.containsKey(simpleDTO.getServiceType()) && planWeights.get(simpleDTO.getServiceType())[0] == 1)
                         .build())
                 .collect(Collectors.toList());
     }

@@ -1,19 +1,16 @@
 package com.ssafy.exhi.domain.recommendation.service;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ssafy.exhi.base.status.ErrorStatus;
 import com.ssafy.exhi.domain.ServiceType;
 import com.ssafy.exhi.domain.couple.model.entity.Couple;
 import com.ssafy.exhi.domain.couple.repository.CoupleRepository;
 import com.ssafy.exhi.domain.plan.model.entity.Plan;
+import com.ssafy.exhi.domain.plan.model.entity.PlanStatus;
 import com.ssafy.exhi.domain.recommendation.converter.RecommendationConverter;
 import com.ssafy.exhi.domain.recommendation.model.dto.RecommendationResponse;
 import com.ssafy.exhi.domain.recommendation.model.entity.*;
-import com.ssafy.exhi.domain.recommendation.repository.ClusterCentersRepository;
-import com.ssafy.exhi.domain.recommendation.repository.ClusterRepresentativeRepository;
-import com.ssafy.exhi.domain.recommendation.repository.ClusteringParameterRepository;
-import com.ssafy.exhi.domain.recommendation.repository.UserClusterRepository;
+import com.ssafy.exhi.domain.recommendation.repository.*;
+import com.ssafy.exhi.domain.timecapsule.model.entity.TimeCapsule;
 import com.ssafy.exhi.domain.user.model.entity.User;
 import com.ssafy.exhi.domain.user.model.entity.UserDetail;
 import com.ssafy.exhi.domain.user.repository.UserRepository;
@@ -24,585 +21,802 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.core.env.Environment;
-import java.io.File;
-import java.io.IOException;
+
+import java.time.LocalDate;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
-import jakarta.annotation.PostConstruct;
-import java.util.stream.IntStream;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
 
-import com.ssafy.exhi.domain.plan.model.entity.PlanStatus;
-
-/**
- * 추천 서비스 구현 클래스
- * 사용자 클러스터링 및 전시회 추천 기능을 제공합니다.
- */
 @Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class RecommendationServiceImpl implements RecommendationService {
 
-    // === 의존성 주입 ===
-    private final UserClusterRepository userClusterRepository;
-    private final ClusteringParameterRepository clusteringParameterRepository;
-    private final ClusterCentersRepository clusterCentersRepository;
-    private final ClusterRepresentativeRepository representativeRepository;
+    // === Repository Dependencies ===
     private final UserRepository userRepository;
+    private final UserClusterRepository userClusterRepository;
+    private final UserClusterCentersRepository userClusterCentersRepository;
+    private final UserClusteringParameterRepository userClusteringParameterRepository;
     private final CoupleRepository coupleRepository;
+    private final CoupleClusterRepository coupleClusterRepository;
+    private final CoupleClusterCentersRepository coupleClusterCentersRepository;
+    private final CoupleClusteringParameterRepository coupleClusteringParameterRepository;
     private final VirginRoadRepository virginRoadRepository;
-    private final ObjectMapper objectMapper = new ObjectMapper();
-    private final Environment env;
-    
-    // === 환경 설정 변수 ===
-    private String jsonOutputDir;
-    private String pythonInterpreter;
-    private String pythonScript;
-    private int pythonScriptTimeout;
 
-    /**
-     * 초기 설정을 로드하는 메서드
-     */
-    @PostConstruct
-    public void init() {
-        jsonOutputDir = env.getProperty("json.output.dir");
-        pythonInterpreter = env.getProperty("python.interpreter");
-        
-        // Python 스크립트 경로 설정
-        String pythonScriptDir = env.getProperty("python.script.dir");
-        String pythonScriptName = env.getProperty("python.script.name");
-        pythonScript = new File(pythonScriptDir, pythonScriptName).getAbsolutePath();
-        
-        pythonScriptTimeout = Integer.parseInt(
-            env.getProperty("python.script.timeout", "30")
-        );
-        
-        log.info("=== Python Configuration ===");
-        log.info("Python Interpreter: {}", pythonInterpreter);
-        log.info("Python Script: {}", pythonScript);
-        log.info("JSON Output Directory: {}", jsonOutputDir);
-        log.info("Script Timeout: {} minutes", pythonScriptTimeout);
-    }
+    // === Cached Parameters ===
+    private volatile UserClusteringParameter userClusteringParam;
+    private volatile CoupleClusteringParameter coupleClusteringParam;
 
-    // === 클러스터링 데이터 처리 메서드 (임시 구현) ===
-    
-    /**
-     * 클러스터링을 위한 사용자 데이터 JSON 파일을 생성합니다.
-     */
-    @Override
-    public void generateUserDataJSON() {
-        try {
-            List<Map<String, Object>> userData = getUserDataFromDB();
-            File outputFile = new File(jsonOutputDir, "input_data.json");
-            objectMapper.writeValue(outputFile, userData);
-            log.info("User data JSON generated: {}", outputFile.getAbsolutePath());
-        } catch (IOException e) {
-            log.error("Error generating JSON file: ", e);
-            throw new ExceptionHandler(ErrorStatus.RECOMMENDATION_FILE_IO_ERROR);
-        }
-    }
+    // 동기화를 위한 락 객체
+    private final Object lock = new Object();
 
-    /**
-     * Python 클러스터링 스크립트를 실행합니다.
-     */
-    @Override
-    @Transactional
-    public void executeClusteringProcess() {
-        Process process = null;
-        try {
-            ProcessBuilder processBuilder = new ProcessBuilder(
-                pythonInterpreter,
-                pythonScript
-            );
-            
-            // 작업 디렉토리 설정
-            File workingDir = new File(pythonScript).getParentFile();
-            processBuilder.directory(workingDir);
-            
-            // 환경 변수 설정
-            Map<String, String> env = processBuilder.environment();
-            env.put("RESOURCE_DIR", jsonOutputDir);
-            env.put("PYTHONPATH", workingDir.getAbsolutePath());  // PYTHONPATH 설정
-            env.put("PYTHONIOENCODING", "utf-8");
-            
-            // 표준 출력과 에러를 상위 프로세스로 리다이렉트
-            processBuilder.redirectErrorStream(true);
-            
-            // 프로세스 시작
-            process = processBuilder.start();
-            
-            // 실시간으로 출력 읽기
-            try (BufferedReader reader = new BufferedReader(
-                    new InputStreamReader(process.getInputStream(), "UTF-8"))) {
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    log.info("Python output: {}", line);
+    private UserClusteringParameter getUserClusteringParam() {
+        if (userClusteringParam == null) {
+            synchronized (lock) {
+                if (userClusteringParam == null) {
+                    userClusteringParam = userClusteringParameterRepository
+                        .findFirstByOrderByCreatedAtDesc()
+                        .orElseThrow(() -> new ExceptionHandler(ErrorStatus.RECOMMENDATION_DATA_NOT_READY));
                 }
             }
-            
-            if (!process.waitFor(pythonScriptTimeout, TimeUnit.MINUTES)) {
-                process.destroyForcibly();
-                throw new ExceptionHandler(ErrorStatus.RECOMMENDATION_SCRIPT_TIMEOUT);
-            }
-            
-            int exitCode = process.exitValue();
-            if (exitCode != 0) {
-                throw new ExceptionHandler(ErrorStatus.RECOMMENDATION_SCRIPT_ERROR);
-            }
-            
-        } catch (Exception e) {
-            log.error("Python script execution error: ", e);
-            throw new ExceptionHandler(ErrorStatus.RECOMMENDATION_SCRIPT_ERROR);
-        } finally {
-            if (process != null) {
-                process.destroyForcibly();
-            }
         }
+        return userClusteringParam;
     }
 
-    /**
-     * 클러스터링 결과를 DB에 저장합니다.
-     */
-    @Override
-    @Transactional
-    public void processClusteringResults() {
-        try {
-            // 1. ClusteringParameter 생성 및 저장
-            File scalersFile = new File(jsonOutputDir, "scalers.json");
-            File weightsFile = new File(jsonOutputDir, "optimized_weights.json");
-            
-            Map<String, Object> scalers = objectMapper.readValue(scalersFile, new TypeReference<Map<String, Object>>() {});
-            Map<String, Object> weights = objectMapper.readValue(weightsFile, new TypeReference<Map<String, Object>>() {});
-            
-            @SuppressWarnings("unchecked")
-            Map<String, Object> age = (Map<String, Object>) scalers.get("age");
-            @SuppressWarnings("unchecked")
-            Map<String, Object> budget = (Map<String, Object>) scalers.get("budget");
-            @SuppressWarnings("unchecked")
-            List<Double> mbtiWeights = (List<Double>) weights.get("mbti_weights");
-            
-            ClusteringParameter parameter = ClusteringParameter.builder()
-                .ageMean(((Number) age.get("mean")).doubleValue())
-                .ageScale(((Number) age.get("scale")).doubleValue())
-                .budgetMin(((Number) budget.get("min")).doubleValue())
-                .budgetMax(((Number) budget.get("max")).doubleValue())
-                .ageWeight(((Number) weights.get("age_weight")).doubleValue())
-                .budgetWeight(((Number) weights.get("budget_weight")).doubleValue())
-                .mbtiIeWeight(mbtiWeights.get(0))
-                .mbtiSnWeight(mbtiWeights.get(1))
-                .mbtiTfWeight(mbtiWeights.get(2))
-                .mbtiJpWeight(mbtiWeights.get(3))
-                .build();
-            
-            clusteringParameterRepository.save(parameter);
-            
-            // 2. ClusterCenters와 ClusterCenter 생성 및 저장
-            File centersFile = new File(jsonOutputDir, "cluster_centers.json");
-            List<Map<String, Object>> centersList = objectMapper.readValue(centersFile, new TypeReference<List<Map<String, Object>>>() {});
-            
-            // 새로운 ClusterCenters 생성
-            ClusterCenters clusterCenters = new ClusterCenters();
-            
-            for (Map<String, Object> centerData : centersList) {
-                @SuppressWarnings("unchecked")
-                Map<String, Object> coordinates = (Map<String, Object>) centerData.get("coordinates");
-                @SuppressWarnings("unchecked")
-                List<Double> mbtiCoords = (List<Double>) coordinates.get("mbti");
-                
-                ClusterCenter center = ClusterCenter.builder()
-                    .clusterId(((Number) centerData.get("center_id")).intValue())
-                    .ageCoordinate(((Number) coordinates.get("age")).doubleValue())
-                    .budgetCoordinate(((Number) coordinates.get("budget")).doubleValue())
-                    .mbtiIeCoordinate(mbtiCoords.get(0))
-                    .mbtiSnCoordinate(mbtiCoords.get(1))
-                    .mbtiTfCoordinate(mbtiCoords.get(2))
-                    .mbtiJpCoordinate(mbtiCoords.get(3))
-                    .build();
-                
-                clusterCenters.addClusterCenter(center);
-            }
-            
-            clusterCentersRepository.save(clusterCenters);
-            
-            // 3. UserCluster 업데이트
-            File resultsFile = new File(jsonOutputDir, "clustering_results.json");
-            Map<String, Object> clusteringResults = objectMapper.readValue(resultsFile, new TypeReference<Map<String, Object>>() {});
-            
-            // 기존 UserCluster 데이터 삭제
-            userClusterRepository.deleteAll();
-            
-            // 사용자 클러스터 정보 저장
-            @SuppressWarnings("unchecked")
-            List<Map<String, Object>> userClusters = (List<Map<String, Object>>) clusteringResults.get("user_clusters");
-            for (Map<String, Object> userCluster : userClusters) {
-                Integer userId = ((Number) userCluster.get("user_id")).intValue();
-                Integer clusterId = ((Number) userCluster.get("cluster_id")).intValue();
-                
-                User user = userRepository.findById(userId)
-                    .orElseThrow(() -> new ExceptionHandler(ErrorStatus.USER_NOT_FOUND));
-                
-                // 기존 UserCluster가 있는지 확인
-                Optional<UserCluster> existingCluster = userClusterRepository.findByUser(user);
-                if (existingCluster.isPresent()) {
-                    // 기존 클러스터 정보 업데이트
-                    UserCluster cluster = existingCluster.get();
-                    cluster.setClusterId(clusterId);
-                    userClusterRepository.save(cluster);
-                } else {
-                    // 새로운 클러스터 정보 생성
-                    UserCluster newCluster = UserCluster.builder()
-                        .user(user)
-                        .clusterId(clusterId)
-                        .build();
-                    userClusterRepository.save(newCluster);
+    private CoupleClusteringParameter getCoupleClusteringParam() {
+        if (coupleClusteringParam == null) {
+            synchronized (lock) {
+                if (coupleClusteringParam == null) {
+                    coupleClusteringParam = coupleClusteringParameterRepository
+                        .findFirstByOrderByCreatedAtDesc()
+                        .orElseThrow(() -> new ExceptionHandler(ErrorStatus.RECOMMENDATION_DATA_NOT_READY));
                 }
             }
-            
-            // 4. ClusterRepresentative 업데이트
-            // 기존 대표자 데이터 삭제
-            representativeRepository.deleteAll();
-            
-            // 새로운 대표자 데이터 저장
-            @SuppressWarnings("unchecked")
-            List<Map<String, Object>> representatives = (List<Map<String, Object>>) clusteringResults.get("cluster_representatives");
-            for (Map<String, Object> representative : representatives) {
-                Integer clusterId = ((Number) representative.get("cluster_id")).intValue();
-                Integer representativeId = ((Number) representative.get("representative_id")).intValue();
-                
-                User representativeUser = userRepository.findById(representativeId)
-                    .orElseThrow(() -> new ExceptionHandler(ErrorStatus.USER_NOT_FOUND));
-                
-                // 기존 대표자 찾기
-                Optional<ClusterRepresentative> existingRep = representativeRepository.findByClusterId(clusterId);
-                if (existingRep.isPresent()) {
-                    // 기존 대표자 정보 업데이트
-                    ClusterRepresentative rep = existingRep.get();
-                    rep.setRepresentativeUser(representativeUser);
-                    representativeRepository.save(rep);
-                } else {
-                    // 새로운 대표자 정보 생성
-                    ClusterRepresentative newClusterRep = ClusterRepresentative.builder()
-                        .clusterId(clusterId)
-                        .representativeUser(representativeUser)
-                        .build();
-                    representativeRepository.save(newClusterRep);
-                }
-            }
-            
-            log.info("Successfully processed clustering results and saved to DB");
-            
-        } catch (IOException e) {
-            log.error("Error processing clustering results: ", e);
-            throw new ExceptionHandler(ErrorStatus.RECOMMENDATION_FILE_IO_ERROR);
-        } catch (Exception e) {
-            log.error("Error saving clustering results to DB: ", e);
-            throw new ExceptionHandler(ErrorStatus.DATABASE_INTERNAL_SERVER_ERROR);
         }
+        return coupleClusteringParam;
     }
 
-    // === 사용자 클러스터 관리 ===
+    // === Public API Methods ===
 
     /**
-     * @category ClusteringService
-     * @method addUserToCluster
-     * @description 사용자를 클러스터에 할당합니다.
-     * @param userId 사용자 ID
-     * @throws ExceptionHandler USER_NOT_FOUND, RECOMMENDATION_CLUSTER_ERROR
+     * 사용자와 관련된 모든 클러스터를 처리하는 메서드
      */
     @Override
     @Transactional
     public void addUserToCluster(Integer userId) {
-        // 1. 사용자 조회
+        // 사용자와 해당 사용자의 커플 정보 조회
         User user = getUserById(userId);
-        UserDetail detail = validateUserDetail(user);
+        Couple couple = getCoupleByUserId(userId);
 
-        try {
-            // 2. 최신 클러스터링 파라미터와 중심점들 조회
-            ClusteringParameter params = getLatestClusteringParams();
-            ClusterCenters centers = getLatestClusterCenters();
+        // 현재 사용자의 클러스터 생성 또는 조회 후 할당
+        UserCluster userCluster = findOrCreateUserCluster(user);
+        assignUserToCluster(userCluster, user);
+        userClusterRepository.save(userCluster);
 
-            // 3. 사용자 데이터 정규화
-            double normalizedAge = (detail.getAge() - params.getAgeMean()) / params.getAgeScale();
-            double normalizedBudget = (detail.getBudget() - params.getBudgetMin()) 
-                                    / (params.getBudgetMax() - params.getBudgetMin());
+        // 파트너 사용자의 클러스터 처리
+        User partnerUser = (user.equals(couple.getMale())) ? couple.getFemale() : couple.getMale();
+        UserCluster partnerCluster = findOrCreateUserCluster(partnerUser);
+        assignUserToCluster(partnerCluster, partnerUser);
+        userClusterRepository.save(partnerCluster);
 
-            // 4. MBTI 이진 변환
-            double[] mbtiVector = new double[4];
-            String mbti = detail.getMbti();
-            mbtiVector[0] = mbti.charAt(0) == 'E' ? 1 : 0;  // I/E
-            mbtiVector[1] = mbti.charAt(1) == 'N' ? 1 : 0;  // S/N
-            mbtiVector[2] = mbti.charAt(2) == 'F' ? 1 : 0;  // T/F
-            mbtiVector[3] = mbti.charAt(3) == 'P' ? 1 : 0;  // J/P
+        // 커플 클러스터 처리
+        CoupleCluster coupleCluster = findOrCreateCoupleCluster(couple);
+        calculateCoupleCoordinates(coupleCluster, couple);
+        assignCoupleToCluster(coupleCluster, couple);
+        coupleClusterRepository.save(coupleCluster);
+    }
 
-            // 5. 사용자의 가중치가 적용된 특성 벡터 생성
-            List<Double> userFeatures = Arrays.asList(
-                normalizedAge * params.getAgeWeight(),
-                normalizedBudget * params.getBudgetWeight(),
-                mbtiVector[0] * params.getMbtiIeWeight(),
-                mbtiVector[1] * params.getMbtiSnWeight(),
-                mbtiVector[2] * params.getMbtiTfWeight(),
-                mbtiVector[3] * params.getMbtiJpWeight()
+    /**
+     * 사용자에게 맞춤형 Plan을 추천하는 메서드
+     */
+    public RecommendationResponse.RecommendedPlansDTO getRecommendedPlans(Integer userId) {
+        // 커플과 버진로드 정보 조회
+        Couple couple = getCoupleByUserId(userId);
+        VirginRoad virginRoad = getVirginRoadByCouple(couple);
+
+        // 각 서비스 타입별 추천 가중치 초기화
+        Map<ServiceType, double[]> planWeights = initializePlanWeights(virginRoad);
+
+        // 유사한 커플들의 Plan 데이터를 분석하여 추천 가중치 계산
+        analyzeSimilarCouplesPlans(findSimilarCouples(getCoupleCluster(couple)), couple, planWeights);
+
+        // 최종 추천 결과를 DTO로 변환하여 반환
+        return RecommendationConverter.toRecommendedPlansDTO(virginRoad, planWeights);
+    }
+
+    // === Cluster Assignment Methods ===
+
+    /**
+     * 사용자의 클러스터를 조회하거나 새로 생성하는 메서드
+     */
+    private UserCluster findOrCreateUserCluster(User user) {
+        // 기존 클러스터가 있으면 반환, 없으면 새로 생성
+        return userClusterRepository.findByUser(user)
+                .orElse(UserCluster.builder()
+                        .user(user)
+                        .build());
+    }
+
+    /**
+     * 커플의 클러스터를 조회하거나 새로 생성하는 메서드
+     */
+    private CoupleCluster findOrCreateCoupleCluster(Couple couple) {
+        // 기존 클러스터가 있으면 반환, 없으면 새로 생성
+        return coupleClusterRepository.findByCouple(couple)
+                .orElse(CoupleCluster.builder()
+                        .couple(couple)
+                        .build());
+    }
+
+    /**
+     * 사용자를 가장 가까운 클러스터에 할당하는 메서드
+     */
+    private void assignUserToCluster(UserCluster userCluster, User user) {
+        // 최신 클러스터 중심점 정보 조회
+        UserClusterCenters centers = userClusterCentersRepository.findFirstByOrderByCreatedAtDesc()
+                .orElseThrow(() -> new ExceptionHandler(ErrorStatus.RECOMMENDATION_NO_CLUSTER_CENTERS));
+
+        // 사용자의 특성을 좌표값으로 변환
+        calculateUserCoordinates(userCluster, user);
+
+        // 가장 가까운 클러스터 찾기
+        double minDistance = Double.MAX_VALUE;
+        int nearestClusterId = -1;
+
+        for (UserClusterCenter center : centers.getUserClusterCenterList()) {
+            double distance = calculateEuclideanDistance(
+                new double[]{
+                    userCluster.getAgeCoordinate(),
+                    userCluster.getBudgetCoordinate(),
+                    userCluster.getMbtiIeCoordinate(),
+                    userCluster.getMbtiSnCoordinate(),
+                    userCluster.getMbtiTfCoordinate(),
+                    userCluster.getMbtiJpCoordinate()
+                },
+                new double[]{
+                    center.getAgeCoordinate(),
+                    center.getBudgetCoordinate(),
+                    center.getMbtiIeCoordinate(),
+                    center.getMbtiSnCoordinate(),
+                    center.getMbtiTfCoordinate(),
+                    center.getMbtiJpCoordinate()
+                }
             );
 
-            // 6. 가장 가까운 클러스터 찾기
-            int closestCluster = centers.getClusterCenterList().stream()
-                .map(center -> new AbstractMap.SimpleEntry<>(
-                    center.getClusterId(),
-                    calculateDistance(userFeatures, Arrays.asList(
-                        center.getAgeCoordinate(),
-                        center.getBudgetCoordinate(),
-                        center.getMbtiIeCoordinate(),
-                        center.getMbtiSnCoordinate(),
-                        center.getMbtiTfCoordinate(),
-                        center.getMbtiJpCoordinate()
-                    ))
-                ))
-                .min(Map.Entry.comparingByValue())
-                .map(Map.Entry::getKey)
-                .orElseThrow(() -> new ExceptionHandler(ErrorStatus.RECOMMENDATION_CLUSTER_ERROR));
-
-            // 7. 기존 UserCluster 확인 및 업데이트/생성
-            Optional<UserCluster> existingCluster = userClusterRepository.findByUser(user);
-            if (existingCluster.isPresent()) {
-                // 기존 클러스터 정보 업데이트
-                UserCluster cluster = existingCluster.get();
-                cluster.setClusterId(closestCluster);
-                userClusterRepository.save(cluster);
-            } else {
-                // 새로운 클러스터 정보 생성
-                UserCluster newCluster = UserCluster.builder()
-                    .user(user)
-                    .clusterId(closestCluster)
-                    .build();
-                userClusterRepository.save(newCluster);
+            if (distance < minDistance) {
+                minDistance = distance;
+                nearestClusterId = center.getClusterId();
             }
+        }
 
-            log.info("User {} assigned to cluster {}", userId, closestCluster);
+        if (nearestClusterId == -1) {
+            throw new ExceptionHandler(ErrorStatus.RECOMMENDATION_NO_CLUSTER_CENTERS);
+        }
 
-        } catch (Exception e) {
-            log.error("Error assigning user to cluster: ", e);
-            throw new ExceptionHandler(ErrorStatus.RECOMMENDATION_CLUSTER_ERROR);
+        userCluster.setClusterId(nearestClusterId);
+        userCluster.setUser(user);
+    }
+
+    /**
+     * 커플을 가장 가까운 클러스터에 할당하는 메서드
+     */
+    private void assignCoupleToCluster(CoupleCluster coupleCluster, Couple couple) {
+        CoupleClusterCenters centers = coupleClusterCentersRepository.findFirstByOrderByCreatedAtDesc()
+                .orElseThrow(() -> new ExceptionHandler(ErrorStatus.RECOMMENDATION_NO_CLUSTER_CENTERS));
+
+        double minDistance = Double.MAX_VALUE;
+        int nearestClusterId = -1;
+
+        for (CoupleClusterCenter center : centers.getCoupleClusterCenterList()) {
+            double distance = calculateEuclideanDistance(
+                new double[]{
+                    coupleCluster.getMaleAgeCoordinate(),
+                    coupleCluster.getFemaleAgeCoordinate(),
+                    coupleCluster.getAgeDiffCoordinate(),
+                    coupleCluster.getBudgetCoordinate(),
+                    coupleCluster.getMarriageMonthSinCoordinate(),
+                    coupleCluster.getMarriageMonthCosCoordinate(),
+                    coupleCluster.getMarriageDaySinCoordinate(),
+                    coupleCluster.getMarriageDayCosCoordinate(),
+                    coupleCluster.getUserClusterDistanceCoordinate()
+                },
+                new double[]{
+                    center.getMaleAgeCoordinate(),
+                    center.getFemaleAgeCoordinate(),
+                    center.getAgeDiffCoordinate(),
+                    center.getBudgetCoordinate(),
+                    center.getMarriageMonthSinCoordinate(),
+                    center.getMarriageMonthCosCoordinate(),
+                    center.getMarriageDaySinCoordinate(),
+                    center.getMarriageDayCosCoordinate(),
+                    center.getUserClusterDistanceCoordinate()
+                }
+            );
+
+            if (distance < minDistance) {
+                minDistance = distance;
+                nearestClusterId = center.getClusterId();
+            }
+        }
+
+        if (nearestClusterId == -1) {
+            throw new ExceptionHandler(ErrorStatus.RECOMMENDATION_NO_CLUSTER_CENTERS);
+        }
+
+        coupleCluster.setClusterId(nearestClusterId);
+        coupleCluster.setCouple(couple);
+    }
+
+    /**
+     * 유클리드 거리를 계산하는 메서드
+     */
+    private double calculateEuclideanDistance(double[] vector1, double[] vector2) {
+        if (vector1.length != vector2.length) {
+            throw new IllegalArgumentException("Vectors must have the same length");
+        }
+
+        double sumSquaredDiff = 0.0;
+        for (int i = 0; i < vector1.length; i++) {
+            double diff = vector1[i] - vector2[i];
+            sumSquaredDiff += diff * diff;
+        }
+
+        return Math.sqrt(sumSquaredDiff);
+    }
+
+    /**
+     * 사용자의 특성을 정규화된 좌표값으로 변환하는 메서드
+     */
+    private void calculateUserCoordinates(UserCluster userCluster, User user) {
+        // 사용자 상세 정보 확인
+        UserDetail detail = user.getUserDetail();
+        if (detail == null) {
+            throw new ExceptionHandler(ErrorStatus.USER_DETAIL_NOT_FOUND);
+        }
+
+        // 클러스터링 파라미터 조회
+        UserClusteringParameter param = getUserClusteringParam();
+
+        // 나이 좌표 계산
+        userCluster.setAgeCoordinate(
+            scaleStandard(detail.getAge(), param.getAgeMean(), param.getAgeScale())
+        );
+
+        // 예산 좌표 계산
+        userCluster.setBudgetCoordinate(
+            scaleMinMaxWithRange(
+                getCoupleByUserId(user.getId()).getBudget(),
+                param.getBudgetDataMin(),
+                param.getBudgetDataMax(),
+                param.getBudgetMin(),
+                param.getBudgetScale()
+            )
+        );
+
+        // MBTI 좌표 계산 (각 지표별로 이진값 할당)
+        String mbti = detail.getMbti();
+        if (mbti != null && mbti.length() == 4) {
+            userCluster.setMbtiIeCoordinate(mbti.charAt(0) == 'E' ? 1.0 : 0.0);
+            userCluster.setMbtiSnCoordinate(mbti.charAt(1) == 'S' ? 1.0 : 0.0);
+            userCluster.setMbtiTfCoordinate(mbti.charAt(2) == 'T' ? 1.0 : 0.0);
+            userCluster.setMbtiJpCoordinate(mbti.charAt(3) == 'J' ? 1.0 : 0.0);
+        } else {
+            // MBTI 정보가 없는 경우 기본값 설정
+            userCluster.setMbtiIeCoordinate(-1.0);
+            userCluster.setMbtiSnCoordinate(-1.0);
+            userCluster.setMbtiTfCoordinate(-1.0);
+            userCluster.setMbtiJpCoordinate(-1.0);
         }
     }
 
-    // === 추천 서비스 ===
+    /**
+     * 커플의 좌표값을 계산하여 CoupleCluster에 저장하는 메서드
+     */
+    private void calculateCoupleCoordinates(CoupleCluster coupleCluster, Couple couple) {
+        // 클러스터링 매개변수 세팅
+        CoupleClusteringParameter param = getCoupleClusteringParam();
+
+        // 남편/아내 나이를 StandardScaler로 변환
+        coupleCluster.setMaleAgeCoordinate(
+            scaleStandard(couple.getMale().getUserDetail().getAge(), param.getMaleAgeMean(), param.getMaleAgeScale())
+        );
+
+        coupleCluster.setFemaleAgeCoordinate(
+            scaleStandard(couple.getFemale().getUserDetail().getAge(), param.getFemaleAgeMean(), param.getFemaleAgeScale())
+        );
+
+        // 나이 차이를 계산하여 좌표로 할당
+        int ageDiff = couple.getMale().getUserDetail().getAge() - 
+                     couple.getFemale().getUserDetail().getAge();
+        coupleCluster.setAgeDiffCoordinate(
+            scaleMinMaxWithRange(
+                ageDiff,
+                param.getAgeDiffDataMin(),
+                param.getAgeDiffDataMax(),
+                param.getAgeDiffMin(),
+                param.getAgeDiffScale()
+            )
+        );
+
+        // 예산을 좌표로 할당
+        coupleCluster.setBudgetCoordinate(
+            scaleMinMaxWithRange(
+                couple.getBudget(),
+                param.getBudgetDataMin(),
+                param.getBudgetDataMax(),
+                param.getBudgetMin(),
+                param.getBudgetScale()
+            )
+        );
+
+        // 결혼 날짜 관련 좌표들 계산
+        LocalDate marriageDate = couple.getMarriageDate();
+        int month = marriageDate.getMonthValue();
+        int day = marriageDate.getDayOfMonth();
+
+        // 월 sin/cos 좌표 계산
+        coupleCluster.setMarriageMonthSinCoordinate(
+            scaleMinMaxWithRange(
+                Math.sin(2 * Math.PI * month / 12.0),
+                param.getMarriageMonthSinDataMin(),
+                param.getMarriageMonthSinDataMax(),
+                param.getMarriageMonthSinMin(),
+                param.getMarriageMonthSinScale()
+            )
+        );
+
+        coupleCluster.setMarriageMonthCosCoordinate(
+            scaleMinMaxWithRange(
+                Math.cos(2 * Math.PI * month / 12.0),
+                param.getMarriageMonthCosDataMin(),
+                param.getMarriageMonthCosDataMax(),
+                param.getMarriageMonthCosMin(),
+                param.getMarriageMonthCosScale()
+            )
+        );
+
+        // 일 sin/cos 좌표 계산
+        coupleCluster.setMarriageDaySinCoordinate(
+            scaleMinMaxWithRange(
+                Math.sin(2 * Math.PI * day / 31.0),
+                param.getMarriageDaySinDataMin(),
+                param.getMarriageDaySinDataMax(),
+                param.getMarriageDaySinMin(),
+                param.getMarriageDaySinScale()
+            )
+        );
+
+        coupleCluster.setMarriageDayCosCoordinate(
+            scaleMinMaxWithRange(
+                Math.cos(2 * Math.PI * day / 31.0),
+                param.getMarriageDayCosDataMin(),
+                param.getMarriageDayCosDataMax(),
+                param.getMarriageDayCosMin(),
+                param.getMarriageDayCosScale()
+            )
+        );
+
+        // 유저 클러스터 거리 계산 및 스케일링
+        double userClusterDistance = calculateUserClusterDistance(couple);
+        coupleCluster.setUserClusterDistanceCoordinate(userClusterDistance);
+    }
+
+    // === Distance Calculation Methods ===
 
     /**
-     * @category RecommendationService
-     * @method getRecommendedPlans
-     * @description 사용자에게 맞춤형 플랜을 추천합니다.
-     * @param userId 사용자 ID
-     * @return RecommendedPlansDTO 추천된 플랜 정보
-     * @throws ExceptionHandler USER_NOT_FOUND, COUPLE_NOT_FOUND, VIRGIN_ROAD_NOT_FOUND
+     * 사용자와 클러스터 중심점 간의 거리를 계산하는 메서드
      */
-    @Override
-    public RecommendationResponse.RecommendedPlansDTO getRecommendedPlans(Integer userId) {
-        User user = getUserById(userId);
+    private double calculateUserDistance(User user, UserClusterCenter center, Couple couple) {
+        // 사용자 상세 정보 확인
+        UserDetail detail = user.getUserDetail();
+        if (detail == null) {
+            throw new ExceptionHandler(ErrorStatus.USER_DETAIL_NOT_FOUND);
+        }
+
         UserCluster userCluster = getUserCluster(user);
-        Couple userCouple = getCoupleByUserId(userId);
-        VirginRoad userVirginRoad = getVirginRoadByCouple(userCouple);
+        
+        // 나이 거리 계산
+        double ageDiff = (userCluster.getAgeCoordinate() - center.getAgeCoordinate()) 
+                         * getUserClusteringParam().getAgeWeight();
+        double ageDistSq = ageDiff * ageDiff;
 
-        // 초기 가중치 맵 생성
-        Map<ServiceType, int[]> planWeights = initializePlanWeights(userVirginRoad);
+        // MBTI 거리 계산
+        double mbtiIeDiff = (userCluster.getMbtiIeCoordinate() - center.getMbtiIeCoordinate()) 
+                            * getUserClusteringParam().getMbtiIeWeight();
+        double mbtiSnDiff = (userCluster.getMbtiSnCoordinate() - center.getMbtiSnCoordinate()) 
+                            * getUserClusteringParam().getMbtiSnWeight();
+        double mbtiTfDiff = (userCluster.getMbtiTfCoordinate() - center.getMbtiTfCoordinate()) 
+                            * getUserClusteringParam().getMbtiTfWeight();
+        double mbtiJpDiff = (userCluster.getMbtiJpCoordinate() - center.getMbtiJpCoordinate()) 
+                            * getUserClusteringParam().getMbtiJpWeight();
+        
+        double mbtiDistSq = mbtiIeDiff * mbtiIeDiff + mbtiSnDiff * mbtiSnDiff + 
+                           mbtiTfDiff * mbtiTfDiff + mbtiJpDiff * mbtiJpDiff;
 
-        // 같은 클러스터의 사용자들의 선택 분석
-        int sameGroups = analyzeSameClusterChoices(userCluster, planWeights);
+        // 예산 거리 계산
+        double budgetDiff = (userCluster.getBudgetCoordinate() - center.getBudgetCoordinate()) 
+                            * getUserClusteringParam().getBudgetWeight();
+        double budgetDistSq = budgetDiff * budgetDiff;
 
-        // 추천 임계값 기반으로 가중치 업데이트
-        updateWeightsBasedOnThreshold(planWeights, sameGroups);
-
-        // 검증 로직을 서비스 계층에서 수행
-        if (userVirginRoad.getPlans() == null) {
-            throw new ExceptionHandler(ErrorStatus.PLAN_NOT_FOUND);
-        }
-        if (planWeights == null || planWeights.isEmpty()) {
-            throw new ExceptionHandler(ErrorStatus.NOT_ENOUGH_REQUEST_BODY_ERROR);
-        }
-
-        // 검증이 완료된 데이터를 Converter에 전달
-        return RecommendationConverter.toRecommendedPlansDTO(userVirginRoad, planWeights);
+        // 최종 거리 계산
+        return Math.sqrt(ageDistSq + mbtiDistSq + budgetDistSq);
     }
 
     /**
-     * @category RecommendationHelper
-     * @method initializePlanWeights
-     * @description 버진로드의 플랜들에 대한 초기 가중치 맵을 생성합니다.
-     * @param virginRoad 버진로드 엔티티
-     * @return Map<ServiceType, int[]> 서비스 타입별 가중치 맵
+     * 커플 간의 거리를 계산하는 메서드
+     * 각 특성별 가중치를 적용하여 최종 거리값 산출
      */
-    private Map<ServiceType, int[]> initializePlanWeights(VirginRoad virginRoad) {
-        Map<ServiceType, int[]> planWeights = new HashMap<>();
-        for (Plan plan : virginRoad.getPlans()) {
-            planWeights.put(plan.getServiceType(), 
-                new int[] {plan.getPlanStatus().equals(PlanStatus.BEFORE_START) ? 0 : 1, 0});
+    private double calculateCoupleDistance(Couple couple, CoupleClusterCenter center) {
+        CoupleCluster coupleCluster = getCoupleCluster(couple);
+        CoupleClusteringParameter param = getCoupleClusteringParam();
+
+        // 남편 나이 거리 계산
+        double maleDiff = (coupleCluster.getMaleAgeCoordinate() - center.getMaleAgeCoordinate()) 
+                          * param.getMaleAgeWeight();
+        double maleDistSq = maleDiff * maleDiff;
+
+        // 아내 나이 거리 계산
+        double femaleDiff = (coupleCluster.getFemaleAgeCoordinate() - center.getFemaleAgeCoordinate()) 
+                            * param.getFemaleAgeWeight();
+        double femaleDistSq = femaleDiff * femaleDiff;
+
+        // 나이 차이 거리 계산
+        double ageDiffDist = (coupleCluster.getAgeDiffCoordinate() - center.getAgeDiffCoordinate()) 
+                             * param.getAgeDiffWeight();
+        double ageDiffDistSq = ageDiffDist * ageDiffDist;
+
+        // 예산 거리 계산
+        double budgetDiff = (coupleCluster.getBudgetCoordinate() - center.getBudgetCoordinate()) 
+                            * param.getBudgetWeight();
+        double budgetDistSq = budgetDiff * budgetDiff;
+
+        // 결혼 날짜 관련 거리 계산
+        double monthSinDiff = (coupleCluster.getMarriageMonthSinCoordinate() - center.getMarriageMonthSinCoordinate()) 
+                              * param.getMarriageMonthSinWeight();
+        double monthCosDiff = (coupleCluster.getMarriageMonthCosCoordinate() - center.getMarriageMonthCosCoordinate()) 
+                              * param.getMarriageMonthCosWeight();
+        double daySinDiff = (coupleCluster.getMarriageDaySinCoordinate() - center.getMarriageDaySinCoordinate()) 
+                            * param.getMarriageDaySinWeight();
+        double dayCosDiff = (coupleCluster.getMarriageDayCosCoordinate() - center.getMarriageDayCosCoordinate()) 
+                            * param.getMarriageDayCosWeight();
+
+        double marriageDistSq = monthSinDiff * monthSinDiff + monthCosDiff * monthCosDiff +
+                               daySinDiff * daySinDiff + dayCosDiff * dayCosDiff;
+
+        // 유저 클러스터 거리 계산
+        double userClusterDist = (coupleCluster.getUserClusterDistanceCoordinate() - center.getUserClusterDistanceCoordinate()) 
+                                 * param.getUserClusterDistanceWeight();
+        double userClusterDistSq = userClusterDist * userClusterDist;
+
+        // 최종 거리값 계산
+        return Math.sqrt(maleDistSq + femaleDistSq + ageDiffDistSq + budgetDistSq + 
+                        marriageDistSq + userClusterDistSq);
+    }
+
+    /**
+     * 커플의 유저 클러스터 간 거리를 계산하는 메서드
+     * 남성과 여성 각각의 클러스터 거리를 평균내어 계산
+     */
+    private double calculateUserClusterDistance(Couple couple) {
+        UserCluster maleCluster = getUserCluster(couple.getMale());
+        UserCluster femaleCluster = getUserCluster(couple.getFemale());
+
+        // 클러스터 중심점 정보 조회
+        UserClusterCenters centers = userClusterCentersRepository
+            .findFirstByOrderByCreatedAtDesc()
+            .orElseThrow(() -> new ExceptionHandler(ErrorStatus.RECOMMENDATION_DATA_NOT_READY));
+
+        // 각 사용자의 클러스터 중심점 찾기
+        UserClusterCenter maleCenter = centers.getUserClusterCenterList().stream()
+                .filter(c -> Objects.equals(c.getClusterId(), maleCluster.getClusterId()))
+                .findFirst()
+                .orElseThrow(() -> new ExceptionHandler(ErrorStatus.RECOMMENDATION_DATA_NOT_READY));
+
+        UserClusterCenter femaleCenter = centers.getUserClusterCenterList().stream()
+                .filter(c -> Objects.equals(c.getClusterId(), femaleCluster.getClusterId()))
+                .findFirst()
+                .orElseThrow(() -> new ExceptionHandler(ErrorStatus.RECOMMENDATION_DATA_NOT_READY));
+
+        // 각 사용자의 클러스터 거리 계산
+        double maleDistance = calculateUserDistance(couple.getMale(), maleCenter, couple);
+        double femaleDistance = calculateUserDistance(couple.getFemale(), femaleCenter, couple);
+        
+        // 평균 거리 계산 및 스케일링
+        double rawDistance = (maleDistance + femaleDistance) / 2.0;
+        
+        return scaleMinMaxWithRange(
+            rawDistance,
+            getCoupleClusteringParam().getUserClusterDistDataMin(),
+            getCoupleClusteringParam().getUserClusterDistDataMax(),
+            getCoupleClusteringParam().getUserClusterDistMin(),
+            getCoupleClusteringParam().getUserClusterDistScale()
+        );
+    }
+
+    // === Recommendation Logic Methods ===
+
+    /**
+     * 유사한 커플들을 찾는 메서드
+     * 같은 클러스터에 속한 다른 커플들을 반환
+     */
+    private List<Couple> findSimilarCouples(CoupleCluster coupleCluster) {
+        return coupleRepository.findAllByClusterId(coupleCluster.getClusterId()).stream()
+                .filter(couple -> !couple.equals(coupleCluster.getCouple()))
+                .toList();
+    }
+
+    /**
+     * 각 서비스 타입별 추천 가중치를 초기화하는 메서드
+     * 이미 시작된 Plan은 가중치를 1로, 시작되지 않은 Plan은 0으로 초기화
+     */
+    private Map<ServiceType, double[]> initializePlanWeights(VirginRoad virginRoad) {
+        Map<ServiceType, double[]> planWeights = new HashMap<>();
+
+        for (ServiceType serviceType : ServiceType.values()) {
+            Plan plan = virginRoad.findPlanByServiceType(serviceType);
+            if (plan != null) {
+                double[] weights = new double[2];
+                weights[0] = plan.getPlanStatus() == PlanStatus.BEFORE_START ? 0 : 1;
+                weights[1] = 0;
+                planWeights.put(serviceType, weights);
+            }
         }
+
         return planWeights;
     }
 
     /**
-     * @category RecommendationHelper
-     * @method analyzeSameClusterChoices
-     * @description 같은 클러스터의 사용자들의 선택을 분석하고 가중치를 업데이트합니다.
-     * @param userCluster 사용자 클러스터
-     * @param planWeights 플랜 가중치 맵
-     * @return int 같은 클러스터에 속한 사용자 수
+     * 코사인 유사도를 계산하고 [0,1] 범위로 정규화하는 메서드
      */
-    private int analyzeSameClusterChoices(UserCluster userCluster, Map<ServiceType, int[]> planWeights) {
-        int sameGroups = 0;
-        List<VirginRoad> virginRoads = virginRoadRepository.findAll();
+    private double calculateCosineSimilarityNormalized(double[] vector1, double[] vector2) {
+        double dotProduct = 0.0;
+        double norm1 = 0.0;
+        double norm2 = 0.0;
         
-        for (VirginRoad virginRoad : virginRoads) {
-            Couple couple = virginRoad.getCouple();
-            User femaleUser = couple.getFemale();
-            UserCluster currentCluster = getUserCluster(femaleUser);
+        for (int i = 0; i < vector1.length; i++) {
+            dotProduct += vector1[i] * vector2[i];
+            norm1 += vector1[i] * vector1[i];
+            norm2 += vector2[i] * vector2[i];
+        }
+        
+        // 0벡터 처리
+        if (norm1 == 0 || norm2 == 0) {
+            return 0.5; // 중간값으로 처리
+        }
+        
+        // 코사인 값 계산 [-1,1]
+        double cosineValue = dotProduct / (Math.sqrt(norm1) * Math.sqrt(norm2));
+        
+        // [0,1] 범위로 정규화
+        return (cosineValue + 1.0) / 2.0;
+    }
+
+    /**
+     * 유클리드 거리 기반 유사도를 [0,1] 범위로 계산하는 메서드
+     */
+    private double calculateDistanceSimilarity(CoupleCluster cluster1, CoupleCluster cluster2) {
+        double[] vector1 = calculateCoupleVector(cluster1);
+        double[] vector2 = calculateCoupleVector(cluster2);
+        
+        double sumSquaredDiff = 0.0;
+        for (int i = 0; i < vector1.length; i++) {
+            double diff = vector1[i] - vector2[i];
+            sumSquaredDiff += diff * diff;
+        }
+        
+        double distance = Math.sqrt(sumSquaredDiff);
+        return 1.0 / (1.0 + distance); // 거리가 0이면 1, 거리가 커질수록 0에 수렴
+    }
+
+    /**
+     * 두 유사도를 가중 평균으로 결합하는 메서드
+     */
+    private double combineSimilarities(double cosineSimilarity, double distanceSimilarity, double alpha) {
+        return alpha * cosineSimilarity + (1 - alpha) * distanceSimilarity;
+    }
+
+    /**
+     * 유사한 커플들의 Plan을 분석하여 추천 가중치를 계산하는 메서드
+     */
+    private void analyzeSimilarCouplesPlans(List<Couple> similarCouples, Couple currentCouple, 
+                                          Map<ServiceType, double[]> planWeights) {
+        if (similarCouples.isEmpty()) return;
+        
+        CoupleCluster currentCoupleCluster = getCoupleCluster(currentCouple);
+        double[] currentVector = calculateCoupleVector(currentCoupleCluster);
+        
+        // 각 서비스 타입별 통계 초기화
+        Map<ServiceType, Integer> totalPlans = new HashMap<>();
+        for (ServiceType type : planWeights.keySet()) {
+            totalPlans.put(type, 0);
+        }
+
+        // 유사도 계산 가중치 (코사인:거리 = 7:3)
+        final double COSINE_WEIGHT = 0.7;
+
+        for (Couple similarCouple : similarCouples) {
+            if (similarCouple.equals(currentCouple)) continue;
+
+            try {
+                CoupleCluster similarCoupleCluster = getCoupleCluster(similarCouple);
+                double[] similarVector = calculateCoupleVector(similarCoupleCluster);
+
+                // 정규화된 유사도 계산
+                double cosineSimilarity = calculateCosineSimilarityNormalized(currentVector, similarVector);
+                double distanceSimilarity = calculateDistanceSimilarity(currentCoupleCluster, similarCoupleCluster);
+                
+                // 가중 평균으로 최종 유사도 계산
+                double finalSimilarity = combineSimilarities(cosineSimilarity, distanceSimilarity, COSINE_WEIGHT);
+
+                // 유사 커플의 Plan 분석
+                VirginRoad virginRoad = getVirginRoadByCouple(similarCouple);
+                for (Plan plan : virginRoad.getPlans()) {
+                    ServiceType serviceType = plan.getServiceType();
+                    if (!planWeights.containsKey(serviceType) || planWeights.get(serviceType)[0] == 1) {
+                        continue;
+                    }
+
+                    totalPlans.put(serviceType, totalPlans.get(serviceType) + 1);
+                    double planScore = calculatePlanScore(plan, virginRoad.getVirginRoadStatus());
+                    planWeights.get(serviceType)[1] += planScore * finalSimilarity;
+                }
+            } catch (ExceptionHandler e) {
+                log.warn("Error analyzing couple {}: {}", similarCouple.getId(), e.getMessage());
+                continue;
+            }
+        }
+
+        determineRecommendations(planWeights, totalPlans);
+    }
+
+    /**
+     * 커플의 특성을 벡터로 변환하는 메서드
+     */
+    private double[] calculateCoupleVector(CoupleCluster coupleCluster) {
+        // 모든 좌표값을 벡터로 변환
+        return new double[] {
+            coupleCluster.getMaleAgeCoordinate(),
+            coupleCluster.getFemaleAgeCoordinate(),
+            coupleCluster.getAgeDiffCoordinate(),
+            coupleCluster.getBudgetCoordinate(),
+            coupleCluster.getMarriageMonthSinCoordinate(),
+            coupleCluster.getMarriageMonthCosCoordinate(),
+            coupleCluster.getMarriageDaySinCoordinate(),
+            coupleCluster.getMarriageDayCosCoordinate(),
+            coupleCluster.getUserClusterDistanceCoordinate()
+        };
+    }
+
+    /**
+     * Plan의 점수를 계산하는 메서드
+     * 플랜 상태와 타임캡슐 정보를 기반으로 점수 산출
+     */
+    private double calculatePlanScore(Plan plan, PlanStatus virginRoadStatus) {
+        double score = 0.0;
+        
+        // 기본 점수 계산 (플랜 상태 기준)
+        switch (plan.getPlanStatus()) {
+            case FINISHED -> {
+                score = 2.0;
+                // 타임캡슐이 있는 경우에만 추가 점수
+                if (!plan.getTimeCapsules().isEmpty()) {
+                    double capsuleScore = calculateTimeCapsuleScore(plan.getTimeCapsules());
+                    score += capsuleScore;
+                }
+                // 버진로드가 완료된 경우 추가 가중치
+                if (virginRoadStatus == PlanStatus.FINISHED) {
+                    score *= 1.5;
+                }
+            }
+            case IN_PROGRESS -> score = 1.0;
+            case BEFORE_START -> score = 0.0;
+        }
+        
+        return score;
+    }
+
+    /**
+     * 타임캡슐의 점수를 계산하는 메서드
+     * 긍정적/부정적 평가를 기반으로 점수 산출
+     */
+    private double calculateTimeCapsuleScore(List<TimeCapsule> timeCapsules) {
+        if (timeCapsules.isEmpty()) return 0.0;
+        
+        // 긍정적 평가는 2점, 부정적 평가는 -1점으로 계산
+        int weight = timeCapsules.stream()
+                .mapToInt(tc -> tc.isPlanGrade() ? -1 : 2)
+                .sum();
+        
+        // 타임캡슐 점수를 0.0 ~ 1.0 범위로 정규화
+        return Math.min(Math.max(weight / 5.0, 0.0), 1.0);
+    }
+
+    /**
+     * 최종 추천 여부를 결정하는 메서드
+     * 각 서비스 타입별 점수를 분석하여 추천 여부 결정
+     */
+    private void determineRecommendations(Map<ServiceType, double[]> planWeights, 
+                                        Map<ServiceType, Integer> totalPlans) {
+        double recommendationThreshold = 12.0;  // 12% 이상일 때 추천
+        
+        for (Map.Entry<ServiceType, double[]> entry : planWeights.entrySet()) {
+            ServiceType serviceType = entry.getKey();
+            double[] weights = entry.getValue();
             
-            if (currentCluster.getClusterId().equals(userCluster.getClusterId())) {
-                sameGroups++;
-                updateWeightsFromPlans(virginRoad.getPlans(), planWeights);
-            }
-        }
-        return sameGroups;
-    }
-
-    /**
-     * 주어진 플랜들의 선택 현황을 기반으로 가중치를 업데이트합니다.
-     */
-    private void updateWeightsFromPlans(List<Plan> plans, Map<ServiceType, int[]> planWeights) {
-        for (Plan plan : plans) {
-            if (planWeights.containsKey(plan.getServiceType()) && 
-                plan.getPlanStatus().equals(PlanStatus.FINISHED)) {
-                planWeights.get(plan.getServiceType())[1]++;
-            }
-        }
-    }
-
-    /**
-     * 임계값을 기반으로 최종 가중치를 업데이트합니다.
-     */
-    private void updateWeightsBasedOnThreshold(Map<ServiceType, int[]> planWeights, int sameGroups) {
-        double threshold = sameGroups * 0.4;
-        for (Map.Entry<ServiceType, int[]> entry : planWeights.entrySet()) {
-            int[] weights = entry.getValue();
-            if (weights[0] == 0 && weights[1] >= threshold) {
+            // 이미 시작된 플랜이거나 데이터가 없는 경우 스킵
+            if (weights[0] == 1 || totalPlans.get(serviceType) == 0) continue;
+            
+            // 최대 가능 점수 = 플랜 수 * (기본 최대 점수 + 최대 타임캡슐 점수) * 버진로드 완료 가중치
+            double maxPossibleScore = totalPlans.get(serviceType) * (2.0 + 1.0) * 1.5;
+            double percentage = (weights[1] / maxPossibleScore) * 100.0;
+            
+            // 임계값 이상인 경우 추천으로 설정
+            if (percentage >= recommendationThreshold) {
                 weights[0] = 1;
             }
         }
     }
 
-    // === 클러스터링 유틸리티 메서드 ===
-    /**
-     * @category ClusteringUtility
-     * @method calculateDistance
-     * @description 두 벡터 간의 유클리드 거리를 계산합니다.
-     * @param vector1 첫 번째 벡터
-     * @param vector2 두 번째 벡터
-     * @return double 두 벡터 간의 거리
-     */
-    private double calculateDistance(List<Double> vector1, List<Double> vector2) {
-        return Math.sqrt(
-            IntStream.range(0, vector1.size())
-                .mapToDouble(i -> Math.pow(vector1.get(i) - vector2.get(i), 2))
-                .sum()
-        );
+    // === Helper Methods ===
+
+    private int findNearestUserCluster(User user, UserClusterCenters centers) {
+        Couple couple = getCoupleByUserId(user.getId());
+        return centers.getUserClusterCenterList().stream()
+                .min(Comparator.comparingDouble(center -> calculateUserDistance(user, center, couple)))
+                .map(UserClusterCenter::getClusterId)
+                .orElseThrow(() -> new ExceptionHandler(ErrorStatus.RECOMMENDATION_NO_CLUSTER_CENTERS));
     }
 
-    // === 헬퍼 메서드 ===
-
-    /**
-     * DB에서 사용자 데이터 조회
-     */
-    private List<Map<String, Object>> getUserDataFromDB() {
-        List<User> users = userRepository.findAll();
-        List<Map<String, Object>> userData = new ArrayList<>();
-
-        for (User user : users) {
-            UserDetail detail = user.getUserDetail();
-            if (detail == null || detail.getAge() == null || detail.getMbti() == null) {
-                continue;
-            }
-
-            Map<String, Object> userMap = new HashMap<>();
-            userMap.put("user_id", user.getId());
-            userMap.put("age", detail.getAge());
-            userMap.put("mbti", detail.getMbti());
-            userMap.put("budget", detail.getBudget());
-            // TODO: 실제 루틴 완료 상태를 확인하는 로직으로 수정 필요
-            userMap.put("routine_completed", true);  // 임시로 모든 사용자의 routine_completed를 true로 설정
-            userData.add(userMap);
-        }
-
-        return userData;
+    private int findNearestCoupleCluster(Couple couple, CoupleClusterCenters centers) {
+        return centers.getCoupleClusterCenterList().stream()
+                .min(Comparator.comparingDouble(center -> calculateCoupleDistance(couple, center)))
+                .map(CoupleClusterCenter::getClusterId)
+                .orElseThrow(() -> new ExceptionHandler(ErrorStatus.RECOMMENDATION_NO_CLUSTER_CENTERS));
     }
 
-    /**
-     * @category EntityHelper
-     * @method getUserById
-     * @description ID로 사용자를 조회합니다.
-     * @param userId 사용자 ID
-     * @return User 사용자 엔티티
-     * @throws ExceptionHandler USER_NOT_FOUND
-     */
+    // === Entity Retrieval Methods ===
+
     private User getUserById(Integer userId) {
-        return userRepository.findById(userId)
-            .orElseThrow(() -> new ExceptionHandler(ErrorStatus.USER_NOT_FOUND));
+        return userRepository.findUserById(userId)
+                .orElseThrow(() -> new ExceptionHandler(ErrorStatus.USER_NOT_FOUND));
     }
 
-    /**
-     * 사용자 상세 정보 유효성 검사
-     */
-    private UserDetail validateUserDetail(User user) {
-        UserDetail detail = user.getUserDetail();
-        if (detail == null || detail.getAge() == null || detail.getMbti() == null) {
-            throw new ExceptionHandler(ErrorStatus.RECOMMENDATION_USER_DETAIL_NOT_FOUND);
-        }
-        return detail;
-    }
-
-    /**
-     * 최신 클러스터링 파라미터 조회
-     */
-    private ClusteringParameter getLatestClusteringParams() {
-        return clusteringParameterRepository.findFirstByOrderByCreatedAtDesc()
-            .orElseThrow(() -> new ExceptionHandler(ErrorStatus.RECOMMENDATION_PARAMS_NOT_FOUND));
-    }
-
-    /**
-     * 최신 클러스터 중심점 조회
-     */
-    private ClusterCenters getLatestClusterCenters() {
-        return clusterCentersRepository.findFirstByOrderByCreatedAtDesc()
-            .orElseThrow(() -> new ExceptionHandler(ErrorStatus.RECOMMENDATION_CENTERS_NOT_FOUND));
-    }
-
-    /**
-     * @category EntityHelper
-     * @method getUserCluster
-     * @description 사용자의 클러스터 정보를 조회합니다.
-     * @param user 사용자 엔티티
-     * @return UserCluster 사용자 클러스터 정보
-     * @throws ExceptionHandler RECOMMENDATION_CLUSTER_NOT_FOUND
-     */
     private UserCluster getUserCluster(User user) {
         return userClusterRepository.findByUser(user)
-            .orElseThrow(() -> new ExceptionHandler(ErrorStatus.RECOMMENDATION_CLUSTER_NOT_FOUND));
+                .orElseThrow(() -> new ExceptionHandler(ErrorStatus.RECOMMENDATION_CLUSTER_NOT_FOUND));
     }
 
-    /**
-     * 사용자 ID로 커플 정보 조회
-     */
     private Couple getCoupleByUserId(Integer userId) {
         return coupleRepository.findCoupleByUserId(userId)
-            .orElseThrow(() -> new ExceptionHandler(ErrorStatus.COUPLE_NOT_FOUND));
+                .orElseThrow(() -> new ExceptionHandler(ErrorStatus.RECOMMENDATION_DATA_NOT_READY));
+    }
+
+    private CoupleCluster getCoupleCluster(Couple couple) {
+        return coupleClusterRepository.findByCouple(couple)
+                .orElseThrow(() -> new ExceptionHandler(ErrorStatus.RECOMMENDATION_CLUSTER_NOT_FOUND));
+    }
+
+    private VirginRoad getVirginRoadByCouple(Couple couple) {
+        return virginRoadRepository.getVirginRoadByCouple(couple)
+                .orElseThrow(() -> new ExceptionHandler(ErrorStatus.VIRGIN_ROAD_NOT_FOUND));
+    }
+
+    // === Scaling Methods ===
+
+    /**
+     * 표준 스케일링을 수행하는 메서드
+     */
+    private double scaleStandard(double value, double mean, double scale) {
+        return (value - mean) / scale;
     }
 
     /**
-     * 커플 정보로 버진로드 조회
+     * MinMaxScaler와 커스텀 범위를 적용하는 메서드
      */
-    private VirginRoad getVirginRoadByCouple(Couple couple) {
-        return virginRoadRepository.getVirginRoadByCouple(couple)
-            .orElseThrow(() -> new ExceptionHandler(ErrorStatus.VIRGIN_ROAD_NOT_FOUND));
+    private double scaleMinMaxWithRange(double value, double dataMin, double dataMax, 
+                                      double targetMin, double targetScale) {
+        // 먼저 0-1 스케일로 변환
+        double scaled01 = (value - dataMin) / (dataMax - dataMin);
+        // 그 다음 목표 범위로 변환
+        return targetMin + (scaled01 * targetScale);
     }
 }

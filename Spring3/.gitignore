@@ -1,6 +1,12 @@
 # Created by https://www.toptal.com/developers/gitignore/api/windows,macos,java,eclipse,intellij,gradle
 # Edit at https://www.toptal.com/developers/gitignore?templates=windows,macos,java,eclipse,intellij,gradle
 
+.data/resources/
+
+# Data folder
+/data/
+/data/**
+
 ### Eclipse ###
 .metadata
 bin/

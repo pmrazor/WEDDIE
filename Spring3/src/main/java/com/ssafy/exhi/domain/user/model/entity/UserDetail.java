@@ -43,11 +43,8 @@ public class UserDetail {
   @Column(name = "gender")
   private Gender gender;
 
-  @Column(name = "phone")
-  private String phone;
-
-  @Column(name = "budget")
-  private Integer budget;
+    @Column(name = "phone")
+    private String phone;
 
   @Column(name = "mbti")
   private String mbti;

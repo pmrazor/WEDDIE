@@ -20,7 +20,7 @@ public enum ErrorStatus implements BaseErrorCode {
     NOT_ENOUGH_REQUEST_BODY_ERROR(HttpStatus.BAD_REQUEST, "COMMON404", "요청 바디가 잘못되었습니다."),
 
     // 멤버 관련 에러
-    USER_NOT_FOUND(HttpStatus.BAD_REQUEST, "MEMBER4001", "존재하지않는 계정입니다."),
+    USER_NOT_FOUND(HttpStatus.NOT_FOUND, "MEMBER4001", "존재하지않는 계정입니다."),
     USER_NICKNAME_NOT_EXIST(HttpStatus.BAD_REQUEST, "MEMBER4002", "닉네임은 필수 입니다."),
     USER_DUPLICATED_LOGIN_ID(HttpStatus.BAD_REQUEST, "MEMBER4003", "아이디가 중복되었습니다."),
     USER_DUPLICATED_NICKNAME(HttpStatus.BAD_REQUEST, "MEMBER4004", "닉네임이 중복되었습니다."),
@@ -97,19 +97,27 @@ public enum ErrorStatus implements BaseErrorCode {
 
     // 타임캡슐 관련 에러
     TIMECAPSULE_ALREADY_EXIST(HttpStatus.BAD_REQUEST, "TIME_CAPSULE_4001", "이미 작성된 타임캡슐입니다"),
+    
+    // 추천(클러스터링) 시스템 관련 에러
+    // 1. 클러스터링 관련 오류
+    CLUSTERING_FILE_IO_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "CLUSTER4001", "클러스터링 중 파일 입출력 오류가 발생했습니다"),
+    CLUSTERING_SCRIPT_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "CLUSTER4002", "클러스터링 스크립트 실행 오류가 발생했습니다"),
+    CLUSTERING_SCRIPT_TIMEOUT(HttpStatus.REQUEST_TIMEOUT, "CLUSTER4003", "클러스터링 스크립트 실행 시간이 초과되었습니다"),
+    CLUSTERING_PARAMS_NOT_FOUND(HttpStatus.NOT_FOUND, "CLUSTER4004", "클러스터링 파라미터를 찾을 수 없습니다"),
+    CLUSTERING_CENTERS_NOT_FOUND(HttpStatus.NOT_FOUND, "CLUSTER4005", "클러스터 중심 정보를 찾을 수 없습니다"),
+    CLUSTERING_CLUSTER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "CLUSTER4006", "클러스터링 처리 중 오류가 발생했습니다"),
+    CLUSTERING_CLUSTER_NOT_FOUND(HttpStatus.NOT_FOUND, "CLUSTER4007", "클러스터 정보를 찾을 수 없습니다"),
+    CLUSTERING_USER_DETAIL_NOT_FOUND(HttpStatus.BAD_REQUEST, "CLUSTER4008", "사용자 상세정보가 없어 클러스터링이 불가능합니다"),
+    CLUSTERING_INVALID_DATA(HttpStatus.BAD_REQUEST, "CLUSTER4009", "클러스터링에 필요한 데이터 형식이 잘못되었습니다"),
+    CLUSTERING_NO_DATA(HttpStatus.NOT_FOUND, "CLUSTER4010", "클러스터링에 필요한 데이터가 존재하지 않습니다"),
+    // 2. 추천 관련 오류 
+    RECOMMENDATION_NO_CLUSTER_CENTERS(HttpStatus.NOT_FOUND, "RECOMMEND4001", "클러스터 중심점 정보가 없습니다"),
+    RECOMMENDATION_CLUSTER_NOT_FOUND(HttpStatus.NOT_FOUND, "RECOMMEND4002", "사용자의 클러스터 정보를 찾을 수 없습니다"),
+    RECOMMENDATION_CLUSTER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "RECOMMEND4003", "추천 처리 중 오류가 발생했습니다"),
+    RECOMMENDATION_DATA_NOT_READY(HttpStatus.BAD_REQUEST, "RECOMMEND4004", "추천을 위한 데이터가 준비되지 않았습니다"),
+    RECOMMENDATION_INVALID_USER(HttpStatus.BAD_REQUEST, "RECOMMEND4005", "추천 대상 사용자 정보가 유효하지 않습니다");
 
-    // 공지 관련 에러
-
-    // 추천 시스템 관련 에러
-    RECOMMENDATION_FILE_IO_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "RECOMMEND4001", "파일 입출력 중 오류가 발생했습니다"),
-    RECOMMENDATION_SCRIPT_TIMEOUT(HttpStatus.REQUEST_TIMEOUT, "RECOMMEND4002", "파이썬 스크립트 실행 시간이 초과되었습니다"),
-    RECOMMENDATION_SCRIPT_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "RECOMMEND4003", "파이썬 스크립트 실행 중 오류가 발생했습니다"),
-    RECOMMENDATION_PARAMS_NOT_FOUND(HttpStatus.NOT_FOUND, "RECOMMEND4004", "클러스터링 파라미터를 찾을 수 없습니다"),
-    RECOMMENDATION_CENTERS_NOT_FOUND(HttpStatus.NOT_FOUND, "RECOMMEND4005", "클러스터 중심점 정보를 찾을 수 없습니다"),
-    RECOMMENDATION_CLUSTER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "RECOMMEND4006", "클러스터 할당 중 오류가 발생했습니다"),
-    RECOMMENDATION_CLUSTER_NOT_FOUND(HttpStatus.NOT_FOUND, "RECOMMEND4007", "클러스터 정보를 찾을 수 없습니다"),
-    RECOMMENDATION_USER_DETAIL_NOT_FOUND(HttpStatus.BAD_REQUEST, "RECOMMEND4008", "사용자 상세 정보가 존재하지 않습니다");
-
+    
     private final HttpStatus httpStatus;
     private final String code;
     private final String message;

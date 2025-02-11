@@ -13,7 +13,6 @@ import lombok.*;
 @NoArgsConstructor
 public class UserCluster extends BaseEntity {
 
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
@@ -26,4 +25,12 @@ public class UserCluster extends BaseEntity {
 
     // 어떤 클러스터에 속해 있는지 식별할 수 있는 값 (예: cluster_id)
     private Integer clusterId;
+
+    // 스케일 변환된 좌표값들
+    private Double ageCoordinate;
+    private Double budgetCoordinate;
+    private Double mbtiIeCoordinate;
+    private Double mbtiSnCoordinate;
+    private Double mbtiTfCoordinate;
+    private Double mbtiJpCoordinate;
 }
