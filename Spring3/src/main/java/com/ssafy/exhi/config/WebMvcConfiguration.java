@@ -28,11 +28,12 @@ public class WebMvcConfiguration implements WebMvcConfigurer {
 	@Override
 	public void addCorsMappings(CorsRegistry registry) {
 		registry.addMapping("/**").allowedOrigins("*")
-//			.allowedOrigins("http://localhost:8080", "http://localhost:8081")
+			.allowedOrigins("http://localhost:3000", "https://weddie.ssafy.me")
 //				.allowedMethods(HttpMethod.GET.name(), HttpMethod.POST.name(), HttpMethod.PUT.name(),
 //						HttpMethod.DELETE.name(), HttpMethod.HEAD.name(), HttpMethod.OPTIONS.name(),
 //						HttpMethod.PATCH.name())
 //				.allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH", "HEAD")
+				.allowCredentials(true).maxAge(3600)
 				.allowedMethods("*")
 				.maxAge(1800); // 1800초 동안 preflight 결과를 캐시에 저장
 
