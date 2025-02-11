@@ -4,7 +4,7 @@ import splash from "@/assets/clap.webp";
 const Splash = ({ onFinish }) => {
   return (
     <motion.div
-      className="fixed inset-0 flex flex-col items-center justify-center bg-white z-10"
+      className="fixed inset-0 flex flex-col items-center justify-center bg-white z-10 pb-16"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
