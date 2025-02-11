@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import userApi from "@/utils/userApi";
 import instance from "@/lib/axios";
 
 const useAuthStore = create(
@@ -15,8 +16,11 @@ const useAuthStore = create(
           return response.data;
         },
         async checkAuth() {
-          // login.id.response 를 넣으면 -> 추가 데이터(response.data)를 준다.
           const response = await instance.get("/api/auth/me");
+          return response.data;
+        },
+        async getUserDetail() {
+          const response = await instance.get("/api/users/detail");
           return response.data;
         },
       };
@@ -27,6 +31,7 @@ const useAuthStore = create(
         user: null,
         isAuthenticated: false,
         showSuccessToast: false,
+        gender: "Default",
 
         setAuth: (accessToken, userData) =>
           set({
@@ -48,6 +53,7 @@ const useAuthStore = create(
             user: null,
             isAuthenticated: false,
             showSuccessToast: false,
+            gender: "Default",
           });
         },
 
@@ -61,9 +67,10 @@ const useAuthStore = create(
                 email: null,
                 name: null,
                 profileImg: null,
-                // gender: null, // gender 추가 
               };
               get().setAuth(accessToken, userData);
+              // 로그인 성공 후 사용자 상세 정보 가져오기
+              get().fetchUserDetail();
             }
             return data;
           } catch (error) {
@@ -81,6 +88,8 @@ const useAuthStore = create(
                 user,
                 isAuthenticated: true,
               }));
+              // 인증 확인 후 사용자 상세 정보 가져오기
+              get().fetchUserDetail();
             }
             return data;
           } catch (error) {
@@ -93,6 +102,28 @@ const useAuthStore = create(
           set((state) => ({
             user: { ...state.user, ...userData },
           })),
+
+        // 새로 추가된 사용자 상세 정보 가져오는 함수
+        fetchUserDetail: async () => {
+          try {
+            const data = await apiCalls.getUserDetail();
+            if (data.isSuccess && data.result) {
+              const userDetail = data.result;
+              console.log("User Detail:", userDetail);
+              set((state) => ({
+                ...state,
+                gender:
+                  userDetail.gender === "MALE"
+                    ? "Male"
+                    : userDetail.gender === "FEMALE"
+                    ? "Female"
+                    : "Default",
+              }));
+            }
+          } catch (error) {
+            console.error("Failed to fetch user detail:", error);
+          }
+        },
       };
     },
     {
