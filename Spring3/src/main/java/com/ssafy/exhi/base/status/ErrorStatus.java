@@ -97,7 +97,7 @@ public enum ErrorStatus implements BaseErrorCode {
 
     // 타임캡슐 관련 에러
     TIMECAPSULE_ALREADY_EXIST(HttpStatus.BAD_REQUEST, "TIME_CAPSULE_4001", "이미 작성된 타임캡슐입니다"),
-    
+
     // 추천(클러스터링) 시스템 관련 에러
     // 1. 클러스터링 관련 오류
     CLUSTERING_FILE_IO_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "CLUSTER4001", "클러스터링 중 파일 입출력 오류가 발생했습니다"),
@@ -110,14 +110,16 @@ public enum ErrorStatus implements BaseErrorCode {
     CLUSTERING_USER_DETAIL_NOT_FOUND(HttpStatus.BAD_REQUEST, "CLUSTER4008", "사용자 상세정보가 없어 클러스터링이 불가능합니다"),
     CLUSTERING_INVALID_DATA(HttpStatus.BAD_REQUEST, "CLUSTER4009", "클러스터링에 필요한 데이터 형식이 잘못되었습니다"),
     CLUSTERING_NO_DATA(HttpStatus.NOT_FOUND, "CLUSTER4010", "클러스터링에 필요한 데이터가 존재하지 않습니다"),
-    // 2. 추천 관련 오류 
+    // 2. 추천 관련 오류
     RECOMMENDATION_NO_CLUSTER_CENTERS(HttpStatus.NOT_FOUND, "RECOMMEND4001", "클러스터 중심점 정보가 없습니다"),
     RECOMMENDATION_CLUSTER_NOT_FOUND(HttpStatus.NOT_FOUND, "RECOMMEND4002", "사용자의 클러스터 정보를 찾을 수 없습니다"),
     RECOMMENDATION_CLUSTER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "RECOMMEND4003", "추천 처리 중 오류가 발생했습니다"),
     RECOMMENDATION_DATA_NOT_READY(HttpStatus.BAD_REQUEST, "RECOMMEND4004", "추천을 위한 데이터가 준비되지 않았습니다"),
-    RECOMMENDATION_INVALID_USER(HttpStatus.BAD_REQUEST, "RECOMMEND4005", "추천 대상 사용자 정보가 유효하지 않습니다");
+    RECOMMENDATION_INVALID_USER(HttpStatus.BAD_REQUEST, "RECOMMEND4005", "추천 대상 사용자 정보가 유효하지 않습니다"),
 
-    
+    // 조언 관련 에러
+    ADVICE_API_ERROR(HttpStatus.BAD_REQUEST, "ADVICE4001", "조언 서비스 실행 중 오류가 발생했습니다");
+
     private final HttpStatus httpStatus;
     private final String code;
     private final String message;
@@ -125,19 +127,19 @@ public enum ErrorStatus implements BaseErrorCode {
     @Override
     public ErrorReasonDTO getReason() {
         return ErrorReasonDTO.builder()
-                .message(message)
-                .code(code)
-                .isSuccess(false)
-                .build();
+            .message(message)
+            .code(code)
+            .isSuccess(false)
+            .build();
     }
 
     @Override
     public ErrorReasonDTO getReasonHttpStatus() {
         return ErrorReasonDTO.builder()
-                .message(message)
-                .code(code)
-                .isSuccess(false)
-                .httpStatus(httpStatus)
-                .build();
+            .message(message)
+            .code(code)
+            .isSuccess(false)
+            .httpStatus(httpStatus)
+            .build();
     }
 }
