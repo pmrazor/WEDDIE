@@ -1,14 +1,16 @@
+import useAuthStore from "@/store/auth"
 import "@/style/common/Button.css"
+import { style } from "framer-motion/client"
 
 // 이후에 전역변수로 import할 gender -> gender에 따라 변할 component에다 두면 돼  
-const gender = "W_" // ("", "M_" / "W-")  
-const Button = ({ text, type, onClick, stickyType }) => {
-
-  console.log(gender+type)
+const Button = ({ text, onClick, stickyType, style }) => {
+  
+  // console.log(gender+type)
   return (
     <button 
       onClick={onClick}
-      className={`Button ${gender}${type} sticky-${stickyType}`}
+      className={`Button sticky-${stickyType}`}
+      style={style}
     >
       {text}
     </button>
