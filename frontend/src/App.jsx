@@ -16,11 +16,11 @@ import { injectColors } from "./constants/colors";
 import VirginRoadDetail from "./pages/virginRoad/virginroad/VirginRoadDetail";
 
 function App() {
-  // 색상 설정 함수 호출
+  // 색상 설정 함수 호출 
   useEffect(() => {
-    injectColors();
-  }, []);
-
+    injectColors()
+  }, [])
+  
   return (
     <>
       <Routes>
@@ -40,5 +40,6 @@ function App() {
     </>
   );
 }
+
 
 export default App;
