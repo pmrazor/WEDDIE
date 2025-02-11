@@ -25,6 +25,9 @@ repositories {
 }
 
 dependencies {
+    /* SQL 로깅 */
+    implementation 'com.github.gavlyukovskiy:p6spy-spring-boot-starter:1.9.0'
+
     /* env 파일 관리 */
     implementation 'me.paulschwarz:spring-dotenv:2.5.4'
 
