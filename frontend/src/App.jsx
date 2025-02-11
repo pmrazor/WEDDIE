@@ -14,7 +14,6 @@ import CouplePage from "@/pages/couple/CouplePage";
 import { useEffect } from "react";
 import { injectColors } from "./constants/colors";
 import VirginRoadDetail from "./pages/virginRoad/virginroad/VirginRoadDetail";
-import { ThemeProvider } from "./contexts/theme";
 
 function App() {
   // 색상 설정 함수 호출
