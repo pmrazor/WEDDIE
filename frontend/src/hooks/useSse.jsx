@@ -30,7 +30,7 @@ const useSSE = (onMatchingRequest) => {
       try {
         console.log("[SSE] Connecting to server...");
         const response = await fetch(
-          "http://localhost:8080/api/notifications/subscribe",
+          "https://weddie.ssafy.me/api/notifications/subscribe",
           {
             method: "GET",
             headers: {
