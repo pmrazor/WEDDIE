@@ -61,6 +61,7 @@ const useAuthStore = create(
                 email: null,
                 name: null,
                 profileImg: null,
+                // gender: null, // gender 추가 
               };
               get().setAuth(accessToken, userData);
             }

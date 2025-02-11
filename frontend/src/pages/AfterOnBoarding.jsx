@@ -1,7 +1,7 @@
 // to 버진로드 , to 미작성 타임캡슐 작성 트리거, ... 
 // 온보딩 이후(버진로드 생성된 이후)의 사용자들에게 보여줄 페이지 
 import { useNavigate } from "react-router-dom"
-import "../style/AfterOnBoarding.css"
+import "@/style/page/AfterOnBoarding.css"
 import Card from "@/components/common/cards/IconCard"
 import AdvertisementCard from "@/components/common/cards/AdvertisementCard"
 import DDayCard from "@/components/common/cards/DDayCard"
@@ -64,12 +64,18 @@ const AfterOnBoarding = () => {
         <DDayCard 
           head_text={`D-${untilWedding}`}
           sub_text={"결혼식까지"}
-          style={{backgroundColor : colors.PRIMARY_LIGHT}}
+          style={{
+            backgroundColor : colors.genderColors["Default"].PRIMARY_LIGHT, 
+          }}
+          headTextStyle={{color : colors.genderColors["Default"].PRIMARY_EXTRADEEP}}
           />
         <DDayCard 
           head_text={`D+${fromStart}`}
           sub_text={"우리가 만난 지 "}
-          style={{backgroundColor : colors.PRIMARY_LIGHT}}
+          style={{
+            backgroundColor : colors.genderColors["Default"].PRIMARY_LIGHT, 
+          }}
+          headTextStyle={{color : colors.genderColors["Default"].PRIMARY_EXTRADEEP}}
         />
       </div>
       <div className="to-virgin-road">
@@ -81,12 +87,14 @@ const AfterOnBoarding = () => {
           sub_text1={"우리 부부만을 위한 버진로드가 완성되었어요"}
           // sub_text2={"아름다운 버진 로드, 서로 사랑만 하며 만들어가요"}
           icon={<img src={flowerbouquet} alt="flower-bouquet icon" />}
-          style={{backgroundColor: colors.PRIMARY_EXTRALIGHT}}
+          style={{backgroundColor: colors.genderColors["Default"].PRIMARY_EXTRALIGHT}}
         /> 
         <Button 
           onClick={onClickVirginRoad}
-          type={"PRIMARY_DEEP"}
           text={"버진 로드 걷기"}
+          style={{
+            backgroundColor : colors.genderColors["Default"].PRIMARY
+          }}
         />
       </div>
     </div>

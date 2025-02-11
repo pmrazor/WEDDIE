@@ -1,6 +1,6 @@
 // Home : 로고 스플래시 화면으로 구현
 
-import "../style/Home.css";
+import "@/style/page/Home.css";
 import { useNavigate } from "react-router-dom";
 import useOnBoardingStore from "@/store/onboarding";
 import { useEffect } from "react";

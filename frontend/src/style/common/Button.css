@@ -5,22 +5,9 @@
   border: none;
   cursor: pointer;
   font-size: 16px;
+  font-weight: bold;
   white-space: nowrap;
-  background : none;
-}
-
-.M_PRIMARY_DEEP {
-  background-color: var(--M_PRIMARY_DEEP);
-  color: var(--WHITE);
-}
-
-.W_PRIMARY_DEEP {
-  background-color: var(--W_PRIMARY_DEEP);
-  color: var(--WHITE);
-}
-
-.PRIMARY_DEEP {
-  background-color: var(--PRIMARY_DEEP);
+  /* background : none; */
   color: var(--WHITE);
 }
 

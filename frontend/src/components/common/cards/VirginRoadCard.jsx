@@ -7,6 +7,8 @@ import status3 from "@/assets/VirginRoadCard/status3.svg"
 import status4 from "@/assets/VirginRoadCard/status4.svg"
 import { colors } from "@/constants/colors"
 
+const gender = "Male"
+
 const VirginRoadCard = ({step, planStatus, activated}) => {
   
   const iconForStatus = () => {
@@ -19,16 +21,17 @@ const VirginRoadCard = ({step, planStatus, activated}) => {
   }
   const backgroundForStatus = () => {
     switch (planStatus) {
-      case "BEFORE_START" : return colors.PRIMARY
-      case "IN_PROGRESS" : return colors.PRIMARY_EXTRADEEP
-      case "NOT_TIME_CAPSULE" : return colors.PRIMARY_DEEP
-      case "FINISHED" : return colors.PRIMARY_EXTRALIGHT
+      case "BEFORE_START" : return colors.genderColors[gender].PRIMARY
+      case "IN_PROGRESS" : return colors.genderColors[gender].PRIMARY_EXTRADEEP
+      case "NOT_TIME_CAPSULE" : return colors.genderColors[gender].PRIMARY_DEEP
+      case "FINISHED" : return colors.genderColors[gender].PRIMARY_EXTRALIGHT
     }
   }
 
   const nav = useNavigate()
   const onClickToGo = () => {
-    nav("/virginroad/1")
+    const planId = 1 // 임시로 1 지정 
+    nav(`/virginroad/${planId}`)
   }
   
   return (
@@ -43,7 +46,6 @@ const VirginRoadCard = ({step, planStatus, activated}) => {
         <Button 
           onClick={onClickToGo}
           text={">"}
-          // type={"PRIMARY_DEEP"}
         />
       </div>
     </div>

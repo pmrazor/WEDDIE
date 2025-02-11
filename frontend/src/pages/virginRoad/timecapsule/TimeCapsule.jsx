@@ -1,4 +1,4 @@
-import "../../../style/TimeCapsule.css"
+import "@/style/page/TimeCapsule.css"
 
 const TimeCapsule = () => {
 
