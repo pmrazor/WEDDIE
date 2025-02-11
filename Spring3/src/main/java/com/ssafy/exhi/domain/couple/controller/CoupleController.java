@@ -94,7 +94,7 @@ public class CoupleController {
      * @param requestId
      * @return
      */
-    @PostMapping("/request/{requestId}/reject")
+    @PostMapping("/request/{requestId}/rejected")
     public ResponseEntity<?> rejectCoupleRequest(
             @RequestHeader("Authorization") String accessToken,
             @PathVariable(name = "requestId") Integer requestId
