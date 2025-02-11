@@ -36,6 +36,23 @@ const userApi = {
 
     return data.result.contents;
   },
+  getUserDetail: async () => {
+    const token = getAuthToken();
+    if (!token) throw new Error("인증 토큰이 없습니다.");
+
+    const response = await fetch(`${BASE_URL}/api/users/detail`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    const data = await response.json();
+    if (!data.isSuccess) {
+      throw new Error(data.message || "사용자 정보 조회에 실패했습니다.");
+    }
+
+    return data.result;
+  },
 };
 
 export default userApi;
