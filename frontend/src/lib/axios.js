@@ -4,7 +4,7 @@ import useAuthStore from "@/store/auth";
 const BASE_URL = import.meta.env.VITE_API_URL;
 
 const instance = axios.create({
-  baseURL: "${BASE_URL}",
+  baseURL: BASE_URL,
   timeout: 5000,
 });
 
@@ -36,7 +36,7 @@ instance.interceptors.response.use(
         window.location.href = "/login";
       }
     }
-    return Promise.reject(error); 
+    return Promise.reject(error);
   }
 );
 

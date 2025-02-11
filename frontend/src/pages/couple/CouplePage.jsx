@@ -14,6 +14,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
+import CoupleRequestForm from "./CoupleRequestForm";
 
 const CouplePage = () => {
   const [coupleDetails, setCoupleDetails] = useState(null);
@@ -46,9 +47,10 @@ const CouplePage = () => {
 
   if (!coupleDetails) {
     return (
-      <div className="flex justify-center items-center min-h-screen">
-        <div className="text-center text-gray-500">
-          <p>커플 정보를 찾을 수 없습니다.</p>
+      <div className="max-w-md mx-auto p-6">
+        <div className="bg-white rounded-lg shadow-lg p-8">
+          <h1 className="text-2xl font-bold text-center mb-6">커플 등록하기</h1>
+          <CoupleRequestForm />
         </div>
       </div>
     );
