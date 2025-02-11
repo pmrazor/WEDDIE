@@ -3,6 +3,7 @@ package com.ssafy.exhi.domain.notification.model.dto;
 import com.ssafy.exhi.domain.notification.model.entity.MatchingStatus;
 import com.ssafy.exhi.domain.notification.model.entity.NotificationType;
 import com.ssafy.exhi.domain.user.model.dto.UserResponse;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -30,8 +31,24 @@ public class NotificationResponse {
         public static String getApprovedUrl(Integer id) {
             return url + "/" + id + "/approved";
         }
+
         public static String getRejectedUrl(Integer id) {
             return url + "/" + id + "/rejected";
         }
     }
+
+    @Data
+    @SuperBuilder
+    @ToString
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class PageDTO {
+        private List<NotificationResponse.CoupleMatchingDTO> contents;
+        private Integer listSize;
+        private boolean isFirstPage;
+        private boolean isLastPage;
+        private Integer totalPages;
+        private Long totalElements;
+    }
+
 }

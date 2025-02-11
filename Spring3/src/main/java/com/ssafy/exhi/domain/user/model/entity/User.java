@@ -5,9 +5,24 @@ import com.ssafy.exhi.domain.oauth.AuthProvider;
 import com.ssafy.exhi.domain.recommendation.model.entity.UserCluster;
 import com.ssafy.exhi.domain.user.model.dto.UserRequest;
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.persistence.*;
-import lombok.*;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.Transient;
 import java.util.Objects;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 
 @Getter
 @Setter
@@ -19,7 +34,7 @@ import java.util.Objects;
 @AllArgsConstructor
 public class User extends BaseEntity {
     @Id
-    @Column(name="user_id")
+    @Column(name = "user_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
@@ -55,6 +70,11 @@ public class User extends BaseEntity {
 
     @Column(name = "provider_id")
     private String providerId;
+    /* recommendation 필드 */
+    @OneToOne(mappedBy = "user", orphanRemoval = true)
+    private UserCluster userCluster;
+
+    /* OAuth 필드 끝 */
 
     @PrePersist
     public void prePersist() {
@@ -62,8 +82,6 @@ public class User extends BaseEntity {
             this.provider = AuthProvider.LOCAL;
         }
     }
-
-    /* OAuth 필드 끝 */
 
     public User update(UserRequest.UpdateDTO updateDTO) {
         this.name = updateDTO.getName();
@@ -76,11 +94,6 @@ public class User extends BaseEntity {
         this.userDetail = userDetail;
         userDetail.setUser(this); // 양방향 관계 설정
     }
-
-
-    /* recommendation 필드 */
-    @OneToOne(mappedBy = "user", orphanRemoval = true)
-    private UserCluster userCluster;
 
     // 양방향 편의 메서드
     public void setUserCluster(UserCluster userCluster) {
