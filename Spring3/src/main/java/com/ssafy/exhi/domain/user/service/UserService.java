@@ -1,9 +1,10 @@
 package com.ssafy.exhi.domain.user.service;
 
-
 import com.ssafy.exhi.domain.user.model.dto.UserRequest;
 import com.ssafy.exhi.domain.user.model.dto.UserResponse;
+import com.ssafy.exhi.domain.user.model.dto.UserResponse.PageDTO;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -43,4 +44,6 @@ public interface UserService {
     void delete(Integer userId);
 
     boolean existUserDetail(Integer userId);
+
+    PageDTO searchOtherGenderUser(String loginId, Pageable pageable);
 }

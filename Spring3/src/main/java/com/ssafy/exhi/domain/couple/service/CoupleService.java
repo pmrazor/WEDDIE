@@ -10,7 +10,5 @@ public interface CoupleService {
 
     void deleteCouple(Integer userId);
 
-    CoupleResponse.SimpleResultDTO createCouple(Integer requestId, CoupleRequest.CreateDTO coupleDTO);
-
     CoupleResponse.SimpleResultDTO createCouple(Integer userId, Integer requestId);
 }

@@ -1,5 +1,7 @@
 package com.ssafy.exhi.domain.user.service;
 
+import static com.ssafy.exhi.domain.user.converter.UserConverter.toUserDetailDTO;
+
 import com.ssafy.exhi.base.status.ErrorStatus;
 import com.ssafy.exhi.domain.couple.model.entity.Couple;
 import com.ssafy.exhi.domain.couple.repository.CoupleRepository;
@@ -7,20 +9,21 @@ import com.ssafy.exhi.domain.oauth.AuthProvider;
 import com.ssafy.exhi.domain.user.converter.UserConverter;
 import com.ssafy.exhi.domain.user.model.dto.UserRequest;
 import com.ssafy.exhi.domain.user.model.dto.UserResponse;
+import com.ssafy.exhi.domain.user.model.dto.UserResponse.PageDTO;
 import com.ssafy.exhi.domain.user.model.entity.Token;
 import com.ssafy.exhi.domain.user.model.entity.User;
 import com.ssafy.exhi.domain.user.model.entity.UserDetail;
-import com.ssafy.exhi.domain.user.repository.UserRepository;
 import com.ssafy.exhi.domain.user.repository.UserDetailRepository;
+import com.ssafy.exhi.domain.user.repository.UserRepository;
 import com.ssafy.exhi.exception.ExceptionHandler;
 import com.ssafy.exhi.util.JWTUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import static com.ssafy.exhi.domain.user.converter.UserConverter.toUserDetailDTO;
 
 @Slf4j
 @Service
@@ -39,7 +42,7 @@ public class UserServiceImpl implements UserService {
         User loginUser = getUserByLoginId(memberDto.getLoginId());
         setUserCoupleId(loginUser);
 
-        validatePassword(isMatches(loginUser, memberDto), ErrorStatus.USER_LOGIN_FAILED);
+        validatePassword(isMatches(loginUser, memberDto));
 
         // 토큰 생성
         Token jwtToken = jwtUtil.createJwtToken(loginUser);
@@ -53,7 +56,6 @@ public class UserServiceImpl implements UserService {
     private void setUserCoupleId(User user) {
         user.setCoupleId(coupleRepository.findCoupleByUserId(user.getId()).map(Couple::getId).orElse(null));
     }
-
 
     @Override
     public UserResponse.SimpleResultDTO register(UserRequest.SignUpDTO memberDto) {
@@ -94,7 +96,7 @@ public class UserServiceImpl implements UserService {
         // OAuth 사용자와 로컬 사용자를 구분하여 처리
         if (user.getProvider() == AuthProvider.LOCAL) {
             // 로컬 사용자의 경우에만 비밀번호 검증
-            validatePassword(isMatches(user, userRequest), ErrorStatus.USER_LOGIN_FAILED);
+            validatePassword(isMatches(user, userRequest));
             // 새 비밀번호로 업데이트
             user.setPassword(passwordEncoder.encode(userRequest.getNewPassword()));
         }
@@ -104,14 +106,13 @@ public class UserServiceImpl implements UserService {
         return UserConverter.toDetailResultDTO(user);
     }
 
-
-
     // 유저 기본 정보 수정
     private User getUserInfoById(Integer userId) {
         return userRepository.findUserById(userId)
                 .orElseThrow(() -> new ExceptionHandler(ErrorStatus.USER_INFO_NOT_FOUND)
                 );
     }
+
     public UserResponse.UserInfoDTO updateUserInfo(Integer userId, UserRequest.UpdateInfoDTO userInfoRequest) {
         User user = getUserInfoById(userId);
 
@@ -130,6 +131,7 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(() -> new ExceptionHandler(ErrorStatus.USER_DETAIL_NOT_FOUND)
                 );
     }
+
     public UserResponse.UserDetailDTO updateUserDetail(Integer userId, UserRequest.UpdateDetailDTO userDetailRequest) {
         UserDetail userDetail = updateUserDetailById(userId);
 
@@ -148,8 +150,10 @@ public class UserServiceImpl implements UserService {
         return userDetailRepository.findByUser_Id(userId)
                 .orElseThrow(() -> new ExceptionHandler(ErrorStatus.USER_NOT_FOUND));
     }
-    public UserResponse.UserDetailDTO createUserDetail(Integer userId, UserRequest.CreateDetailDTO createDetailRequest) {
-        
+
+    public UserResponse.UserDetailDTO createUserDetail(Integer userId,
+                                                       UserRequest.CreateDetailDTO createDetailRequest) {
+
         // 기존 UserDetail을 가져와서 존재 여부 확인
         UserDetail existingUserDetail = userDetailRepository.findByUser_Id(userId).orElse(null);
 
@@ -174,20 +178,17 @@ public class UserServiceImpl implements UserService {
         return toUserDetailDTO(newUserDetail);
     }
 
-
-
     // 유저 상세 정보 조회 (온보딩)
     private UserDetail getUserDetailById(Integer userId) {
         return userDetailRepository.findByUser_Id(userId)
                 .orElseThrow(() -> new ExceptionHandler(ErrorStatus.USER_DETAIL_NOT_FOUND)
                 );
     }
+
     public UserResponse.UserDetailDTO getUserDetail(Integer userId) {
         UserDetail userDetail = getUserDetailById(userId);
         return UserConverter.toUserDetailDTO(userDetail);
     }
-
-
 
     @Override
     public boolean checkUser(String loginId) {
@@ -206,6 +207,12 @@ public class UserServiceImpl implements UserService {
         return userDetailRepository.existsByUser(user);
     }
 
+    @Override
+    public PageDTO searchOtherGenderUser(String loginId, Pageable pageable) {
+        Page<User> page = userRepository.findUsersByLoginId(loginId, pageable);
+        return UserConverter.toPageDTO(page);
+    }
+
     private User getUserByLoginId(String userId) {
         return userRepository.findUserByLoginId(userId).orElseThrow(
                 () -> new ExceptionHandler(ErrorStatus.USER_NOT_FOUND)
@@ -218,10 +225,10 @@ public class UserServiceImpl implements UserService {
         );
     }
 
-    private void validatePassword(boolean loginUser, ErrorStatus userLoginFailed) {
+    private void validatePassword(boolean loginUser) {
         // 비밀번호 일치 확인
         if (!loginUser) {
-            throw new ExceptionHandler(userLoginFailed);
+            throw new ExceptionHandler(ErrorStatus.USER_LOGIN_FAILED);
         }
     }
 

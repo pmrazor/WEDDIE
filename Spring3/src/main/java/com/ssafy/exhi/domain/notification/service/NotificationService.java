@@ -1,12 +1,16 @@
-package com.ssafy.exhi.domain.notification;
+package com.ssafy.exhi.domain.notification.service;
 
 import com.ssafy.exhi.base.status.ErrorStatus;
 import com.ssafy.exhi.domain.notification.converter.NotificationConverter;
 import com.ssafy.exhi.domain.notification.model.dto.NotificationRequest;
 import com.ssafy.exhi.domain.notification.model.dto.NotificationResponse;
+import com.ssafy.exhi.domain.notification.model.dto.NotificationResponse.PageDTO;
 import com.ssafy.exhi.domain.notification.model.entity.CoupleMatchingNotification;
 import com.ssafy.exhi.domain.notification.model.entity.MatchingStatus;
+import com.ssafy.exhi.domain.notification.repository.CoupleNotificationRepository;
+import com.ssafy.exhi.domain.user.model.entity.Gender;
 import com.ssafy.exhi.domain.user.model.entity.User;
+import com.ssafy.exhi.domain.user.model.entity.UserDetail;
 import com.ssafy.exhi.domain.user.repository.UserRepository;
 import com.ssafy.exhi.exception.ExceptionHandler;
 import jakarta.transaction.Transactional;
@@ -16,6 +20,8 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
@@ -34,19 +40,19 @@ public class NotificationService {
         SseEmitter emitter = new SseEmitter(3600000L);
 
         // 연결이 종료될 때 정리
-        emitter.onCompletion(() -> {
-            emitters.remove(userId);
-        });
+        emitter.onCompletion(() ->
+                emitters.remove(userId)
+        );
 
         // 타임아웃 시 정리
-        emitter.onTimeout(() -> {
-            emitters.remove(userId);
-        });
+        emitter.onTimeout(() ->
+                emitters.remove(userId)
+        );
 
         // 에러 발생 시 정리
-        emitter.onError(ex -> {
-            emitters.remove(userId);
-        });
+        emitter.onError(ex ->
+                emitters.remove(userId)
+        );
 
         // 기존 연결이 있다면 제거
         SseEmitter oldEmitter = emitters.get(userId);
@@ -88,23 +94,46 @@ public class NotificationService {
     }
 
     // 특정 사용자에게 알림을 보내는 메서드
-    public CoupleMatchingNotification sendCoupleRequest(NotificationRequest.CoupleMatchingDTO notificationDTO,
-                                                        MatchingStatus status) {
+    public NotificationResponse.CoupleMatchingDTO sendCoupleRequest(
+            NotificationRequest.CoupleMatchingDTO notificationDTO
+    ) {
         User receiver = getUserById(notificationDTO.getReceiverId());
         User sender = getUserById(notificationDTO.getSenderId());
+        validateUsers(receiver, sender);
         log.info("emmiter size -> {}, 보낸 사람 -> {}, 받는 사람 -> {}", emitters.size(), sender.getName(), receiver.getName());
 
         // 알림 리포지토리 저장
-        CoupleMatchingNotification entity = NotificationConverter.toEntity(notificationDTO, receiver, sender, status);
+        CoupleMatchingNotification entity = NotificationConverter.toEntity(notificationDTO, receiver, sender);
         CoupleMatchingNotification saved = coupleNotificationRepository.save(entity);
 
         sendNotification(receiver, saved);
-        return saved;
+        return NotificationConverter.toDTO(saved);
+    }
+
+    private void validateUsers(User receiver, User sender) {
+        Gender receiverGender = Optional.ofNullable(receiver)
+                .map(User::getUserDetail)
+                .map(UserDetail::getGender)
+                .orElseThrow(() -> new ExceptionHandler(ErrorStatus.INVALID_USER));
+
+        Gender senderGender = Optional.ofNullable(sender)
+                .map(User::getUserDetail)
+                .map(UserDetail::getGender)
+                .orElseThrow(() -> new ExceptionHandler(ErrorStatus.INVALID_USER));
+
+        if (receiverGender == senderGender) {
+            throw new ExceptionHandler(ErrorStatus.COUPLE_SAME_GENDERED);
+        }
     }
 
     private void sendNotification(User receiver, CoupleMatchingNotification notification) {
+        // 키가 없으면 메시지를 보내지않음
+        if (!emitters.containsKey(receiver.getId())) {
+            return;
+        }
+
         SseEmitter emitter = Optional.ofNullable(emitters.get(receiver.getId())).orElseThrow(
-                () -> new ExceptionHandler(ErrorStatus.USER_BAD_REQUEST)
+                () -> new ExceptionHandler(ErrorStatus.SSR_SUBSCRIBE_NOT_FOUND)
         );
 
         // 알림 전송
@@ -115,7 +144,7 @@ public class NotificationService {
                     .data(payload));
 
         } catch (IOException e) {
-            throw new ExceptionHandler(ErrorStatus.USER_BAD_REQUEST);
+            throw new ExceptionHandler(ErrorStatus.SSR_SUBSCRIBE_NOT_FOUND);
         }
     }
 
@@ -129,5 +158,19 @@ public class NotificationService {
         if (!notification.getMatchingStatus().equals(MatchingStatus.PENDING)) {
             throw new ExceptionHandler(ErrorStatus.NOTIFICATION_STATUS_ERROR);
         }
+    }
+
+    public PageDTO getNotifications(Integer userId, Pageable pageable) {
+        User user = findUserByUserId(userId);
+        Page<CoupleMatchingNotification> page = coupleNotificationRepository
+                .findNotificationByReceiver(user, pageable);
+
+        return NotificationConverter.toPageDTO(page);
+    }
+
+    private User findUserByUserId(Integer userId) {
+        return userRepository.findById(userId).orElseThrow(
+                () -> new ExceptionHandler(ErrorStatus.USER_NOT_FOUND)
+        );
     }
 }

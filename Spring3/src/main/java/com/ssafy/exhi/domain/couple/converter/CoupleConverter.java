@@ -48,7 +48,7 @@ public class CoupleConverter {
         User receiver = notification.getReceiver();
 
         return Couple.builder()
-                .coupleName("")
+                .coupleName(notification.getMessage())
                 .male(getMaleUser(sender, receiver))
                 .female(getFemaleUser(sender, receiver))
                 .build();

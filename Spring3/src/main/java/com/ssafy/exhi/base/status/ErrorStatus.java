@@ -26,6 +26,7 @@ public enum ErrorStatus implements BaseErrorCode {
     USER_DUPLICATED_NICKNAME(HttpStatus.BAD_REQUEST, "MEMBER4004", "닉네임이 중복되었습니다."),
     USER_LOGIN_FAILED(HttpStatus.UNAUTHORIZED, "MEMBER4005", "잘못된 비밀번호입니다."),
     USER_BAD_REQUEST(HttpStatus.BAD_REQUEST, "MEMBER4006", "토큰 값과 요청한 아이디가 일치하지않습니다."),
+    INVALID_USER(HttpStatus.BAD_REQUEST, "MEMBER4007", "멤버 값을 잘 확인해주세요 (온보딩, 성별 등)"),
 
     // 로컬멤버 기본정보
     USER_INFO_NOT_FOUND(HttpStatus.BAD_REQUEST, "USERINFO4001", "유저 기본정보가 존재하지않습니다."),
@@ -45,6 +46,7 @@ public enum ErrorStatus implements BaseErrorCode {
     COUPLE_REQUEST_ALREADY_SENT(HttpStatus.BAD_REQUEST, "COUPLE4004", "이미 커플 요청을 보냈습니다."),
     COUPLE_REQUEST_TO_SELF(HttpStatus.BAD_REQUEST, "COUPLE4005", "자신에게 커플 요청을 보낼 수 없습니다."),
     COUPLE_UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "COUPLE4006", "커플 관계가 아닙니다."),
+    COUPLE_SAME_GENDERED(HttpStatus.BAD_REQUEST, "COUPLE4007", "동성간의 연애는 지원하지 않습니다."),
 
     // 버진로드 관련 에러
     VIRGIN_ROAD_NOT_FOUND(HttpStatus.NOT_FOUND, "VIRGIN_ROAD4001", "존재하지 않는 플래너입니다."),
@@ -65,6 +67,9 @@ public enum ErrorStatus implements BaseErrorCode {
 
     // 공지 사항 관련 에러
     NOTICE_NOT_FOUND(HttpStatus.NOT_FOUND, "NOTICE4001", "존재하지 않는 공지입니다.."),
+
+    // SSE 관련 에러
+    SSR_SUBSCRIBE_NOT_FOUND(HttpStatus.NOT_FOUND, "SUBSCRIBE4001", "구독 상태를 확인해주세요"),
 
     // 토큰 관련 에러
     TOKEN_EXPIRED_ERROR(HttpStatus.UNAUTHORIZED, "TOKEN4001", "토큰의 유효기간이 만료되었습니다."),

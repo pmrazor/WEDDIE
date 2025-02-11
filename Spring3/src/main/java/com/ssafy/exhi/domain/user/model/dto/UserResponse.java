@@ -1,9 +1,14 @@
 package com.ssafy.exhi.domain.user.model.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.*;
-
 import java.time.LocalDateTime;
+import java.util.List;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
+import lombok.experimental.SuperBuilder;
 
 public class UserResponse {
 
@@ -47,12 +52,6 @@ public class UserResponse {
 
         @Schema(description = "사용자의 아이디", example = "john123")
         private String loginId;
-
-        @Schema(description = "사용자 생성 시간", example = "2023-01-01T12:00:00")
-        private LocalDateTime createdAt;
-
-        @Schema(description = "사용자 정보 마지막 업데이트 시간", example = "2023-01-10T15:30:00")
-        private LocalDateTime updatedAt;
 
         private String provider;
         private String profileImg;
@@ -128,7 +127,18 @@ public class UserResponse {
         private String accessToken;
     }
 
-
-
+    @Data
+    @SuperBuilder
+    @ToString
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class PageDTO {
+        private List<UserResponse.SimpleResultDTO> contents;
+        private Integer listSize;
+        private boolean isFirstPage;
+        private boolean isLastPage;
+        private Integer totalPages;
+        private Long totalElements;
+    }
 
 }

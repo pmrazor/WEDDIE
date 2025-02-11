@@ -2,13 +2,14 @@ package com.ssafy.exhi.domain.couple.controller;
 
 import static com.ssafy.exhi.domain.couple.model.dto.CoupleResponse.SimpleResultDTO;
 
+import com.ssafy.exhi.base.ApiResponse;
 import com.ssafy.exhi.domain.couple.model.dto.CoupleRequest;
 import com.ssafy.exhi.domain.couple.model.dto.CoupleResponse;
 import com.ssafy.exhi.domain.couple.service.CoupleService;
-import com.ssafy.exhi.domain.notification.NotificationService;
 import com.ssafy.exhi.domain.notification.model.dto.NotificationRequest;
-import com.ssafy.exhi.domain.notification.model.entity.CoupleMatchingNotification;
+import com.ssafy.exhi.domain.notification.model.dto.NotificationResponse.CoupleMatchingDTO;
 import com.ssafy.exhi.domain.notification.model.entity.MatchingStatus;
+import com.ssafy.exhi.domain.notification.service.NotificationService;
 import com.ssafy.exhi.util.JWTUtil;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -51,7 +52,7 @@ public class CoupleController {
         coupleDTO.setUserId(userId);
 
         SimpleResultDTO response = coupleService.createCouple(coupleDTO);
-        return ResponseEntity.ok().body(response);
+        return ResponseEntity.ok().body(ApiResponse.onSuccess(response));
     }
 
     @PostMapping("/request")
@@ -63,11 +64,9 @@ public class CoupleController {
         matchingDTO.setSenderId(userId);
         log.info("requestCouple: sender={}, receiver={}", userId, matchingDTO.getReceiverId());
 
-        CoupleMatchingNotification response = notificationService.sendCoupleRequest(
-                matchingDTO, MatchingStatus.PENDING
-        );
-        
-        return ResponseEntity.ok().body(response);
+        CoupleMatchingDTO response = notificationService.sendCoupleRequest(matchingDTO);
+
+        return ResponseEntity.ok().body(ApiResponse.onSuccess(response));
     }
 
     /**
@@ -111,6 +110,7 @@ public class CoupleController {
             Integer requestId,
             MatchingStatus status
     ) {
+
         SimpleResultDTO response = SimpleResultDTO.builder().build();
 
         if (status == MatchingStatus.APPROVED) {
@@ -119,7 +119,7 @@ public class CoupleController {
 
         notificationService.sendCoupleResponse(requestId, status);
 
-        return ResponseEntity.ok().body(response);
+        return ResponseEntity.ok().body(ApiResponse.onSuccess(response));
     }
 
     /**
@@ -134,7 +134,7 @@ public class CoupleController {
         log.info("getCouple: userId={}", userId);
 
         CoupleResponse.DetailResultDTO response = coupleService.getCouple(userId);
-        return ResponseEntity.ok().body(response);
+        return ResponseEntity.ok().body(ApiResponse.onSuccess(response));
     }
 
     @DeleteMapping
