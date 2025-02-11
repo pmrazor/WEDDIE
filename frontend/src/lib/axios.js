@@ -1,8 +1,10 @@
 import axios from "axios";
 import useAuthStore from "@/store/auth";
 
+const BASE_URL = import.meta.env.VITE_API_URL;
+
 const instance = axios.create({
-  baseURL: "https://weddie.ssafy.me",
+  baseURL: "${BASE_URL}",
   timeout: 5000,
 });
 

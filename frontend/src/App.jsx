@@ -10,9 +10,12 @@ import BeforeOnBoarding from "./pages/BeforeOnBoarding";
 import AfterOnBoarding from "./pages/AfterOnBoarding";
 import Register from "./pages/auth/register/Register";
 import Callback from "@/pages/auth/oauth/callback";
+import CouplePage from "@/pages/couple/CouplePage";
+import Test from "./style/text";
 import { useEffect } from "react";
 import { injectColors } from "./constants/colors";
 import VirginRoadDetail from "./pages/virginRoad/virginroad/VirginRoadDetail";
+import { ThemeProvider } from "./contexts/theme";
 
 function App() {
   // 색상 설정 함수 호출 
@@ -33,11 +36,11 @@ function App() {
       <Route path="/virginroad" element={<VirginRoad />} />
       <Route path="/virginroad/:nodeId" element={<VirginRoadDetail />} />
       <Route path="/timecapsule/:nodeId" element={<TimeCapsule />} />
+      <Route path="/couple" element={<CouplePage />} />
       <Route path="*" element={<NotFound />} />
     </Routes>
     </>
   );
 }
-
 
 export default App;
