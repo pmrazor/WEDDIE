@@ -13,7 +13,7 @@ public class PaymentResponse {
     @NoArgsConstructor
     @AllArgsConstructor
 
-    public static class PaymentDTO {
+    public static class CreateResultDTO {
         private String paymentKey;   // 결제 키
         private String orderId;      // 주문 번호
         private String orderName;    // 주문 이름

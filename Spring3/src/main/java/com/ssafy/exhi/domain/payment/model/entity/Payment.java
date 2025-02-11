@@ -33,12 +33,12 @@ public class Payment {
     // 결제 방식 (PaymentMethod.java)
     @Enumerated(value = EnumType.STRING)
     @Column(nullable = false)
-    PaymentMethod PaymentMethod;
+    PaymentMethod paymentMethod;
 
     // 결제 상태 (PaymentStatus.java)
     @Enumerated(value = EnumType.STRING)
     @Column(nullable = false)
-    PaymentStatus PaymentStatus;
+    PaymentStatus paymentStatus;
 
     // 결제 요청 시간
     @Column(nullable = false)

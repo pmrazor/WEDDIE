@@ -5,7 +5,7 @@ import com.ssafy.exhi.domain.payment.model.dto.PaymentResponse;
 import jakarta.validation.Valid;
 import org.springframework.stereotype.Service;
 
-@Service
 public interface PaymentService {
-    PaymentResponse.PaymentDTO getPayment(Integer paymentId);
+    PaymentResponse.CreateResultDTO createPayment(PaymentRequest.CreateDTO paymentRequest);
+    PaymentResponse.CreateResultDTO confirmPayment(PaymentRequest.ConfirmDTO confirmRequest);
 }
