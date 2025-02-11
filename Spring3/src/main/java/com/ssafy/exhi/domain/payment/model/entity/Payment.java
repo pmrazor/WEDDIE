@@ -1,6 +1,6 @@
 package com.ssafy.exhi.domain.payment.model.entity;
 
-import com.ssafy.exhi.domain.order.model.entity.Order; // Order 엔티티 import
+import com.ssafy.exhi.domain.demand.model.entity.Demand; // Order 엔티티 import
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
@@ -12,20 +12,18 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class Payment {
     @Id
-    byte[] paymentId;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long paymentId;
+
 
     // toss에서 제공하는 결제 키
     @Column(nullable = false, unique = true)
-    String PaymentKey;
-
-    // toss 내부 주문번호
-    @Column(nullable = false)
-    String OrderId;
+    String paymentKey;
 
     // Order 엔티티와의 관계 설정
     @OneToOne
-    @JoinColumn(name = "order_id", nullable = false)
-    Order order;
+    @JoinColumn(name = "demand_id", nullable = false)
+    Demand demand;
 
     // 총 결제 금액
     long totalAmount;
