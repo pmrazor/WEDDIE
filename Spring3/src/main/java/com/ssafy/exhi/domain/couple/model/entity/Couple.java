@@ -1,10 +1,13 @@
 package com.ssafy.exhi.domain.couple.model.entity;
 
-
+import com.ssafy.exhi.base.BaseEntity;
+import com.ssafy.exhi.domain.recommendation.model.entity.CoupleCluster;
 import com.ssafy.exhi.domain.user.model.entity.User;
 import com.ssafy.exhi.domain.virginroad.model.entity.VirginRoad;
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.time.LocalDate;
 
 @Entity
 @Getter
@@ -12,9 +15,9 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "couples")
-public class Couple {
+public class Couple extends BaseEntity {
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "couple_id")
     private Integer id;
 
@@ -31,4 +34,21 @@ public class Couple {
 
     @OneToOne(mappedBy = "couple")
     private VirginRoad virginRoad;
+
+    // for recommend
+
+    @Column(name = "budget")
+    private Integer budget;
+
+    @Column(name = "marriage_date")
+    private LocalDate marriageDate;
+
+    @OneToOne(mappedBy = "couple", cascade = CascadeType.ALL, orphanRemoval = true)
+    private CoupleCluster coupleCluster;
+
+    public void setCoupleCluster(CoupleCluster coupleCluster) {
+        this.coupleCluster = coupleCluster;
+        coupleCluster.setCouple(this);
+    }
+
 }

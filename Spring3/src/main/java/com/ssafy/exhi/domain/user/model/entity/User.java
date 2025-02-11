@@ -70,9 +70,6 @@ public class User extends BaseEntity {
 
     @Column(name = "provider_id")
     private String providerId;
-    /* recommendation 필드 */
-    @OneToOne(mappedBy = "user", orphanRemoval = true)
-    private UserCluster userCluster;
 
     /* OAuth 필드 끝 */
 
@@ -94,6 +91,11 @@ public class User extends BaseEntity {
         this.userDetail = userDetail;
         userDetail.setUser(this); // 양방향 관계 설정
     }
+
+
+    /* recommendation 필드 */
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private UserCluster userCluster;
 
     // 양방향 편의 메서드
     public void setUserCluster(UserCluster userCluster) {
