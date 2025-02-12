@@ -1,7 +1,9 @@
 package com.ssafy.exhi.domain.todo.repository;
 
 import com.ssafy.exhi.domain.todo.model.entity.Todo;
+import com.ssafy.exhi.domain.todo.model.entity.TodoType;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -13,4 +15,8 @@ public interface TodoRepository extends JpaRepository<Todo, Integer> {
 
     List<Todo> findByPlanId(Integer planId);
 
+    List<Todo> findByPlanIdAndTodoTypeIn(
+            @Param("planId") Integer planId,
+            @Param("todoTypes") List<TodoType> todoTypes
+    );
 }

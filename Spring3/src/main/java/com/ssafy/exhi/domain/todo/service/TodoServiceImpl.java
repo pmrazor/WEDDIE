@@ -11,6 +11,7 @@ import com.ssafy.exhi.domain.todo.model.dto.TodoResponse;
 import com.ssafy.exhi.domain.todo.model.entity.Todo;
 import com.ssafy.exhi.domain.todo.model.entity.TodoType;
 import com.ssafy.exhi.domain.todo.repository.TodoRepository;
+import com.ssafy.exhi.domain.user.model.entity.Gender;
 import com.ssafy.exhi.domain.user.repository.UserDetailRepository;
 import com.ssafy.exhi.domain.virginroad.model.entity.VirginRoad;
 import com.ssafy.exhi.exception.ExceptionHandler;
@@ -19,6 +20,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -84,6 +87,24 @@ public class TodoServiceImpl implements TodoService {
 
         Todo todo = getTodoById(todoId);
         todoRepository.delete(todo);
+    }
+
+    @Override
+    public List<TodoResponse.DetailResultDTO> getTodo(Integer userId, Integer planId) {
+        Gender gender = findGenderByUserId(userId);
+        TodoType type = gender.equals(Gender.FEMALE) ? TodoType.FEMALE : TodoType.MALE;
+        List<TodoType> list = Arrays.asList(TodoType.COMMON, type);
+
+        List<Todo> todo = todoRepository.findByPlanIdAndTodoTypeIn(planId, list);
+
+        return TodoConverter.toDTO(todo);
+    }
+
+    private Gender findGenderByUserId(Integer userId) {
+        Gender gender = userDetailRepository.findByUser_Id(userId)
+                .orElseThrow(() -> new ExceptionHandler(ErrorStatus.USER_DETAIL_NOT_FOUND))
+                .getGender();
+        return gender;
     }
 
     private void checkPlanOwnerShip(Couple couple, Plan plan) {
