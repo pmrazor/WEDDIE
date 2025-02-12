@@ -21,6 +21,7 @@ import java.util.Map;
 @Slf4j
 @Entity
 @Getter
+@Setter
 @Builder
 @ToString
 @NoArgsConstructor

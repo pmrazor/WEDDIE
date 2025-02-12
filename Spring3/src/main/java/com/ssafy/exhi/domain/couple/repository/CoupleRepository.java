@@ -30,12 +30,19 @@ public interface CoupleRepository extends JpaRepository<Couple, Integer> {
 
 
     // for RecommendationServiceImpl
-    @Query("""
-            SELECT c
-            FROM Couple c
-            JOIN CoupleCluster cc ON cc.couple.id = c.id
-            WHERE cc.clusterId = :clusterId
-            ORDER BY c.createdAt DESC
-    """)
-    List<Couple> findAllByClusterId(@Param("clusterId") Integer clusterId);
+    /**
+     * 같은 clusterId를 가진 커플 중, 제외할 ID를 뺀 뒤
+     * 최대 100명의 커플을 무작위(RAND())로 불러옵니다.
+     */
+    @Query(value = """
+            SELECT c.*
+            FROM couples c
+            JOIN couple_cluster cc ON cc.couple_id = c.couple_id
+            WHERE cc.cluster_id = :clusterId
+              AND c.couple_id != :excludeId
+            ORDER BY RAND()
+            LIMIT 100
+            """, nativeQuery = true)
+    List<Couple> findRandomSimilarCouples(@Param("clusterId") Integer clusterId,
+                                          @Param("excludeId") Integer excludeId);
 }
