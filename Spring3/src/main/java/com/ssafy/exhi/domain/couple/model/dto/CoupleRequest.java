@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
+
 public class CoupleRequest {
     @Data
     @Builder
@@ -16,4 +18,13 @@ public class CoupleRequest {
         private String coupleName;
     }
 
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class UpdateDTO {
+        private LocalDate marriageDate;
+        //        private LocalDate loveAnniversary;
+        private Integer budget;
+    }
 }

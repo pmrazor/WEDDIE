@@ -1,11 +1,15 @@
 package com.ssafy.exhi.domain.couple.model.entity;
 
 import com.ssafy.exhi.base.BaseEntity;
+import com.ssafy.exhi.domain.couple.model.dto.CoupleRequest;
 import com.ssafy.exhi.domain.recommendation.model.entity.CoupleCluster;
 import com.ssafy.exhi.domain.user.model.entity.User;
 import com.ssafy.exhi.domain.virginroad.model.entity.VirginRoad;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 
@@ -40,8 +44,13 @@ public class Couple extends BaseEntity {
     @Column(name = "budget")
     private Integer budget;
 
+    // 결혼 예정일
     @Column(name = "marriage_date")
     private LocalDate marriageDate;
+
+//    // 사귀기 시작한 날짜
+//    @Column(name = "love_anniversary")
+//    private LocalDate loveAnniversary;
 
     @OneToOne(mappedBy = "couple", cascade = CascadeType.ALL, orphanRemoval = true)
     private CoupleCluster coupleCluster;
@@ -51,4 +60,8 @@ public class Couple extends BaseEntity {
         coupleCluster.setCouple(this);
     }
 
+    public void updateCouple(CoupleRequest.UpdateDTO updateDTO) {
+        this.marriageDate = updateDTO.getMarriageDate();
+        this.budget = updateDTO.getBudget();
+    }
 }

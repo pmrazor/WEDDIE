@@ -1,7 +1,5 @@
 package com.ssafy.exhi.domain.couple.controller;
 
-import static com.ssafy.exhi.domain.couple.model.dto.CoupleResponse.SimpleResultDTO;
-
 import com.ssafy.exhi.base.ApiResponse;
 import com.ssafy.exhi.domain.couple.model.dto.CoupleRequest;
 import com.ssafy.exhi.domain.couple.model.dto.CoupleResponse;
@@ -15,14 +13,9 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import static com.ssafy.exhi.domain.couple.model.dto.CoupleResponse.SimpleResultDTO;
 
 @Slf4j
 @RestController
@@ -43,8 +36,8 @@ public class CoupleController {
      */
     @PostMapping
     public ResponseEntity<?> createCouple(
-            @RequestHeader("Authorization") String accessToken,
-            @RequestBody @Valid CoupleRequest.CreateDTO coupleDTO
+        @RequestHeader("Authorization") String accessToken,
+        @RequestBody @Valid CoupleRequest.CreateDTO coupleDTO
     ) {
         Integer userId = jwtUtil.getUserId(accessToken);
         log.info("createCouple: userId={}", userId);
@@ -57,8 +50,8 @@ public class CoupleController {
 
     @PostMapping("/request")
     public ResponseEntity<?> requestCouple(
-            @RequestHeader("Authorization") String accessToken,
-            @RequestBody @Valid NotificationRequest.CoupleMatchingDTO matchingDTO
+        @RequestHeader("Authorization") String accessToken,
+        @RequestBody @Valid NotificationRequest.CoupleMatchingDTO matchingDTO
     ) {
         Integer userId = jwtUtil.getUserId(accessToken);
         matchingDTO.setSenderId(userId);
@@ -78,8 +71,8 @@ public class CoupleController {
      */
     @PostMapping("/request/{requestId}/approved")
     public ResponseEntity<?> approveCoupleRequest(
-            @RequestHeader("Authorization") String accessToken,
-            @PathVariable(name = "requestId") Integer requestId
+        @RequestHeader("Authorization") String accessToken,
+        @PathVariable(name = "requestId") Integer requestId
     ) {
         Integer userId = jwtUtil.getUserId(accessToken);
         log.info("createCouple: userId={}", userId);
@@ -96,8 +89,8 @@ public class CoupleController {
      */
     @PostMapping("/request/{requestId}/rejected")
     public ResponseEntity<?> rejectCoupleRequest(
-            @RequestHeader("Authorization") String accessToken,
-            @PathVariable(name = "requestId") Integer requestId
+        @RequestHeader("Authorization") String accessToken,
+        @PathVariable(name = "requestId") Integer requestId
     ) {
         Integer userId = jwtUtil.getUserId(accessToken);
         log.info("rejectCoupleRequest: userId={}", userId);
@@ -106,9 +99,9 @@ public class CoupleController {
     }
 
     private ResponseEntity<?> getSimpleResultDTOResponseEntity(
-            Integer userId,
-            Integer requestId,
-            MatchingStatus status
+        Integer userId,
+        Integer requestId,
+        MatchingStatus status
     ) {
 
         SimpleResultDTO response = SimpleResultDTO.builder().build();
@@ -146,4 +139,13 @@ public class CoupleController {
         return ResponseEntity.noContent().build();
     }
 
+    @PatchMapping
+    public ResponseEntity<?> updateCouple(
+        @RequestHeader("Authorization") String accessToken,
+        @RequestBody CoupleRequest.UpdateDTO updateDTO) {
+        Integer userId = jwtUtil.getUserId(accessToken);
+
+        coupleService.updateCouple(userId, updateDTO);
+        return ResponseEntity.ok().body(null);
+    }
 }

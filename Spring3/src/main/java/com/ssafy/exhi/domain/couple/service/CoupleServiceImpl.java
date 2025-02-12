@@ -16,10 +16,11 @@ import com.ssafy.exhi.domain.user.model.entity.UserDetail;
 import com.ssafy.exhi.domain.user.repository.UserRepository;
 import com.ssafy.exhi.exception.ExceptionHandler;
 import jakarta.transaction.Transactional;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -49,7 +50,7 @@ public class CoupleServiceImpl implements CoupleService {
         validateCouple(notification);
 
         log.info("sender: {}, receiver: {}, status: {}", notification.getSender(), notification.getReceiver(),
-                notification.getMatchingStatus());
+            notification.getMatchingStatus());
 
         Couple couple = CoupleConverter.toEntity(notification);
         Couple saved = coupleRepository.save(couple);
@@ -57,12 +58,19 @@ public class CoupleServiceImpl implements CoupleService {
         return CoupleConverter.toSimpleDTO(saved);
     }
 
+    @Override
+    public void updateCouple(Integer userId, CoupleRequest.UpdateDTO updateDTO) {
+        Couple couple = findCoupleByUserId(userId);
+
+        couple.updateCouple(updateDTO);
+    }
+
     private void validateCouple(CoupleMatchingNotification notification) {
         User sender = notification.getSender();
         User receiver = notification.getReceiver();
 
         if (coupleRepository.existsCoupleByUserIds(sender.getId(),
-                receiver.getId())) {
+            receiver.getId())) {
             throw new ExceptionHandler(ErrorStatus.COUPLE_ALREADY_EXIST);
         }
 
@@ -71,9 +79,9 @@ public class CoupleServiceImpl implements CoupleService {
 
     private CoupleMatchingNotification findNotificationByRequestId(Integer requestId) {
         return coupleNotificationRepository.findCoupleMatchingNotificationById(requestId)
-                .orElseThrow(
-                        () -> new ExceptionHandler(ErrorStatus.NOTIFICATION_NOT_FOUND)
-                );
+            .orElseThrow(
+                () -> new ExceptionHandler(ErrorStatus.NOTIFICATION_NOT_FOUND)
+            );
     }
 
     private void validateNotification(CoupleMatchingNotification notification) {
@@ -84,14 +92,14 @@ public class CoupleServiceImpl implements CoupleService {
 
     private void validateUsers(User receiver, User sender) {
         Gender receiverGender = Optional.ofNullable(receiver)
-                .map(User::getUserDetail)
-                .map(UserDetail::getGender)
-                .orElseThrow(() -> new ExceptionHandler(ErrorStatus.INVALID_USER));
+            .map(User::getUserDetail)
+            .map(UserDetail::getGender)
+            .orElseThrow(() -> new ExceptionHandler(ErrorStatus.INVALID_USER));
 
         Gender senderGender = Optional.ofNullable(sender)
-                .map(User::getUserDetail)
-                .map(UserDetail::getGender)
-                .orElseThrow(() -> new ExceptionHandler(ErrorStatus.INVALID_USER));
+            .map(User::getUserDetail)
+            .map(UserDetail::getGender)
+            .orElseThrow(() -> new ExceptionHandler(ErrorStatus.INVALID_USER));
 
         if (receiverGender == senderGender) {
             throw new ExceptionHandler(ErrorStatus.COUPLE_SAME_GENDERED);
@@ -112,15 +120,15 @@ public class CoupleServiceImpl implements CoupleService {
 
     private User findUserByUserId(Integer userId) {
         return userRepository.findById(userId)
-                .orElseThrow(
-                        () -> new ExceptionHandler(ErrorStatus.USER_NOT_FOUND)
-                );
+            .orElseThrow(
+                () -> new ExceptionHandler(ErrorStatus.USER_NOT_FOUND)
+            );
     }
 
     private Couple findCoupleByUserId(Integer userId) {
         return coupleRepository.findCoupleByUserId(userId)
-                .orElseThrow(
-                        () -> new ExceptionHandler(ErrorStatus.COUPLE_NOT_FOUND)
-                );
+            .orElseThrow(
+                () -> new ExceptionHandler(ErrorStatus.COUPLE_NOT_FOUND)
+            );
     }
 }
