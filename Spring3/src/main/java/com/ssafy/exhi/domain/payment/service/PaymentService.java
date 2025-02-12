@@ -7,5 +7,5 @@ import org.springframework.stereotype.Service;
 @Service
 public interface PaymentService {
     PaymentResponse.CreateResultDTO createPayment(PaymentRequest.CreateDTO paymentRequest);
-    PaymentResponse.CreateResultDTO confirmPayment(PaymentRequest.ConfirmDTO confirmRequest);
+    PaymentResponse.ConfirmResultDTO confirmPayment(PaymentRequest.ConfirmDTO confirmRequest);
 }

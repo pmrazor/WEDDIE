@@ -26,7 +26,7 @@ public class PaymentController {
     // ✅ 결제 승인 API (Toss에서 successUrl로 요청 보낼 때 실행됨)
     @PostMapping("/confirm")
     public ResponseEntity<?> confirmPayment(@RequestBody PaymentRequest.ConfirmDTO confirmRequest) {
-        PaymentResponse.CreateResultDTO response = paymentService.confirmPayment(confirmRequest);
+        PaymentResponse.ConfirmResultDTO response = paymentService.confirmPayment(confirmRequest);
         return ResponseEntity.ok(response);
     }
 }

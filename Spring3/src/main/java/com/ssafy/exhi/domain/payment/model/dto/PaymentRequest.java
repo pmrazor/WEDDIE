@@ -1,6 +1,11 @@
 package com.ssafy.exhi.domain.payment.model.dto;
 
 import lombok.*;
+import com.ssafy.exhi.domain.payment.model.entity.PaymentMethod;
+import com.ssafy.exhi.domain.payment.model.entity.Payment;
+import java.util.UUID;
+
+
 
 @Getter
 @Setter
@@ -21,14 +26,36 @@ public class PaymentRequest {
         private String customerMobilePhone;  // 고객 휴대폰 번호
     }
 
+//    @Data
+//    @Builder
+//    @NoArgsConstructor
+//    @AllArgsConstructor
+//    public static class ConfirmDTO {
+//        private String paymentKey;  // Toss 결제 키
+//        private String orderId;     // 주문 ID
+//        private Number amount;         // 결제 금액
+//    }
+
     @Data
     @Builder
     @NoArgsConstructor
     @AllArgsConstructor
     public static class ConfirmDTO {
-        private String paymentKey;  // Toss 결제 키
-        private String orderId;     // 주문 ID
-        private Number amount;         // 결제 금액
+        private Long paymentId;
+        private PaymentMethod paymentMethod;
+        private Long amount;
+        private String orderName;
+        private String yourSuccessUrl;
+        private String yourFailUrl;
+
+        public Payment toEntity() {
+            return Payment.builder()
+                    .paymentMethod(this.paymentMethod)
+                    .amount(amount)
+                    .orderName(orderName)
+                    .orderId(UUID.randomUUID().toString())
+                    .build();
+        }
     }
 }
 

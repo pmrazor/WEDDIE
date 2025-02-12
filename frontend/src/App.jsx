@@ -10,6 +10,7 @@ import BeforeOnBoarding from "./pages/BeforeOnBoarding";
 import AfterOnBoarding from "./pages/AfterOnBoarding";
 import Register from "./pages/auth/register/Register";
 import Callback from "@/pages/auth/oauth/callback";
+import CheckoutPage from "./pages/payment/Payment";
 import Test from "./style/text";
 import { useEffect } from "react";
 import { injectColors } from "./constants/colors";
@@ -33,6 +34,7 @@ function App() {
         <Route path="/afteronboarding" element={<AfterOnBoarding />} />
         <Route path="/onboarding" element={<Onboarding />} />
         <Route path="/virginroad" element={<VirginRoad />} />
+        <Route path="/payment" element={<CheckoutPage />} />
         <Route path="/timecapsule/:nodeId" element={<TimeCapsule />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
