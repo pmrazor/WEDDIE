@@ -11,6 +11,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @Slf4j
 @RestController
 @RequiredArgsConstructor
@@ -19,6 +21,16 @@ public class TodoController {
 
     private final JWTUtil jwtUtil;
     private final TodoService todoService;
+
+    @GetMapping("/{planId}/todo")
+    public ResponseEntity<?> getTodo(
+            @RequestHeader(name = "Authorization") String accessToken,
+            @PathVariable("planId") Integer planId
+    ) {
+        Integer userId = jwtUtil.getUserId(accessToken);
+        List<TodoResponse.DetailResultDTO> response = todoService.getTodo(userId, planId);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
 
     /**
      *

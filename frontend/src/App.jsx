@@ -16,11 +16,11 @@ import { injectColors } from "./constants/colors";
 import VirginRoadDetail from "./pages/virginRoad/virginroad/VirginRoadDetail";
 
 function App() {
-  // 색상 설정 함수 호출 
+  // 색상 설정 함수 호출
   useEffect(() => {
-    injectColors()
-  }, [])
-  
+    injectColors();
+  }, []);
+
   return (
     <>
       <Routes>
@@ -32,7 +32,7 @@ function App() {
         <Route path="/afteronboarding" element={<AfterOnBoarding />} />
         <Route path="/onboarding" element={<Onboarding />} />
         <Route path="/virginroad" element={<VirginRoad />} />
-        <Route path="/virginroad/:nodeId" element={<VirginRoadDetail />} />
+        <Route path="/virginroad/:planId" element={<VirginRoadDetail />} />
         <Route path="/timecapsule/:nodeId" element={<TimeCapsule />} />
         <Route path="/couple" element={<CouplePage />} />
         <Route path="*" element={<NotFound />} />
@@ -40,6 +40,5 @@ function App() {
     </>
   );
 }
-
 
 export default App;
