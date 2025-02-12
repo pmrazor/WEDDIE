@@ -15,7 +15,7 @@ import lombok.*;
 @AllArgsConstructor
 public class DefaultTodo extends BaseEntity {
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "default_todo_id")
     private Integer id;
 

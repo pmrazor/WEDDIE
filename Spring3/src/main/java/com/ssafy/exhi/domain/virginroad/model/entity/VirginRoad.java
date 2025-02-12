@@ -24,7 +24,7 @@ import java.util.Optional;
 public class VirginRoad {
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "virgin_road_id")
     private Integer id;
 

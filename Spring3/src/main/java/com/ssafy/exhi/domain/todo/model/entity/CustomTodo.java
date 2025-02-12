@@ -2,12 +2,7 @@ package com.ssafy.exhi.domain.todo.model.entity;
 
 import com.ssafy.exhi.base.BaseEntity;
 import com.ssafy.exhi.domain.ServiceType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -23,7 +18,7 @@ import lombok.ToString;
 public class CustomTodo extends BaseEntity {
     @Id
     @Column(name = "custom_todo_id")
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
     @Column(name = "content")

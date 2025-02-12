@@ -1,10 +1,7 @@
 package com.ssafy.exhi.domain.tip.model.model;
 
 import com.ssafy.exhi.domain.ServiceType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -17,7 +14,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class Tip {
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "tip_id")
     private Integer id;
 
