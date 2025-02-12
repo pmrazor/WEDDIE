@@ -13,7 +13,7 @@ const IconCard = ({ type, head_text1, head_text2, sub_text1, sub_text2, icon, st
       </div>
       <div className="icon-area"> {/* icon이 있을 위치 조정 */}
         {icon} {/* icon은 어디서 가져오나?  */}
-      </div>
+      </div>    
     </div>
   )
 }
