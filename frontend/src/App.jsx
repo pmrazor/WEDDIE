@@ -16,6 +16,8 @@ import { injectColors } from "./constants/colors";
 import VirginRoadDetail from "./pages/virginRoad/virginroad/VirginRoadDetail";
 import ApiTest from "./pages/apitest/ApiTest";
 import VirginRoadSplash from "./pages/virginRoad/splash";
+import ShopList from "./pages/shop/shopList";
+import ShopDetail from "./pages/shop/shopDetail";
 
 function App() {
   // 색상 설정 함수 호출
@@ -39,6 +41,9 @@ function App() {
         <Route path="/timecapsule/:nodeId" element={<TimeCapsule />} />
         <Route path="/couple" element={<CouplePage />} />
         <Route path="/api-test" element={<ApiTest />} />
+        <Route path="/shop/list" element={<ShopList />} />
+        <Route path="/shop/detail" element={<ShopDetail />} />
+
         <Route path="*" element={<NotFound />} />
       </Routes>
     </>
