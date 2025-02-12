@@ -13,6 +13,7 @@ const useAuthStore = create(
             loginId,
             password,
           });
+          console.log(loginId, password);
           return response.data;
         },
         async checkAuth() {
@@ -21,6 +22,10 @@ const useAuthStore = create(
         },
         async getUserDetail() {
           const response = await instance.get("/api/users/detail");
+          return response.data;
+        },
+        async deleteUser() {
+          const response = await instance.delete("/api/users");
           return response.data;
         },
       };
@@ -102,6 +107,11 @@ const useAuthStore = create(
           set((state) => ({
             user: { ...state.user, ...userData },
           })),
+        
+        deleteUser: async () => {
+          const data = await apiCalls.deleteUser()
+          return data
+        },
 
         // 새로 추가된 사용자 상세 정보 가져오는 함수
         fetchUserDetail: async () => {

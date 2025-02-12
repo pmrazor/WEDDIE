@@ -9,11 +9,7 @@ const useOnboardingStore = create((set) => ({
       const accessToken = useAuthStore.getState().accessToken;
 
       // Authorization 헤더에 토큰을 포함하여 요청
-      const response = await instance.post("/api/users/detail", formData, {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      });
+      const response = await instance.post("/api/users/detail", formData);
 
       // 온보딩 성공 시 유저 정보 업데이트
       if (response.data) {

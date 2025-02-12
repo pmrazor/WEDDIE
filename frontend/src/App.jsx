@@ -14,6 +14,7 @@ import CouplePage from "@/pages/couple/CouplePage";
 import { useEffect } from "react";
 import { injectColors } from "./constants/colors";
 import VirginRoadDetail from "./pages/virginRoad/virginroad/VirginRoadDetail";
+import ApiTest from "./pages/apitest/ApiTest";
 
 function App() {
   // 색상 설정 함수 호출
@@ -35,6 +36,7 @@ function App() {
         <Route path="/virginroad/:planId" element={<VirginRoadDetail />} />
         <Route path="/timecapsule/:nodeId" element={<TimeCapsule />} />
         <Route path="/couple" element={<CouplePage />} />
+        <Route path="/api-test" element={<ApiTest />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </>

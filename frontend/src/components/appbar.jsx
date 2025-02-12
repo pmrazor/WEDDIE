@@ -130,6 +130,9 @@ const Appbar = () => {
               <Link to="/menu3" className="hover:text-gray-300 text-sm">
                 메뉴 3
               </Link>
+              <Link to="/api-test" className="hover:text-gray-300 text-sm">
+                API 테스트
+              </Link>
             </div>
           </div>
 
