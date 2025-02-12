@@ -144,7 +144,7 @@ const VirginRoadDetail = () => {
   // const gender = "Male";
 
   // const gender = useAuthStore((state) => state.gender)
-  const gender = "Female"
+  // const gender = "Female"
 
   const genderBack = () => {
     switch (gender) {

@@ -9,27 +9,34 @@ const useVirginRoadStore = create(
       const apiCalls = {
         async createVirginRoad(plans) {
           const response = await instance.post("/api/virginRoad", { plans });
-          console.log("버진로드 생성 api 호출", response)
+          console.log("버진로드 생성 api 호출", response);
+          return response.data;
+        },
+        async getRecommendVirginRoad() {
+          const response = await instance.get(
+            "/api/recommendation/recommendPlans"
+          );
+          console.log("버진로드 조회 api 호출", response);
           return response.data;
         },
         async getVirginRoad() {
           const response = await instance.get("/api/virginRoad");
-          console.log("버진로드 조회 api 호출", response)
+          console.log("버진로드 조회 api 호출", response);
           return response.data;
         },
         async deleteVirginRoad() {
           const response = await instance.delete("/api/virginRoad");
-          console.log("버진로드 삭제 api 호출", response)
+          console.log("버진로드 삭제 api 호출", response);
           return response.data;
         },
         async updateVirginRoadPlans(plans) {
           const response = await instance.put("/api/virginRoad", { plans });
-          console.log("버진로드 업데이트 api 호출", response.data)
+          console.log("버진로드 업데이트 api 호출", response.data);
           return response.data;
         },
         async completeVirginRoad() {
           const response = await instance.patch("/api/virginRoad");
-          console.log("버진로드 완료 api 호출", response.data)
+          console.log("버진로드 완료 api 호출", response.data);
           return response.data;
         },
       };
@@ -55,7 +62,7 @@ const useVirginRoadStore = create(
               couple: data.couple,
               isLoading: false,
             });
-            
+
             return data;
           } catch (error) {
             set({ error: error.message, isLoading: false });
@@ -65,7 +72,6 @@ const useVirginRoadStore = create(
 
         // 버진로드 조회
         getVirginRoad: async () => {
-            
           try {
             set({ isLoading: true });
             const data = await apiCalls.getVirginRoad();
@@ -84,6 +90,24 @@ const useVirginRoadStore = create(
           }
         },
 
+        getRecommendVirginRoad: async () => {
+          try {
+            set({ isLoading: true });
+            const data = await apiCalls.getRecommendVirginRoad();
+            set({
+              result: data.result,
+              virginRoad: data.result.id,
+              plans: data.result.plans,
+              couple: data.result.couple,
+              isLoading: false,
+            });
+            return data;
+          } catch (error) {
+            set({ error: error.message, isLoading: false });
+            throw error;
+          }
+        },
+
         // 버진로드 삭제
         deleteVirginRoad: async () => {
           try {
@@ -91,7 +115,7 @@ const useVirginRoadStore = create(
             const data = await apiCalls.deleteVirginRoad();
             console.log(data);
             const result = data;
-            
+
             set({
               result: result,
               virginRoad: null,
@@ -99,7 +123,7 @@ const useVirginRoadStore = create(
               couple: null,
               isLoading: false,
             });
-            return result
+            return result;
           } catch (error) {
             set({ error: error.message, isLoading: false });
             throw error;
@@ -111,7 +135,7 @@ const useVirginRoadStore = create(
           try {
             set({ isLoading: true });
             const data = await apiCalls.updateVirginRoadPlans(plans);
-            console.log("updatePlans", data)
+            console.log("updatePlans", data);
             set({
               plans: data.plans,
               isLoading: false,

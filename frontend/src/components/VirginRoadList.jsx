@@ -7,8 +7,7 @@ const VirginRoadList = ({ isEditing, plans, toggleActivated }) => {
   const [VirginRoadData, setVirginRoadData] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
-  const { plans, getVirginRoad, isLoading } = useVirginRoadStore();
-
+  const { getVirginRoad, isLoading } = useVirginRoadStore();
 
   // 컴포넌트 마운트 시 버진로드 데이터 조회
   useEffect(() => {
@@ -48,12 +47,12 @@ const VirginRoadList = ({ isEditing, plans, toggleActivated }) => {
 
   return (
     <div className="VirginRoadList">
-      {plans.map((plan) => (
+      {plans.map((plan, index) => (
         <VirginRoadCard 
           key={plan.planId} 
-          step={getStepName(plan, serviceType)} 
+          step={getStepName(plan.serviceType)} 
           planStatus={plan.planStatus} 
-          activated={plan.visible} 
+          visible={plan.visible} 
           isEditing={isEditing}
           toggleActivated={() => toggleActivated(index)}
         />
