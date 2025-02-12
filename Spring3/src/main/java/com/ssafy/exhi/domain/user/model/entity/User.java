@@ -4,7 +4,6 @@ import com.ssafy.exhi.base.BaseEntity;
 import com.ssafy.exhi.domain.oauth.AuthProvider;
 import com.ssafy.exhi.domain.recommendation.model.entity.UserCluster;
 import com.ssafy.exhi.domain.user.model.dto.UserRequest;
-import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -29,7 +28,6 @@ import lombok.ToString;
 @Builder
 @ToString
 @Entity
-@Schema(name = "User", description = "유저 엔티티")
 @NoArgsConstructor
 @AllArgsConstructor
 public class User extends BaseEntity {
@@ -40,9 +38,6 @@ public class User extends BaseEntity {
 
     @Column(name = "name")
     private String name;
-
-//    @Column(name = "gender")
-//    private Gender gender;
 
     @Column(name = "login_id", unique = true)
     private String loginId;
