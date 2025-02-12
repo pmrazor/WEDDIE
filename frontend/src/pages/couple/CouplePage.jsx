@@ -53,9 +53,11 @@ const CouplePage = () => {
 
   const handleUpdateCoupleDetails = async () => {
     try {
+      console.log("merriageDate", merriageDate);
+      console.log("format", format(merriageDate, "yyyy-MM-dd"));
       await coupleApi.updateCoupleDetails({
         budget: parseInt(budget),
-        marriage_date: merriageDate ? format(merriageDate, "yyyy-MM-dd") : null,
+        marriageDate: merriageDate ? format(merriageDate, "yyyy-MM-dd") : null,
       });
 
       toast({
