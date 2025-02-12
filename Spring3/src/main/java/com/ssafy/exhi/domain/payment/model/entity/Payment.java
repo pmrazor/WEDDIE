@@ -12,39 +12,31 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class Payment {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long paymentId;
+    @GeneratedValue(strategy = GenerationType.IDENTITY) // ✅ PK 자동 생성
+    private Long paymentId;  // byte[] → Long 타입으로 변경!
 
-
-    // toss에서 제공하는 결제 키
     @Column(nullable = false, unique = true)
-    String paymentKey;
+    private String paymentKey;
 
-    // Order 엔티티와의 관계 설정
+    // ✅ Demand와 OneToOne 관계
     @OneToOne
-    @JoinColumn(name = "demand_id", nullable = false)
-    Demand demand;
+    @JoinColumn(name = "demand_id", nullable = false, unique = true) // ✅ FK 설정
+    private Demand demand;
 
-    // 총 결제 금액
-    long totalAmount;
-
-    // 결제 방식 (PaymentMethod.java)
-    @Enumerated(value = EnumType.STRING)
     @Column(nullable = false)
-    PaymentMethod paymentMethod;
+    private long totalAmount;
 
-    // 결제 상태 (PaymentStatus.java)
-    @Enumerated(value = EnumType.STRING)
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    PaymentStatus paymentStatus;
+    private PaymentMethod paymentMethod;
 
-    // 결제 요청 시간
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    LocalDateTime requestedAt;
+    private PaymentStatus paymentStatus;
 
-    // 결제 승인 시간
-    LocalDateTime approvedAt;
+    @Column(nullable = false)
+    private LocalDateTime requestedAt;
 
-    // 기타 메서드 생략
+    private LocalDateTime approvedAt;
 }
 

@@ -10,9 +10,9 @@ import com.ssafy.exhi.domain.payment.repository.PaymentRepository;
 import com.ssafy.exhi.domain.demand.model.entity.Demand;
 import com.ssafy.exhi.domain.demand.repository.DemandRepository;
 import lombok.extern.slf4j.Slf4j;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import lombok.RequiredArgsConstructor;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.net.URI;
@@ -29,28 +29,27 @@ import java.time.LocalDateTime;
 @RequiredArgsConstructor
 public class PaymentServiceImpl implements PaymentService {
 
-    @Value("${payment.api.url}")
+    @Value("${payment.api.url}")  // application.properties에서 API URL 가져오기
     private String paymentApiUrl;
 
-    @Value("${payment.secret.key}")
+    @Value("${payment.secret.key}") // application.properties에서 시크릿 키 가져오기
     private String secretKey;
 
     private final PaymentRepository paymentRepository;
     private final DemandRepository demandRepository;
     private final ObjectMapper objectMapper = new ObjectMapper();
+    private final HttpClient httpClient = HttpClient.newHttpClient(); // HTTP 요청 재사용
 
     // ✅ 결제 요청 (결제 요청 정보를 DB에 저장)
     @Override
     public PaymentResponse.CreateResultDTO createPayment(PaymentRequest.CreateDTO paymentRequest) {
-        // Demand 엔티티 조회
         Demand demand = demandRepository.findById(paymentRequest.getDemandId())
-                .orElseThrow(() -> new RuntimeException("해당 demandId에 대한 주문을 찾을 수 없습니다."));
+                .orElseThrow(() -> new RuntimeException("❌ 해당 demandId에 대한 주문을 찾을 수 없습니다."));
 
-        // 결제 요청 정보를 DB에 저장
         Payment payment = Payment.builder()
-                .demand(demand) // Demand 객체 저장
+                .demand(demand)
                 .totalAmount(paymentRequest.getAmount())
-                .paymentStatus(PaymentStatus.READY) // 결제 대기 상태
+                .paymentStatus(PaymentStatus.READY)
                 .requestedAt(LocalDateTime.now())
                 .build();
 
@@ -60,7 +59,7 @@ public class PaymentServiceImpl implements PaymentService {
                 .demandId(demand.getId())
                 .demandName(demand.getDemandName())
                 .totalAmount(paymentRequest.getAmount())
-                .status(PaymentStatus.READY.name()) // Enum의 문자열 값 반환
+                .status(PaymentStatus.READY.name())
                 .build();
     }
 
@@ -74,7 +73,7 @@ public class PaymentServiceImpl implements PaymentService {
 
             // Demand 조회
             Demand demand = demandRepository.findById(demandId)
-                    .orElseThrow(() -> new RuntimeException("해당 demandId에 대한 주문을 찾을 수 없습니다."));
+                    .orElseThrow(() -> new RuntimeException("❌ 해당 demandId에 대한 주문을 찾을 수 없습니다."));
 
             // JSON 요청 객체 생성
             JsonNode requestObj = objectMapper.createObjectNode()
@@ -89,22 +88,21 @@ public class PaymentServiceImpl implements PaymentService {
                     .uri(URI.create(paymentApiUrl + "/v1/payments/confirm"))
                     .header("Authorization", getAuthorizationHeader())
                     .header("Content-Type", "application/json")
-                    .method("POST", HttpRequest.BodyPublishers.ofString(requestBody))
+                    .POST(HttpRequest.BodyPublishers.ofString(requestBody))
                     .build();
 
-            HttpResponse<String> response = HttpClient.newHttpClient()
-                    .send(request, HttpResponse.BodyHandlers.ofString());
+            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 
             if (response.statusCode() == 200) {
                 Map<String, Object> paymentData = objectMapper.readValue(response.body(), Map.class);
 
                 // 기존 결제 정보 조회
                 Payment payment = paymentRepository.findByDemand(demand)
-                        .orElseThrow(() -> new RuntimeException("결제 정보를 찾을 수 없습니다."));
+                        .orElseThrow(() -> new RuntimeException("❌ 결제 정보를 찾을 수 없습니다."));
 
                 // ✅ 결제 정보 업데이트
                 payment.setPaymentKey(paymentKey);
-                payment.setPaymentStatus(PaymentStatus.DONE); // ✅ ENUM 직접 사용
+                payment.setPaymentStatus(PaymentStatus.DONE);
                 payment.setApprovedAt(LocalDateTime.parse((String) paymentData.get("approvedAt")));
 
                 // ✅ 변경된 결제 정보 저장
@@ -115,15 +113,15 @@ public class PaymentServiceImpl implements PaymentService {
                         .demandId(demand.getId())
                         .demandName(demand.getDemandName())
                         .totalAmount(amount)
-                        .status(PaymentStatus.DONE.name()) // ✅ Enum의 문자열 값 반환
+                        .status(PaymentStatus.DONE.name())
                         .paymentMethod((String) paymentData.get("method"))
                         .build();
             } else {
-                throw new RuntimeException("결제 승인 실패: " + response.body());
+                throw new RuntimeException("❌ 결제 승인 실패: " + response.body());
             }
 
         } catch (Exception e) {
-            throw new RuntimeException("결제 승인 오류 발생: " + e.getMessage());
+            throw new RuntimeException("❌ 결제 승인 오류 발생: " + e.getMessage());
         }
     }
 
