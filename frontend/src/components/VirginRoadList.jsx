@@ -1,8 +1,12 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import "../style/VirginRoadList.css"
 import VirginRoadCard from "@/components/common/cards/VirginRoadCard";
 import useVirginRoadStore from "@/store/virginroad";
 
-const VirginRoadList = () => {
+const VirginRoadList = ({ isEditing, plans, toggleActivated }) => {
+  const [VirginRoadData, setVirginRoadData] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
   const { plans, getVirginRoad, isLoading } = useVirginRoadStore();
 
 
@@ -34,14 +38,24 @@ const VirginRoadList = () => {
     return <div>로딩 중...</div>;
   }
 
+  // const toggleActivated = (index) => {
+  //   setVirginRoadData((prevData) =>
+  //     prevData.map((item, i) =>
+  //       i === index ? { ...item, activated: item.activated === "TRUE" ? "FALSE" : "TRUE" } : item
+  //     )
+  //   );
+  // };
+
   return (
-    <div className="virgin-road-list">
+    <div className="VirginRoadList">
       {plans.map((plan) => (
-        <VirginRoadCard
-          key={plan.planId}
-          step={getStepName(plan.serviceType)}
-          planStatus={plan.planStatus}
-          activated={plan.visible}
+        <VirginRoadCard 
+          key={plan.planId} 
+          step={getStepName(plan, serviceType)} 
+          planStatus={plan.planStatus} 
+          activated={plan.visible} 
+          isEditing={isEditing}
+          toggleActivated={() => toggleActivated(index)}
         />
       ))}
     </div>

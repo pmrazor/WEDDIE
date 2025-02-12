@@ -9,6 +9,8 @@ import { useEffect, useState } from "react"
 import { colors } from "@/constants/colors"
 import Button from "@/components/common/Button"
 import flowerbouquet from "@/assets/BeforeOnBoarding/flower-bouquet.png"
+import dummy02 from "/Advertisement/dummy02.jpg"
+
 
 const weddingDay = new Date("2025-05-05")
 const startDay = new Date("2023-11-01")
@@ -54,9 +56,9 @@ const AfterOnBoarding = () => {
     <div className="AfterOnBoarding">
       <div className="Advertisement">
         <AdvertisementCard 
-          head_text={"작지만 확실한 행복, 스몰웨딩"}
-          sub_text={"소중한 사람들과 함께하는 작은 결혼식 준비 가이드"}
-          backgroundImage={`url(${"/Advertisement/heart.png"})`}
+          headText={"작지만 확실한 행복, 스몰웨딩"}
+          subText1={"소중한 사람들과 함께하는 작은 결혼식 준비 가이드"}
+          style={{backgroundImage : `url(${dummy02})`}}
         />
         {/* 여기에 n개 중 몇번째인지 보여주는 버튼 UI */}
       </div>
