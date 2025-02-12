@@ -9,21 +9,30 @@ import { colors } from "@/constants/colors"
 import man from "@/assets/BeforeOnBoarding/man.svg"
 import heartwithribbon from "@/assets/BeforeOnBoarding/heartwithribbon.svg"
 import flowerbouquet from "@/assets/BeforeOnBoarding/flower-bouquet.png"
+import useOnboardingStore from "@/store/onboarding"
 
 const BeforeOnBoarding = () => {
 
   const { isAuthenticated } = useAuthStore() 
+  // const { isOnBoarded } = useOnboardingStore()
+  const isOnBoarded = false // 임의
   const nav = useNavigate()
-
+  
   const onClickButton = () => {
     switch (isAuthenticated) {
       case false : return nav("/login") 
-      case true : return nav("/virginroad")
+      case true : 
+      switch (isOnBoarded) {
+        case false : return nav("/onboarding") 
+        case true : return nav("/virginroad")
+      }
     }
   }
 
   // const { theme } = useTheme() 
   // console.log("[from BeforeOnBoarding.jsx] theme.PRIMARY : ", theme.PRIMARY)
+
+  const gender = "Male"
 
 
   return (
@@ -39,7 +48,7 @@ const BeforeOnBoarding = () => {
           onClick={onClickButton} 
           stickyType={"UNDER"}  
           text={"우리 부부만의 버진 로드 시작하기"} 
-          style={{backgroundColor : colors.genderColors["Default"].PRIMARY}}
+          style={{backgroundColor : colors.genderColors[gender].PRIMARY_DEEP}}
         />
       </div>
       <div className="card-container">

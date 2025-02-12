@@ -1,22 +1,30 @@
 import "@/style/component/VirginRoadCard.css"
 import Button from "../Button"
 import { useNavigate } from "react-router-dom"
-import status1 from "@/assets/VirginRoadCard/status1.svg"
-import status2 from "@/assets/VirginRoadCard/status2.svg"
-import status3 from "@/assets/VirginRoadCard/status3.svg"
-import status4 from "@/assets/VirginRoadCard/status4.svg"
+// import status1 from "@/assets/VirginRoadCard/status1.svg"
+// import status2 from "@/assets/VirginRoadCard/status2.svg"
+// import status3 from "@/assets/VirginRoadCard/status3.svg"
+// import status4 from "@/assets/VirginRoadCard/status4.svg"
+import man1 from "@/assets/VirginRoadCard/man1.svg"
+import man2 from "@/assets/VirginRoadCard/man2.svg"
+import man3 from "@/assets/VirginRoadCard/man3.svg"
+import man4 from "@/assets/VirginRoadCard/man4.svg"
+import battery1 from "@/assets/VirginRoadCard/battery1.svg"
+import battery2 from "@/assets/VirginRoadCard/battery2.svg"
+import battery3 from "@/assets/VirginRoadCard/battery3.svg"
+import battery4 from "@/assets/VirginRoadCard/battery4.svg"
 import { colors } from "@/constants/colors"
 
 const gender = "Male"
 
-const VirginRoadCard = ({step, planStatus, activated}) => {
+const VirginRoadCard = ({step, planStatus, activated, isEditing, toggleActivated }) => {
   
   const iconForStatus = () => {
     switch (planStatus) {
-      case "BEFORE_START" : return status1
-      case "IN_PROGRESS" : return status2
-      case "NOT_TIME_CAPSULE" : return status3
-      case "FINISHED" : return status4
+      case "BEFORE_START" : return man1
+      case "IN_PROGRESS" : return man2
+      case "NOT_TIME_CAPSULE" : return man3
+      case "FINISHED" : return man4
     }
   }
   const backgroundForStatus = () => {
@@ -24,7 +32,7 @@ const VirginRoadCard = ({step, planStatus, activated}) => {
       case "BEFORE_START" : return colors.genderColors[gender].PRIMARY
       case "IN_PROGRESS" : return colors.genderColors[gender].PRIMARY_EXTRADEEP
       case "NOT_TIME_CAPSULE" : return colors.genderColors[gender].PRIMARY_DEEP
-      case "FINISHED" : return colors.genderColors[gender].PRIMARY_EXTRALIGHT
+      case "FINISHED" : return colors.genderColors[gender].PRIMARY
     }
   }
 
@@ -35,7 +43,15 @@ const VirginRoadCard = ({step, planStatus, activated}) => {
   }
   
   return (
-    <div className="VirginRoadCard" style={{backgroundColor : backgroundForStatus()}}>
+    <div 
+      className={`VirginRoadCard ${isEditing ? "shake" : ""}`}
+      style={
+        activated !== "TRUE" 
+        ? {backgroundColor : colors.GRAY_100} 
+        : planStatus === "FINISHED" 
+          ? {border : `3px solid ${backgroundForStatus()}`, backgroundColor: backgroundForStatus()}
+          : {border : `3px solid ${backgroundForStatus()}`}}
+    >
       <div className="icon-area">
         <img src={iconForStatus()} alt="icon"/>
       </div>
@@ -43,10 +59,21 @@ const VirginRoadCard = ({step, planStatus, activated}) => {
         {step}
       </div>
       <div className="to-go-button">
-        <Button 
-          onClick={onClickToGo}
-          text={">"}
-        />
+        {isEditing ? (
+          <Button 
+            onClick={toggleActivated}
+            text={"-"}
+            addClass={"hide-button"}
+            style={{backgroundColor : colors.WHITE, color : colors.DELETE}}
+          /> 
+        ) : (
+          <Button 
+            onClick={onClickToGo}
+            text={">"}
+            addClass={"to-go-button"}
+            style={{backgroundColor : colors.WHITE , color : colors.genderColors[gender].PRIMARY_DEEP}}
+          />
+        )}
       </div>
     </div>
   )

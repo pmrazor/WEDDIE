@@ -1,12 +1,25 @@
 .VirginRoadCard {
   /* border: 1px solid; */
-  border-radius: 5px;
+  border-radius: 15px;
   display: flex;
   flex-direction: row;
   align-items: center;
   padding: 1%;
   background-color: var(--PRIMARY_LIGHT);
 }
+
+@keyframes float {
+  0% { transform: translateY(0); }
+  25% { transform: translateY(-1px); }
+  50% { transform: translateY(1px); }
+  75% { transform: translateY(-1px); }
+  100% { transform: translateY(0); }
+}
+
+.shake {
+  animation: float 0.5s ease-in-out infinite;
+}
+
 
 .VirginRoadCard .icon-area {
   /* border: 1px solid; */
