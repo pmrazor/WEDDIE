@@ -21,10 +21,10 @@ const VirginRoadCard = ({step, planStatus, visible, isEditing, toggleActivated }
 
   const iconForStatus = () => {
     switch (planStatus) {
-      case "BEFORE_START" : return man1
-      case "IN_PROGRESS" : return man2
-      case "NOT_TIME_CAPSULE" : return man3
-      case "FINISHED" : return man4
+      case "BEFORE_START" : return battery1
+      case "IN_PROGRESS" : return battery2
+      case "NOT_TIME_CAPSULE" : return battery3
+      case "FINISHED" : return battery4
     }
   }
   const backgroundForStatus = () => {
