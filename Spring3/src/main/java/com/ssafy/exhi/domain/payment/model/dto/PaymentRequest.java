@@ -27,8 +27,8 @@ public class PaymentRequest {
     @AllArgsConstructor
     public static class ConfirmDTO {
         private String paymentKey;  // Toss 결제 키
-        private Long demandId;     // 주문 ID
-        private int amount;         // 결제 금액
+        private String orderId;     // 주문 ID
+        private Number amount;         // 결제 금액
     }
 }
 

@@ -1,13 +1,11 @@
 package com.ssafy.exhi.domain.payment.repository;
 
 import com.ssafy.exhi.domain.payment.model.entity.Payment;
-import com.ssafy.exhi.domain.demand.model.entity.Demand;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
-@Repository
 public interface PaymentRepository extends JpaRepository<Payment, Long> {
-    Optional<Payment> findByDemand(Demand demand);
+    // 기존 CRUD 메소드들 외에 paymentKey로 Payment를 조회할 수 있는 메소드 추가
+    Optional<Payment> findByPaymentKey(String paymentKey);
+    Optional<Payment> findByOrderId(String orderId);  // 주문 ID로 조회
 }
-

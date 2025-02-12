@@ -1,6 +1,5 @@
 package com.ssafy.exhi.domain.payment.model.entity;
 
-import com.ssafy.exhi.domain.demand.model.entity.Demand; // Order 엔티티 import
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
@@ -18,11 +17,6 @@ public class Payment {
     @Column(nullable = false, unique = true)
     private String paymentKey;
 
-    // ✅ Demand와 OneToOne 관계
-    @OneToOne
-    @JoinColumn(name = "demand_id", nullable = false, unique = true) // ✅ FK 설정
-    private Demand demand;
-
     @Column(nullable = false)
     private long totalAmount;
 
@@ -38,5 +32,8 @@ public class Payment {
     private LocalDateTime requestedAt;
 
     private LocalDateTime approvedAt;
+
+    @Column(nullable = false)
+    private String orderId;  // 주문 ID 추가
 }
 

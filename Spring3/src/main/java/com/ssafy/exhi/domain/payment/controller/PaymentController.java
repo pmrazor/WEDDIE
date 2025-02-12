@@ -6,12 +6,9 @@ import com.ssafy.exhi.domain.payment.model.dto.PaymentResponse;
 import com.ssafy.exhi.domain.payment.service.PaymentService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import com.ssafy.exhi.util.JWTUtil;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 
 @RestController
-@RequestMapping("/payment")
+@RequestMapping("/api/v1/payment")
 public class PaymentController {
 
     private final PaymentService paymentService;
