@@ -1,9 +1,14 @@
 .CheckListItem {
   /* border: 1px solid; */
-  width: 90vw;
+  width: 100%;
   display: flex;
   flex-direction: row;
-  justify-content: space-between;
+  align-items: center;
+  /* justify-content: space-between; */
+}
+
+.CheckListItem .text-area {
+  flex: 1;
 }
 
 .CheckListItem .isFinished {
@@ -23,6 +28,6 @@
   /* justify-content: center; */
 }
 
-.CheckListItem .delete-button {
-  padding: 10px 20px;
+.CheckListItem button {
+  width: 15%;
 }
