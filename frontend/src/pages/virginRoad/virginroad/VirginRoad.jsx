@@ -11,6 +11,7 @@ import battery1 from "@/assets/VirginRoadCard/battery1.svg"
 import battery2 from "@/assets/VirginRoadCard/battery2.svg"
 import battery3 from "@/assets/VirginRoadCard/battery3.svg"
 import battery4 from "@/assets/VirginRoadCard/battery4.svg"
+import useVirginRoadStore from "@/store/virginroad"
 
 // const gender = useAuthStore(userInfo.gender)
 const gender = "Male"
@@ -43,27 +44,30 @@ const VirginRoad = () => {
   }
 
   const [isEditing, setIsEditing] = useState(false)
+  console.log("now isEditing : ", isEditing)
 
   const toggleEditing = () => {
     setIsEditing((prev) => !prev) // true -> false , false -> true 
-    console.log("isEditing : ", isEditing)
   }
   
+  const { plans } = useVirginRoadStore()
+
   // 현재 진행중인 아이템을 advertisement 카드에서 소개하려고 
-  const [VirginRoadData, setVirginRoadData] = useState(mockData)
+  const [VirginRoadData, setVirginRoadData] = useState(plans)
 
   // isEditing 이 true이면 모든 데이터를 보여주기 , false일 경우 activated가 "TRUE"인 데이터만 보여주기 
-  const visibleData = isEditing ? VirginRoadData : VirginRoadData.filter(item => item.activated === "TRUE")
+  const visibleData = isEditing ? VirginRoadData : VirginRoadData.filter(item => item.visible === true)
 
   const inProgressItem = VirginRoadData.find(item => item.planStatus === "IN_PROGRESS")
 
   const toggleActivated = (index) => {
     setVirginRoadData((prevData) =>
       prevData.map((item, i) =>
-        i === index ? { ...item, activated: item.activated === "TRUE" ? "FALSE" : "TRUE" } : item
+        i === index ? { ...item, visible: item.visible === true ? false : true } : item
       )
     );
   };
+
 
   return (
     <div className="VirginRoad">
@@ -137,9 +141,10 @@ const VirginRoad = () => {
        </div>
       <div className="VirginRoadItem">
         <VirginRoadList 
-          mockData={visibleData}
+          // mockData={visibleData}
           isEditing={isEditing}
           toggleActivated={toggleActivated}
+          plans={visibleData}
           />         
       </div>
     </div>

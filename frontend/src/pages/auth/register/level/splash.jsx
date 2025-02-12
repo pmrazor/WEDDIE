@@ -10,7 +10,6 @@ const Splash = ({ onFinish }) => {
       exit={{ opacity: 0 }}
     >
       <div className="w-64 h-64 mb-8">
-        {/* 여기에 움직이는 이미지나 애니메이션을 넣으세요 */}
         <img
           src={splash}
           alt="Splash Animation"

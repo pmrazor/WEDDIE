@@ -17,8 +17,8 @@ import { colors } from "@/constants/colors"
 
 const gender = "Male"
 
-const VirginRoadCard = ({step, planStatus, activated, isEditing, toggleActivated }) => {
-  
+const VirginRoadCard = ({step, planStatus, visible, isEditing, toggleActivated }) => {
+
   const iconForStatus = () => {
     switch (planStatus) {
       case "BEFORE_START" : return man1
@@ -46,7 +46,7 @@ const VirginRoadCard = ({step, planStatus, activated, isEditing, toggleActivated
     <div 
       className={`VirginRoadCard ${isEditing ? "shake" : ""}`}
       style={
-        activated !== "TRUE" 
+        visible !== true
         ? {backgroundColor : colors.GRAY_100} 
         : planStatus === "FINISHED" 
           ? {border : `3px solid ${backgroundForStatus()}`, backgroundColor: backgroundForStatus()}
