@@ -75,6 +75,7 @@
 
 .VirginRoadDetail .checklist-area {
   /* border: 1px solid; */
+  width: 95%;
   display: flex;
   flex-direction: column;
   padding: 10px;
@@ -82,23 +83,66 @@
   border-radius: 15px;
 }
 
-.VirginRoadDetail .checklist-header {
+.VirginRoadDetail .checklist-area .checklist {
   /* border: 1px solid; */
-  display: flex;
-  padding-block: 2%;
+  border-radius: 10px;
+  background-color: white;
+  padding: 3% 2%;
 }
 
-.VirginRoadDetail .checklist-header h3 {
-  flex: 1;
-  padding-left: 5%;
-  font-weight: bold;
+.VirginRoadDetail .checklist-header {
+  /* border: 1px solid; */
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  justify-content: space-between;
+  /* padding-block: 2%; */
+  padding-inline: 5%;
 }
 
 .VirginRoadDetail .checklist-header button {
   /* border: 1px solid; */
-  border-radius: 5px;
-  width: 10%;
+  border-radius: 50px;
+  /* width: 10%; */
   display: flex;
   justify-content: center;
   align-items: center;
+  padding: 5px 10px;
+}
+
+.VirginRoadDetail .add-todo-form {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  gap: 5px;
+  padding-bottom: 2%;
+}
+
+.VirginRoadDetail .add-todo-form input {
+  width: 95%;
+  display: flex;
+  flex: 1;
+  padding-block: 2%;
+  padding-left: 3%;
+  border-radius: 5px;
+}
+
+.VirginRoadDetail .add-todo-form .check-box {
+  /* border: 1px solid black; */
+  display: flex;
+  justify-content: space-between;
+  width: 90%;
+}
+
+.VirginRoadDetail .add-todo-form .check-box .check-box-container {
+  display: flex;
+  flex-direction: row;
+  gap: 5px;
+}
+
+.VirginRoadDetail .add-todo-form .check-box .Button {
+  padding: 0px;
 }

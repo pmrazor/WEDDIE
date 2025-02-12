@@ -71,6 +71,10 @@ const VirginRoadDetail = () => {
     }
   };
 
+  const toggleAddingTodo = () => {
+    setIsAddingTodo((prev) => !prev)
+  }
+
   const handleAddTodo = async () => {
     if (!newTodoContent.trim()) {
       alert("할 일 내용을 입력해주세요.");
@@ -202,23 +206,41 @@ const VirginRoadDetail = () => {
       </div>
       <div className="checklist-area" style={{ backgroundColor: colors.genderColors[gender].PRIMARY_LIGHT }}>
         <div className="checklist-header">
-          <h3>체크리스트</h3>
-          <button onClick={() => setIsAddingTodo(true)}>추가</button>
+          <Button 
+            text={"체크리스트"}
+            style={{color : colors.BLACK}}
+          />
+          <Button
+            onClick={toggleAddingTodo}
+            text={isAddingTodo ? "돌아가기" : "추가하기"}
+            style={{color : colors.BLACK}}
+          />
+          {/* <button onClick={(prev) => setIsAddingTodo(!prev)}>{isAddingTodo === true ? "돌아가기" : "추가"}</button> */}
         </div>
         {isAddingTodo && (
           <div className="add-todo-form">
-            <input
+            <input 
               type="text"
               value={newTodoContent}
               onChange={(e) => setNewTodoContent(e.target.value)}
               placeholder="새로운 할 일 입력"
             />
-            <label>
-              <input type="checkbox" checked={newTodoTogether} onChange={(e) => setNewTodoTogether(e.target.checked)} />
-              Together
-            </label>
-            <button onClick={handleAddTodo}>확인</button>
-            <button onClick={() => setIsAddingTodo(false)}>취소</button>
+            <div className="check-box">
+              <div className="check-box-container">
+                <input 
+                  type="checkbox" 
+                  checked={newTodoTogether} 
+                  onChange={(e) => setNewTodoTogether(e.target.checked)} 
+                />
+                <Button 
+                  text={"우리 같이 할 일"}
+                />
+              </div>
+              <Button 
+                onClick={handleAddTodo}
+                text={"추가하기"}
+              /> 
+            </div>
           </div>
         )}
         <div className="checklist">

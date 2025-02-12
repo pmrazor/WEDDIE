@@ -1,9 +1,9 @@
-// import "@/style/component/CheckListItem.css"
+import "@/style/component/CheckListItem.css"
 
 const CheckListItem = ({ id, content, isCompleted, onToggle, onDelete }) => {
   return (
-    <div className="checklist-item flex items-center justify-between">
-      <div>
+    <div className="CheckListItem">
+      <div className="text-area">
         <input type="checkbox" checked={isCompleted === "true"} onChange={() => onToggle(id)} className="mr-2" />
         <span>{content}</span>
       </div>
