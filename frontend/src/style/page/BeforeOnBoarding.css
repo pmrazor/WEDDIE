@@ -1,7 +1,47 @@
 .BeforeOnBoarding {
-  padding-bottom: 20%;
+  /* margin-top: 50px; */
+  /* gap : 50px; */
 }
 
 .BeforeOnBoarding .Button {
+  margin-top: 50px;
   border-radius: 30px;
+}
+
+.BeforeOnBoarding .card-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  /* gap: 200px; */ 
+  /* margin-block: 500px;  */
+  /* margin-bottom: 300px; */
+}
+
+.BeforeOnBoarding .card-container .IconCard {
+  padding-top: 200px;
+  opacity: 1;
+  /* transition: all 1.5s; */
+  transform: translateY(0);
+  transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+}
+
+.BeforeOnBoarding .card-container .IconCard.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.BeforeOnBoarding .joint {
+  padding: 100px;
+}
+
+.footer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  flex: auto;
+} 
+
+.footer .logo {
+  width: 50px;
 }
