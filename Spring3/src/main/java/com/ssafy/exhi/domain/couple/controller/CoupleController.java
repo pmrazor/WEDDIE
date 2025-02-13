@@ -145,7 +145,7 @@ public class CoupleController {
         @RequestBody CoupleRequest.UpdateDTO updateDTO) {
         Integer userId = jwtUtil.getUserId(accessToken);
 
-        coupleService.updateCouple(userId, updateDTO);
-        return ResponseEntity.ok().body(null);
+        CoupleResponse.DetailResultDTO couple = coupleService.updateCouple(userId, updateDTO);
+        return ResponseEntity.ok().body(couple);
     }
 }
