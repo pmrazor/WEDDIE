@@ -51,20 +51,55 @@ public class PaymentServiceImpl implements PaymentService {
         return "Basic " + encodedKey;
     }
 
-    // 결제 요청
     @Override
     public PaymentResponse.CreateResultDTO createPayment(PaymentRequest.CreateDTO paymentRequest) {
-        // 결제 객체 생성 (Demand 없이 결제만)
-        Payment payment = Payment.builder()
-                .amount(paymentRequest.getAmount())
-                .paymentStatus(PaymentStatus.READY)
-                .build();
+        try {
+            // 결제 정보 객체 생성 (금액, 결제 상태 등)
+            Payment payment = Payment.builder()
+                    .amount(paymentRequest.getAmount())
+                    .orderId(paymentRequest.getOrderId())  // 주문 ID도 포함되어야 함
+                    .paymentStatus(PaymentStatus.READY)
+                    .build();
 
-        paymentRepository.save(payment);  // 결제 정보 저장
+            // 결제 정보를 DB에 저장 (paymentKey는 결제 시스템에서 받아옴)
+            paymentRepository.save(payment);
 
-        // DTO로 변환하여 반환
-        return paymentConverter.toCreateResultDTO(payment);
+            // 결제 시스템에 요청 보내기 (결제 요청)
+            String requestBody = String.format("{\"orderId\":\"%s\", \"amount\":%d}",
+                    payment.getOrderId(), payment.getAmount());
+
+            String authorizationHeader = getAuthorizationHeader();
+
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(paymentApiUrl + "/v1/payments/create"))  // 결제 API 엔드포인트
+                    .header("Authorization", authorizationHeader)
+                    .header("Content-Type", "application/json")
+                    .POST(HttpRequest.BodyPublishers.ofString(requestBody))
+                    .build();
+
+            // 결제 요청 API 호출
+            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+
+            if (response.statusCode() == 200) {
+                // 결제 요청 성공 시, API 응답에서 paymentKey 추출
+                String paymentKey = extractPaymentKeyFromResponse(response.body());
+
+                // 받은 paymentKey를 Payment 엔티티에 저장
+                payment.setPaymentKey(paymentKey);
+                payment.setPaymentStatus(PaymentStatus.IN_PROGRESS);  // 결제 대기 상태로 설정
+                paymentRepository.save(payment);  // DB에 업데이트
+
+                // 결제 요청 성공 응답 반환
+                return paymentConverter.toCreateResultDTO(payment);
+            } else {
+                throw new RuntimeException("결제 요청 실패, 상태 코드: " + response.statusCode());
+            }
+        } catch (Exception e) {
+            log.error("❌ 결제 요청 오류: {}", e.getMessage());
+            throw new RuntimeException("❌ 결제 요청 오류 발생: " + e.getMessage());
+        }
     }
+
 
     @Override
     public PaymentResponse.ConfirmResultDTO confirmPayment(PaymentRequest.ConfirmDTO confirmRequest) {

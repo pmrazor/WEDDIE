@@ -19,8 +19,8 @@ public class PaymentController {
 
     // ✅ 결제 요청 API (Toss 결제창 띄우기)
     @PostMapping("/create")
-    public ResponseEntity<?> createPayment(@RequestBody PaymentRequest.CreateDTO request) {
-        return ResponseEntity.ok(paymentService.createPayment(request));
+    public ResponseEntity<?> createPayment(@RequestBody PaymentRequest.CreateDTO createRequest) {
+        return ResponseEntity.ok(paymentService.createPayment(createRequest));
     }
 
     // ✅ 결제 승인 API (Toss에서 successUrl로 요청 보낼 때 실행됨)

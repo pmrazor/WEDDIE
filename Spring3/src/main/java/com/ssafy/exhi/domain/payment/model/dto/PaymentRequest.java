@@ -17,6 +17,7 @@ public class PaymentRequest {
     @AllArgsConstructor
     public static class CreateDTO {
         private Long demandId;     // 주문 ID (고유 값, Toss 결제 요청 시 사용)
+        private String OrderId;      // 주문 번호
         private String demandName;   // 주문 이름
         private int amount;         // 결제 금액
         private String successUrl;  // 결제 성공 후 이동할 URL
