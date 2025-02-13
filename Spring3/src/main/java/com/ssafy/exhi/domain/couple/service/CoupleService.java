@@ -12,5 +12,5 @@ public interface CoupleService {
 
     CoupleResponse.SimpleResultDTO createCouple(Integer userId, Integer requestId);
 
-    void updateCouple(Integer userId, CoupleRequest.UpdateDTO updateDTO);
+    CoupleResponse.DetailResultDTO updateCouple(Integer userId, CoupleRequest.UpdateDTO updateDTO);
 }

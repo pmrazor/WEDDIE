@@ -6,6 +6,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
+
 public class CoupleResponse {
 
     @Data
@@ -17,7 +19,6 @@ public class CoupleResponse {
         private String coupleName;
         private UserResponse.SimpleResultDTO female;
         private UserResponse.SimpleResultDTO male;
-
     }
 
     @Data
@@ -29,6 +30,8 @@ public class CoupleResponse {
         private String coupleName;
         private UserResponse.DetailResultDTO female;
         private UserResponse.DetailResultDTO male;
-
+        private LocalDate marriageDate;
+        private LocalDate loveAnniversary;
+        private Integer budget;
     }
 }

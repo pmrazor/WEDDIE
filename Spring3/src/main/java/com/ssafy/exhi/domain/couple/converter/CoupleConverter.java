@@ -32,6 +32,9 @@ public class CoupleConverter {
                 .coupleName(couple.getCoupleName())
                 .male(male)
                 .female(female)
+                .budget(couple.getBudget())
+                .loveAnniversary(couple.getLoveAnniversary())
+                .marriageDate(couple.getMarriageDate())
                 .build();
     }
 

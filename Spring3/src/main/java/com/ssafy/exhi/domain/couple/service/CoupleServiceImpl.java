@@ -59,10 +59,12 @@ public class CoupleServiceImpl implements CoupleService {
     }
 
     @Override
-    public void updateCouple(Integer userId, CoupleRequest.UpdateDTO updateDTO) {
+    public CoupleResponse.DetailResultDTO updateCouple(Integer userId, CoupleRequest.UpdateDTO updateDTO) {
         Couple couple = findCoupleByUserId(userId);
 
         couple.updateCouple(updateDTO);
+        log.info("{}", couple);
+        return CoupleConverter.toDetailDTO(couple);
     }
 
     private void validateCouple(CoupleMatchingNotification notification) {
