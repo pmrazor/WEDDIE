@@ -4,6 +4,7 @@ import com.ssafy.exhi.base.status.ErrorStatus;
 import com.ssafy.exhi.domain.ServiceType;
 import com.ssafy.exhi.domain.couple.model.entity.Couple;
 import com.ssafy.exhi.domain.couple.repository.CoupleRepository;
+import com.ssafy.exhi.domain.plan.converter.PlanConverter;
 import com.ssafy.exhi.domain.plan.model.dto.PlanRequest;
 import com.ssafy.exhi.domain.plan.model.entity.Plan;
 import com.ssafy.exhi.domain.todo.model.entity.DefaultTodo;
@@ -18,11 +19,14 @@ import com.ssafy.exhi.domain.virginroad.model.dto.VirginRoadResponse;
 import com.ssafy.exhi.domain.virginroad.model.entity.VirginRoad;
 import com.ssafy.exhi.domain.virginroad.repository.VirginRoadRepository;
 import com.ssafy.exhi.exception.ExceptionHandler;
+import com.ssafy.exhi.util.ServiceTypeScheduler;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -39,6 +43,7 @@ public class VirginRoadServiceImpl implements VirginRoadService {
     private final VirginRoadRepository virginRoadRepository;
     private final DefaultTodoRepository defaultTodoRepository;
     private final TodoRepository todoRepository;
+    private final ServiceTypeScheduler serviceTypeScheduler;
 
     /**
      * 플랜과 버진로드를 동시에 생성하기
@@ -55,9 +60,12 @@ public class VirginRoadServiceImpl implements VirginRoadService {
 
         log.info("{}", createDTO);
 
+        List<PlanRequest.CreateDTO> updatedPlans = setPlanDefaultDates(createDTO);
+        createDTO.setPlans(updatedPlans);
+
         VirginRoad virginRoad = VirginRoadConverter.toEntity(createDTO, couple);
 
-        List<ServiceType> visibleServiceTypes = createDTO.getPlans().stream()
+        List<ServiceType> visibleServiceTypes = updatedPlans.stream()
             .filter(PlanRequest.CreateDTO::isVisible)
             .map(PlanRequest.CreateDTO::getServiceType)
             .collect(Collectors.toList());
@@ -71,6 +79,33 @@ public class VirginRoadServiceImpl implements VirginRoadService {
         VirginRoad saved = virginRoadRepository.save(virginRoad);
 
         return VirginRoadConverter.toDTO(saved);
+    }
+
+    private List<PlanRequest.CreateDTO> setPlanDefaultDates(VirginRoadRequest.CreateDTO createDTO) {
+        LocalDate marriageDate = coupleRepository.findCoupleByUserId(createDTO.getUserId())
+                .orElseThrow(() -> new ExceptionHandler(ErrorStatus.COUPLE_NOT_FOUND)).getMarriageDate();
+        LocalDate today = LocalDate.now();
+        long totalDays = ChronoUnit.DAYS.between(today, marriageDate);
+
+        Map<ServiceType, Double> scheduleDays = serviceTypeScheduler.getServiceTypeSchedule();
+
+        List<PlanRequest.CreateDTO> updatedPlans = new ArrayList<>();
+
+        for(PlanRequest.CreateDTO cur : createDTO.getPlans()) {
+            Plan plan = PlanConverter.toEntity(cur);
+
+            double percentage = scheduleDays.getOrDefault(cur.getServiceType(), 0.3);
+
+            long daysBeforeWedding = (long) (totalDays * percentage);
+            LocalDate planDate = marriageDate.minusDays(daysBeforeWedding);
+            plan.setPlanTime(planDate.atStartOfDay());
+
+            PlanRequest.CreateDTO updatedPlan = PlanConverter.toCreateDTO(plan, planDate);
+
+            updatedPlans.add(updatedPlan);
+        }
+
+        return updatedPlans;
     }
 
     private Map<ServiceType, List<DefaultTodo>> getDefaultTodos(User user, List<ServiceType> visibleServiceTypes) {
