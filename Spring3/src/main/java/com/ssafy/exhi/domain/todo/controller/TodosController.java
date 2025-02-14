@@ -45,7 +45,7 @@ public class TodosController {
             Integer userId = jwtUtil.getUserId(accessToken);
             Integer coupleId = jwtUtil.getCoupleId(accessToken);
             TodoResponse.DetailResultDTO response = todosService.createTodo(userId, coupleId, serviceType, stageType, content);
-            return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.onSuccess(response));
+            return ResponseEntity.ok(response);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(ErrorStatus._BAD_REQUEST.getReason());
         } catch (Exception e) {
@@ -64,7 +64,7 @@ public class TodosController {
             Integer userId = jwtUtil.getUserId(accessToken);
             Integer coupleId = jwtUtil.getCoupleId(accessToken);
             TodoResponse.FindAllResultDTO response = todosService.readTodos(userId, coupleId, serviceType);
-            return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.onSuccess(response));
+            return ResponseEntity.ok(response);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body("Invalid serviceType provided");
         }
@@ -83,7 +83,7 @@ public class TodosController {
 
             Boolean isCompleted = (Boolean) requestBody.get("isCompleted");
             TodoResponse.FindResultDTO response = todosService.updateTodo(todoId, isCompleted);
-            return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.onSuccess(response));
+            return ResponseEntity.ok(response);
         } catch (ClassCastException e) {
             return ResponseEntity.badRequest().body("Invalid 'isCompleted' value");
         } catch (Exception e) {
