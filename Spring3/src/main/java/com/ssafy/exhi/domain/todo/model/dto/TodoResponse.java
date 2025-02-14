@@ -9,6 +9,9 @@ import lombok.NoArgsConstructor;
 import java.util.List;
 import java.util.Map;
 
+import java.util.List;
+import java.util.Map;
+
 public class TodoResponse {
     @Data
     @Builder
@@ -41,6 +44,6 @@ public class TodoResponse {
     public static class FindAllResultDTO {
         private Integer planId;
         private ServiceType serviceType;
-        private Map<String, List<FindResultDTO>> allResults;
+        private Map<String, List<FindResultDTO>> todos;
     }
 }

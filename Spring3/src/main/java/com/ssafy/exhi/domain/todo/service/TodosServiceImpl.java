@@ -90,7 +90,7 @@ public class TodosServiceImpl implements TodosService {
         return TodoResponse.FindAllResultDTO.builder()
                 .planId(todos.get(0).getPlan().getId())
                 .serviceType(serviceType)
-                .allResults(Map.of(
+                .todos(Map.of(
                         "pre", preTodos,
                         "on", onTodos,
                         "post", postTodos

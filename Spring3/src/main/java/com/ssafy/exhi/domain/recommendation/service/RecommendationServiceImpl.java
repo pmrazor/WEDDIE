@@ -228,12 +228,14 @@ public class RecommendationServiceImpl implements RecommendationService {
                 .plans(new ArrayList<>())
                 .build();
 
-//            // DefaultTodo를 ServiceType별로 그룹화
-            Map<ServiceType, List<DefaultTodo>> defaultTodoMap = getAllDefaultTodosInMap();
-            // Default Plan/Todo 구성
-            virginRoad.setDefaultPlans(defaultTodoMap);
+            List<Plan> plans = new ArrayList<>();
+            for (ServiceType serviceType : ServiceType.values()) {
+                Plan plan = Plan.createDefault(serviceType, virginRoad);
+                todoInitializer.initializeTodosForPlan(plan);
+                plans.add(plan);
+            }
 
-            virginRoad.addPlans(setPlanDefaultDates(virginRoad.getPlans(), couple));
+            virginRoad.addPlans(plans);
 
             virginRoad = virginRoadRepository.save(virginRoad);
         }
