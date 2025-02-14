@@ -2,6 +2,7 @@ package com.ssafy.exhi.domain.plan.controller;
 
 import com.ssafy.exhi.base.ApiResponse;
 import com.ssafy.exhi.domain.plan.model.dto.PlanResponse;
+import com.ssafy.exhi.domain.plan.model.dto.PlanRequest;
 import com.ssafy.exhi.domain.plan.service.PlanService;
 import com.ssafy.exhi.util.JWTUtil;
 import lombok.RequiredArgsConstructor;
@@ -33,9 +34,9 @@ public class PlanController {
     @GetMapping("/main")
     public ResponseEntity<?> getAllPlans(
             @RequestHeader("Authorization") String accessToken,
-            @RequestParam Integer coupleId
-    ) {
+            @RequestBody PlanRequest.TimeDTO timeDTO) {
         Integer userId = jwtUtil.getUserId(accessToken);  // JWT에서 유저 ID 추출
+        Integer coupleId = timeDTO.getCoupleId(); // JSON에서 coupleId 가져오기
         log.info("getAllPlans coupleId: {}", coupleId);
 
         // 유저에 해당하는 모든 플랜을 서비스에서 가져오기

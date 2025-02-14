@@ -44,24 +44,19 @@ public class Plan extends BaseEntity {
     @Column(name = "visible")
     private boolean visible;
 
-    // 시작 날짜
     @Column(name = "start_date")
     private LocalDateTime startTime;
 
-    // 당일날짜
     @Column(name = "plan_time")
     private LocalDateTime planTime;
 
-    // 끝 날짜
     @Column(name = "end_time")
     private LocalDateTime endTime;
 
-    // 전, 중, 타입캡슐필요, 완전 끝
     @Column(name = "plan_status")
     @Enumerated(EnumType.STRING)
     private PlanStatus planStatus;
 
-    // 플랜들
     @OneToMany(mappedBy = "plan", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Todo> todos = new ArrayList<>();
 
@@ -76,40 +71,41 @@ public class Plan extends BaseEntity {
     @JoinColumn(name = "tip_id", referencedColumnName = "tip_id")
     private Tip tip;
 
-
     /* 비즈니스 로직 */
 
-    // 서비스 로직에서 호출할 메서드, 엔티티에서 날짜를 계산하여 설정
+    // calculate start and end dates using planTime and duration
     public void calculateStartAndEndDates(int duration) {
         if (planTime != null) {
-            // planTime에서 duration 만큼 빼고 더하기
-            this.startTime = planTime.minusDays(duration); // startDate는 planTime에서 30일 전
-            this.endTime = planTime.plusDays(duration); // endDate는 planTime에서 30일 후
+            this.startTime = planTime.minusDays(duration);  // 시작 시간은 planTime에서 30일 전
+            this.endTime = planTime.plusDays(duration);     // 종료 시간은 planTime에서 30일 후
         }
     }
 
-    // 플랜 Status를 업데이트하는 메서드, planTime 기준으로 계싼
+    // 플랜 Status를 업데이트하는 메서드, planTime 기준으로 계산
     public void updatePlanStatus(LocalDateTime currentDateTime, int duration) {
+        if (planTime == null) {
+            log.warn("planTime is null for Plan ID: {}. Setting default value.", this.id);
+            planTime = currentDateTime;  // currentDateTime을 기본값으로 설정
+        }
+
         // planTime을 기준으로 상태를 결정
         if (planTime.isAfter(currentDateTime.plusDays(duration))) {
-            this.planStatus = PlanStatus.BEFORE_START; // planTime이 30일 후면 BEFORE_START
+            this.planStatus = PlanStatus.BEFORE_START;  // planTime이 30일 후면 BEFORE_START
         } else if (planTime.isBefore(currentDateTime.minusDays(duration))) {
-            this.planStatus = PlanStatus.FINISHED; // planTime이 30일 전이면 FINISHED
+            this.planStatus = PlanStatus.FINISHED;  // planTime이 30일 전이면 FINISHED
         } else if (planTime.isAfter(currentDateTime) && planTime.isBefore(currentDateTime.plusDays(duration))) {
-            this.planStatus = PlanStatus.IN_PROGRESS; // planTime이 현재보다 크고 30일 이내면 IN_PROGRESS
+            this.planStatus = PlanStatus.IN_PROGRESS;  // planTime이 현재보다 크고 30일 이내면 IN_PROGRESS
         } else {
-            this.planStatus = PlanStatus.NOT_TIME_CAPSULE; // planTime이 현재보다 크고 30일 이내면 NOT_TIME_CAPSULE
+            this.planStatus = PlanStatus.NOT_TIME_CAPSULE;  // planTime이 현재보다 크고 30일 이내면 NOT_TIME_CAPSULE
         }
 
         log.info("Plan status updated to: {}", this.planStatus);
     }
 
-
     public void updateVirginRoad(VirginRoad virginRoad) {
         if (this.virginRoad != null) {
             this.virginRoad.getPlans().remove(this);
         }
-
         this.virginRoad = virginRoad;
     }
 
@@ -123,22 +119,19 @@ public class Plan extends BaseEntity {
 
     public static Plan createDefault(ServiceType serviceType, VirginRoad virginRoad) {
         return Plan.builder()
-            .virginRoad(virginRoad)
-            .serviceType(serviceType)
-            .visible(false) // 디폴트 값 설정 (예: isVisible = false)
-            .planStatus(PlanStatus.BEFORE_START)
-            .todos(new ArrayList<>())
-            .build();
+                .virginRoad(virginRoad)
+                .serviceType(serviceType)
+                .visible(false) // 디폴트 값 설정 (예: isVisible = false)
+                .planStatus(PlanStatus.BEFORE_START)
+                .todos(new ArrayList<>())
+                .build();
     }
 
     public void setDefaultTodos(ServiceType serviceType, Map<ServiceType, List<DefaultTodo>> defaultTodos) {
         if (!defaultTodos.containsKey(serviceType)) return;
         List<DefaultTodo> defaultTodoList = defaultTodos.get(serviceType);
-
         this.todos.addAll(
-            defaultTodoList.stream().map(
-                todo -> todo.toTodo(this)
-            ).toList()
+                defaultTodoList.stream().map(todo -> todo.toTodo(this)).toList()
         );
     }
 
@@ -148,6 +141,7 @@ public class Plan extends BaseEntity {
             this.planStatus = PlanStatus.FINISHED;
         }
     }
-    /* 비즈니스 로직 */
 
+    /* 비즈니스 로직 */
 }
+

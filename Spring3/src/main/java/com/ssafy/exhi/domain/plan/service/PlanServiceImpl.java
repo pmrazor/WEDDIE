@@ -44,7 +44,7 @@ public class PlanServiceImpl implements PlanService {
     public DetailResultDTO getPlan(Integer userId, Integer planId) {
         Couple couple = getCoupleByUserId(userId);
         Gender gender = findGenderByUserId(userId);
-        
+
         TodoType type = gender.equals(Gender.FEMALE) ? TodoType.FEMALE : TodoType.MALE;
         List<TodoType> list = Arrays.asList(TodoType.COMMON, type);
 
@@ -57,52 +57,44 @@ public class PlanServiceImpl implements PlanService {
 
     private static final int DURATION = 30;  // 상수 DURATION 30일 설정
 
-    // 유저 ID에 맞는 플랜을 가져오는 메서드
     @Override
     public AllResultDTO getAllPlans(Integer coupleId) {
-        // coupleId에 해당하는 모든 플랜을 가져옴
-        List<Plan> plans = planRepository.findByVirginRoad_Couple_Id(coupleId);  // VirginRoad -> Couple -> coupleId로 플랜 조회
+        List<Plan> plans = planRepository.findByVirginRoad_Couple_Id(coupleId);
         if (plans.isEmpty()) {
             throw new ExceptionHandler(ErrorStatus.PLAN_NOT_FOUND);
         }
 
-        // 플랜의 날짜 계산 메서드 호출 (각 플랜에 대해 startTime, endTime 계산)
+        // TimeWrapper로 currentDateTime을 얻어 플랜들에 대한 상태 및 날짜 계산
         for (Plan plan : plans) {
-            plan.calculateStartAndEndDates(DURATION);  // 플랜마다 시작일과 종료일을 계산
-            plan.updatePlanStatus(timeWrapper.now(), DURATION);  // 상태 업데이트
+            plan.calculateStartAndEndDates(DURATION);
+            plan.updatePlanStatus(timeWrapper.now(), DURATION);  // TimeWrapper를 통해 현재 시간 설정
         }
 
-        // 플랜을 상태별로 그룹화
         Map<PlanStatus, List<Integer>> groupedPlans = groupPlansByStatus(plans);
-
-        // 사용자 플랜 응답 DTO 생성
         return new AllResultDTO(groupedPlans);
     }
 
-    // 상태별로 플랜을 그룹화하는 메서드
     private Map<PlanStatus, List<Integer>> groupPlansByStatus(List<Plan> plans) {
         Map<PlanStatus, List<Integer>> groupedPlans = new HashMap<>();
         for (Plan plan : plans) {
-            // 상태별로 플랜 ID를 그룹에 추가
             groupedPlans.computeIfAbsent(plan.getPlanStatus(), k -> new ArrayList<>()).add(plan.getId());
         }
         return groupedPlans;
     }
 
-
     private Gender findGenderByUserId(Integer userId) {
         Gender gender = userDetailRepository.findByUser_Id(userId)
-            .orElseThrow(() -> new ExceptionHandler(ErrorStatus.USER_DETAIL_NOT_FOUND))
-            .getGender();
+                .orElseThrow(() -> new ExceptionHandler(ErrorStatus.USER_DETAIL_NOT_FOUND))
+                .getGender();
         return gender;
     }
 
     private void checkPlanOwnerShip(Couple couple, Plan plan) {
         Integer coupleId = Optional.ofNullable(plan)
-            .map(Plan::getVirginRoad)
-            .map(VirginRoad::getCouple)
-            .map(Couple::getId)
-            .orElseThrow(() -> new ExceptionHandler(ErrorStatus._FORBIDDEN));
+                .map(Plan::getVirginRoad)
+                .map(VirginRoad::getCouple)
+                .map(Couple::getId)
+                .orElseThrow(() -> new ExceptionHandler(ErrorStatus._FORBIDDEN));
 
         if (!Objects.equals(couple.getId(), coupleId)) {
             throw new ExceptionHandler(ErrorStatus._FORBIDDEN);
@@ -111,7 +103,8 @@ public class PlanServiceImpl implements PlanService {
 
     private Couple getCoupleByUserId(Integer userId) {
         return coupleRepository.findCoupleByUserId(userId).orElseThrow(
-            () -> new ExceptionHandler(ErrorStatus.COUPLE_NOT_FOUND)
+                () -> new ExceptionHandler(ErrorStatus.COUPLE_NOT_FOUND)
         );
     }
 }
+
