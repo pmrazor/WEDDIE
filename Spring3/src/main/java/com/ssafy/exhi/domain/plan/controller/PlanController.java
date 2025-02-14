@@ -30,5 +30,21 @@ public class PlanController {
         return ResponseEntity.ok(ApiResponse.onSuccess(response));
     }
 
-    // TODO Plan의 상태를 변경하는 메서드 
+    // TODO Plan의 상태를 변경하는 메서드
+
+
+    // IN_PROGRESS에서 필요한 plan과 tip 랜딩
+    @GetMapping("/now")
+    public ResponseEntity<?> getPlansForNow(
+            @RequestHeader("Authorization") String accessToken
+    ) {
+        // JWT에서 userId 추출
+        Integer userId = jwtUtil.getUserId(accessToken);
+        log.info("getPlansForNow userId: {}", userId);
+
+        // PlanService에서 IN_PROGRESS 상태인 Plan과 Tip을 가져옴
+        PlanResponse.DetailResultDTO response = planService.getPlansForStatus(PlanStatus.IN_PROGRESS, userId);
+        return ResponseEntity.ok(ApiResponse.onSuccess(response));
+    }
+
 }

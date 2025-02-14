@@ -1,6 +1,7 @@
-package com.ssafy.exhi.domain.tip.model.model;
+package com.ssafy.exhi.domain.tip.model.entity;
 
 import com.ssafy.exhi.domain.ServiceType;
+import com.ssafy.exhi.domain.plan.model.entity.Plan;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -23,4 +24,7 @@ public class Tip {
 
     @Column(name = "tip", length = 2000)
     private String tip;
+
+    @OneToOne(mappedBy = "tip", fetch = FetchType.LAZY)
+    private Plan plan;
 }

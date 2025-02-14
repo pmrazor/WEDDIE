@@ -1,7 +1,7 @@
 package com.ssafy.exhi.domain.tip.repository;
 
 import com.ssafy.exhi.domain.ServiceType;
-import com.ssafy.exhi.domain.tip.model.model.Tip;
+import com.ssafy.exhi.domain.tip.model.entity.Tip;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

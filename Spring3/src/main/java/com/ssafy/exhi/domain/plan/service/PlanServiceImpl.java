@@ -10,6 +10,7 @@ import com.ssafy.exhi.domain.todo.model.entity.TodoType;
 import com.ssafy.exhi.domain.user.model.entity.Gender;
 import com.ssafy.exhi.domain.user.repository.UserDetailRepository;
 import com.ssafy.exhi.domain.virginroad.model.entity.VirginRoad;
+import com.ssafy.exhi.domain.tip.service.TipServiceImpl;
 import com.ssafy.exhi.exception.ExceptionHandler;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -32,6 +33,7 @@ public class PlanServiceImpl implements PlanService {
     private final PlanRepository planRepository;
     private final CoupleRepository coupleRepository;
     private final UserDetailRepository userDetailRepository;
+    private final TipServiceImpl tipService;  // TipService를 주입받음
 
     @Override
     public DetailResultDTO getPlan(Integer userId, Integer planId) {
@@ -47,6 +49,9 @@ public class PlanServiceImpl implements PlanService {
 
         return PlanConverter.toDetailDTO(plan);
     }
+
+
+
 
     private Gender findGenderByUserId(Integer userId) {
         Gender gender = userDetailRepository.findByUser_Id(userId)
