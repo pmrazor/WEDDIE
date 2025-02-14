@@ -5,6 +5,8 @@ import com.ssafy.exhi.domain.plan.model.entity.PlanStatus;
 import com.ssafy.exhi.domain.timecapsule.model.dto.TimeCapsuleRequest;
 import com.ssafy.exhi.domain.timecapsule.model.dto.TimeCapsuleResponse;
 import com.ssafy.exhi.domain.timecapsule.model.entity.TimeCapsule;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class TimeCapsuleConverter {
     public static TimeCapsule toEntity (TimeCapsuleRequest.CreateDTO request, Plan plan, PlanStatus timeCapeulsStatus) {
@@ -31,5 +33,11 @@ public class TimeCapsuleConverter {
                 .badContent(timeCapsule.getBadContent())
                 .badImage(timeCapsule.getBadImage())
                 .build();
+    }
+
+    public static List<TimeCapsuleResponse.TimeCapsuleResponseDto> toResponse (List<TimeCapsule> timeCapsules) {
+        return timeCapsules.stream()
+                .map(TimeCapsuleConverter::toResponse)
+                .toList();
     }
 }

@@ -3,12 +3,14 @@ package com.ssafy.exhi.domain.timecapsule.service;
 import com.ssafy.exhi.base.status.ErrorStatus;
 import com.ssafy.exhi.domain.couple.model.entity.Couple;
 import com.ssafy.exhi.domain.couple.repository.CoupleRepository;
+import com.ssafy.exhi.domain.notice.service.MinioImageService;
 import com.ssafy.exhi.domain.plan.model.entity.Plan;
 import com.ssafy.exhi.domain.plan.model.entity.PlanStatus;
 import com.ssafy.exhi.domain.plan.repository.PlanRepository;
 import com.ssafy.exhi.domain.timecapsule.converter.TimeCapsuleConverter;
 import com.ssafy.exhi.domain.timecapsule.model.dto.TimeCapsuleRequest;
 import com.ssafy.exhi.domain.timecapsule.model.dto.TimeCapsuleResponse;
+import com.ssafy.exhi.domain.timecapsule.model.dto.TimeCapsuleResponse.TimeCapsuleResponseDto;
 import com.ssafy.exhi.domain.timecapsule.model.entity.TimeCapsule;
 import com.ssafy.exhi.domain.timecapsule.repository.TimeCapsuleRepository;
 import com.ssafy.exhi.domain.user.model.entity.User;
@@ -26,6 +28,7 @@ import java.util.stream.Collectors;
 public class TimeCapsuleServiceImpl implements TimeCapsuleService {
 
     private final TimeCapsuleRepository timeCapsuleRepository;
+    private final MinioImageService minioImageService;
     private final UserRepository userRepository;
     private final PlanRepository planRepository;
     private final CoupleRepository coupleRepository;
@@ -33,7 +36,7 @@ public class TimeCapsuleServiceImpl implements TimeCapsuleService {
     @Override
     public TimeCapsuleResponse.TimeCapsuleResponseDto createTimeCapsule(TimeCapsuleRequest.CreateDTO registTimeCapsule) {
         User user = findUserByUserId(registTimeCapsule.getUserId());
-
+        minioImageService.uploadImage(registTimeCapsule.getImage());
         Plan plan = planRepository.findById(Long.valueOf(registTimeCapsule.getPlanId()))
                 .orElseThrow(() -> new ExceptionHandler(ErrorStatus.PLAN_NOT_FOUND));
 
@@ -43,13 +46,11 @@ public class TimeCapsuleServiceImpl implements TimeCapsuleService {
         }
 
         Couple couple = findCoupleByUserId(user.getId());
-
         registTimeCapsule.setCoupleId(couple.getId());
-
         PlanStatus planStatus;
 
         // 이미 해당 유저가 해당 플랜에 작성한 타임캡슐이 있다면
-        if(timeCapsuleRepository.existsByUserIdAndPlanId(registTimeCapsule.getUserId(), registTimeCapsule.getPlanId())) {
+        if ( timeCapsuleRepository.existsByUserIdAndPlanId(registTimeCapsule.getUserId(), registTimeCapsule.getPlanId())) {
             throw new ExceptionHandler(ErrorStatus.TIMECAPSULE_ALREADY_EXIST);
         }
         else {
@@ -77,12 +78,12 @@ public class TimeCapsuleServiceImpl implements TimeCapsuleService {
 
         List<TimeCapsule> timeCapsules = timeCapsuleRepository.findAllByCoupleId(couple.getId());
 
-        // Collection 인 List 를 Stream(데이터 처리 파이프라인 으로 변환)
-        return timeCapsules.stream()
-                // map() 으로 스트림의 각 요소를 다른 형태로 변환
-                .map(TimeCapsuleConverter::toResponse)
-                // 스트림 처리 결과를 다시 List 형태로 수집
-                .collect(Collectors.toList());
+        timeCapsules.forEach(timeCapsule -> {
+            timeCapsule.setBadImagePath(minioImageService.getImageUrl(timeCapsule.getBadImagePath()));
+            timeCapsule.setGoodImagePath(minioImageService.getImageUrl(timeCapsule.getGoodImagePath()));
+        });
+
+        return TimeCapsuleConverter.toResponse(timeCapsules);
     }
     private User findUserByUserId(Integer userId) {
         return userRepository.findUserById(userId).
