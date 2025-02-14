@@ -43,7 +43,7 @@ public class OAuth2AuthenticationFailureHandler extends SimpleUrlAuthenticationF
         log.error("Error Message: {}", errorMessage);
 
         String encodedMessage = URLEncoder.encode(errorMessage, StandardCharsets.UTF_8);
-        String targetUrl = UriComponentsBuilder.fromUriString("http://localhost:5173/login")
+        String targetUrl = UriComponentsBuilder.fromUriString("https://weddie.ssafy.me/login")
                 .queryParam("error", encodedMessage)
                 .build()
                 .toUriString();
