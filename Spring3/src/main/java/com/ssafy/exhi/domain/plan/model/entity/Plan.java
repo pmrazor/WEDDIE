@@ -8,6 +8,7 @@ import com.ssafy.exhi.domain.timecapsule.model.entity.TimeCapsule;
 import com.ssafy.exhi.domain.todo.model.entity.DefaultTodo;
 import com.ssafy.exhi.domain.todo.model.entity.Todo;
 import com.ssafy.exhi.domain.tip.model.entity.Tip;
+import com.ssafy.exhi.domain.TimeWrapper; // 시간 조작 클래스
 import com.ssafy.exhi.domain.virginroad.model.entity.VirginRoad;
 import com.ssafy.exhi.exception.ExceptionHandler;
 import jakarta.persistence.*;

@@ -33,7 +33,6 @@ public class PlanServiceImpl implements PlanService {
     private final PlanRepository planRepository;
     private final CoupleRepository coupleRepository;
     private final UserDetailRepository userDetailRepository;
-    private final TipServiceImpl tipService;  // TipService를 주입받음
 
     @Override
     public DetailResultDTO getPlan(Integer userId, Integer planId) {
