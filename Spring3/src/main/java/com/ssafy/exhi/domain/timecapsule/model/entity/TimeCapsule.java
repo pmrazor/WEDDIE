@@ -37,12 +37,20 @@ public class TimeCapsule extends BaseEntity {
     @Column(name="good_image")
     private String goodImage;
 
+    @Setter
+    @Transient
+    private String goodImagePath;
+
     @Size(max = 255, message = "다퉜던 내용은 최대 100자까지 입력 가능합니다.")
     @Column(name="bad_content")
     private String badContent;
 
     @Column(name="bad_image")
     private String badImage;
+
+    @Setter
+    @Transient
+    private String badImagePath;
 
     @Enumerated(EnumType.STRING)
     @Column(name="time_capsule_status")

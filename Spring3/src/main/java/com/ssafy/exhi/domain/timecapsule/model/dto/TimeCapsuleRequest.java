@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.web.multipart.MultipartFile;
 
 public class TimeCapsuleRequest {
     @Data
@@ -39,5 +40,6 @@ public class TimeCapsuleRequest {
         // 해당 플랜에 대한 만족도 평가
         private boolean planGrade;
 
+        private MultipartFile image;
     }
 }
