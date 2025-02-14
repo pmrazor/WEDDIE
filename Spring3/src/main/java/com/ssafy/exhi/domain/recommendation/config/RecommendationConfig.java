@@ -29,7 +29,7 @@ public class RecommendationConfig {
     private double virginRoadFinishedFactor = 1.3;     // 버진로드 완료 시 추가 가중치
 
     // ※ 타임캡슐 사용 여부 및 가중치
-    private boolean useTimeCapsuleFactor = true;       // 타임캡슐 점수를 사용할지 여부
+    private boolean useTimeCapsuleFactor = false;       // 타임캡슐 점수를 사용할지 여부
     private double timeCapsuleFactor = 1.2;            // 타임캡슐 가중치 (예: 1.2 → 20% 가중)
 
     private double recommendationThreshold = 20.0;     // 추천 임계값 (%). 이를 넘으면 추천

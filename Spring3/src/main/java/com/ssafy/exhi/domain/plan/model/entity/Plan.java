@@ -59,6 +59,7 @@ public class Plan extends BaseEntity {
     @OneToMany(mappedBy = "plan", cascade = CascadeType.ALL)
     private List<TimeCapsule> timeCapsules = new ArrayList<>();
 
+
     /* 비즈니스 로직 */
 
     public void updateVirginRoad(VirginRoad virginRoad) {
