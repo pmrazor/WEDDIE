@@ -173,7 +173,7 @@ export default function OnBoarding() {
           ))}
         </div>
       </div>
-      <div className="flex mt-auto">
+      <div className="flex mt-auto pb-12 mb-1">
         {step > 1 && (
           <button
             onClick={handleBack}
