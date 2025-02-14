@@ -7,6 +7,7 @@ import com.ssafy.exhi.domain.plan.model.entity.PlanStatus;
 import com.ssafy.exhi.domain.todo.converter.TodoConverter;
 import com.ssafy.exhi.domain.todo.model.dto.TodoResponse;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -24,6 +25,15 @@ public class PlanConverter {
                 .planStatus(plan.getPlanStatus())
                 .serviceType(plan.getServiceType())
                 .visible(plan.isVisible())
+                .build();
+    }
+
+    public static PlanRequest.CreateDTO toCreateDTO(Plan plan, LocalDate planDate) {
+        return PlanRequest.CreateDTO.builder()
+                .serviceType(plan.getServiceType())
+                .shopName(plan.getShopName())
+                .visible(plan.isVisible())
+                .planTime(planDate.atStartOfDay())
                 .build();
     }
 
