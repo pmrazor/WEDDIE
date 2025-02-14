@@ -19,7 +19,7 @@ public enum ErrorStatus implements BaseErrorCode {
     // 입력 관련 에러
     NOT_ENOUGH_REQUEST_BODY_ERROR(HttpStatus.BAD_REQUEST, "COMMON404", "요청 바디가 잘못되었습니다."),
 
-    // 멤버 관련 에러
+    // 멤버 관련 에러5r
     USER_NOT_FOUND(HttpStatus.NOT_FOUND, "MEMBER4001", "존재하지않는 계정입니다."),
     USER_NICKNAME_NOT_EXIST(HttpStatus.BAD_REQUEST, "MEMBER4002", "닉네임은 필수 입니다."),
     USER_DUPLICATED_LOGIN_ID(HttpStatus.BAD_REQUEST, "MEMBER4003", "아이디가 중복되었습니다."),

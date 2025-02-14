@@ -3,10 +3,13 @@ package com.ssafy.exhi.domain.todo.controller;
 import com.ssafy.exhi.base.ApiResponse;
 import com.ssafy.exhi.base.status.ErrorStatus;
 import com.ssafy.exhi.domain.ServiceType;
+import com.ssafy.exhi.domain.todo.model.dto.TodoRequest;
 import com.ssafy.exhi.domain.todo.model.dto.TodoResponse;
 import com.ssafy.exhi.domain.todo.model.entity.StageType;
+import com.ssafy.exhi.domain.todo.service.TodoService;
 import com.ssafy.exhi.domain.todo.service.TodosService;
 import com.ssafy.exhi.util.JWTUtil;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -23,6 +26,7 @@ public class TodosController {
 
     private final JWTUtil jwtUtil;
     private final TodosService todosService;
+    private final TodoService todoService;
 
     @PostMapping("/createTodo")
     public ResponseEntity<?> createTodo(
@@ -66,22 +70,49 @@ public class TodosController {
         }
     }
 
-    @PatchMapping("/{todo_id}")
+    @PatchMapping("/{todoId}")
     public ResponseEntity<?> updateTodo(
             @RequestHeader(name = "Authorization") String accessToken,
-            @PathVariable("todo_id") Integer todoId,
-            @RequestBody Boolean isCompleted
+            @PathVariable("todoId") Integer todoId,
+            @RequestBody Map<String, Object> requestBody
     ) {
-        TodoResponse.FindResultDTO response = todosService.updateTodo(todoId, isCompleted);
-        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.onSuccess(response));
+        try {
+            if (!requestBody.containsKey("isCompleted")) {
+                return ResponseEntity.badRequest().body("Missing 'isCompleted' field");
+            }
+
+            Boolean isCompleted = (Boolean) requestBody.get("isCompleted");
+            TodoResponse.FindResultDTO response = todosService.updateTodo(todoId, isCompleted);
+            return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.onSuccess(response));
+        } catch (ClassCastException e) {
+            return ResponseEntity.badRequest().body("Invalid 'isCompleted' value");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Internal server error");
+        }
     }
 
-    @DeleteMapping("/{todo_id}")
+    @DeleteMapping("/{todoId}")
     public ResponseEntity<?> deleteTodo(
             @RequestHeader(name = "Authorization") String accessToken,
-            @PathVariable("todo_id") Integer todoId
+            @PathVariable("todoId") Integer todoId
     ) {
         todosService.deleteTodo(todoId);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+
+    @PatchMapping("{planId}/{todoId}")
+    public ResponseEntity<?> patchTodo(
+            @RequestHeader(name = "Authorization") String accessToken,
+            @PathVariable("planId") Integer planId,
+            @PathVariable("todoId") Integer todoId,
+            @RequestBody @Valid TodoRequest.UpdateDTO updateDTO
+    ) {
+        Integer userId = jwtUtil.getUserId(accessToken);
+        updateDTO.setPlanId(planId);
+        updateDTO.setTodoId(todoId);
+
+        TodoResponse.DetailResultDTO response = todoService.patchTodo(userId, updateDTO);
+
+        return ResponseEntity.ok(response);
     }
 }
