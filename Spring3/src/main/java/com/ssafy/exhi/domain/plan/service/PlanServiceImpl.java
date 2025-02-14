@@ -7,6 +7,7 @@ import com.ssafy.exhi.domain.plan.converter.PlanConverter;
 import com.ssafy.exhi.domain.plan.model.entity.Plan;
 import com.ssafy.exhi.domain.plan.model.entity.PlanStatus; // enum 임포트
 import com.ssafy.exhi.domain.plan.repository.PlanRepository;
+import com.ssafy.exhi.domain.virginroad.repository.VirginRoadRepository; // 버진로드에서 커플ID 찾기
 import com.ssafy.exhi.domain.todo.model.entity.TodoType;
 import com.ssafy.exhi.domain.user.model.entity.Gender;
 import com.ssafy.exhi.domain.user.repository.UserDetailRepository;
@@ -17,6 +18,8 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import com.ssafy.exhi.util.JWTUtil;
+
 
 import java.util.Arrays;
 import java.util.Map;
@@ -39,6 +42,8 @@ public class PlanServiceImpl implements PlanService {
     private final CoupleRepository coupleRepository;
     private final UserDetailRepository userDetailRepository;
     private final TimeWrapper timeWrapper;
+    private final VirginRoadRepository virginRoadRepository;
+    private final JWTUtil jwtUtil;
 
     @Override
     public DetailResultDTO getPlan(Integer userId, Integer planId) {
@@ -58,7 +63,9 @@ public class PlanServiceImpl implements PlanService {
     private static final int DURATION = 30;  // 상수 DURATION 30일 설정
 
     @Override
-    public AllResultDTO getAllPlans(Integer coupleId) {
+    public AllResultDTO getAllPlans(String header) {
+        Integer coupleId = jwtUtil.getCoupleId(header);
+
         List<Plan> plans = planRepository.findByVirginRoad_Couple_Id(coupleId);
         if (plans.isEmpty()) {
             throw new ExceptionHandler(ErrorStatus.PLAN_NOT_FOUND);
@@ -73,6 +80,13 @@ public class PlanServiceImpl implements PlanService {
         Map<PlanStatus, List<Integer>> groupedPlans = groupPlansByStatus(plans);
         return new AllResultDTO(groupedPlans);
     }
+
+//    // userId를 통해 coupleId를 가져오는 메서드
+//    private Integer getCoupleIdByUserId(Integer userId) {
+//        VirginRoad virginRoad =  virginRoadRepository.findByCouple_UserId(userId) // VirginRoadRepository에서 userId로 VirginRoad를 찾기
+//                .orElseThrow(() -> new ExceptionHandler(ErrorStatus.COUPLE_NOT_FOUND));
+//        return virginRoad.getCouple().getId();  // coupleId 반환
+//    }
 
     private Map<PlanStatus, List<Integer>> groupPlansByStatus(List<Plan> plans) {
         Map<PlanStatus, List<Integer>> groupedPlans = new HashMap<>();

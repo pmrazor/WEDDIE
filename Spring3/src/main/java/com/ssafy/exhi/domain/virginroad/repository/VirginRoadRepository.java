@@ -16,6 +16,9 @@ public interface VirginRoadRepository extends JpaRepository<VirginRoad, Integer>
 
     boolean existsVirginRoadByCouple(Couple couple);
 
+    // coupleId로 VirginRoad 찾기 (userId를 통해)
+//    Optional<VirginRoad> findByCouple_UserId(Integer userId);
+
     @Query("""
             SELECT new com.ssafy.exhi.domain.recommendation.model.dto.RoadPlanCapsuleDTO(
                 vr.couple.id,
