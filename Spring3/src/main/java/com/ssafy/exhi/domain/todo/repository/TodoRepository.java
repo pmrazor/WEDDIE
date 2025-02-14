@@ -19,4 +19,6 @@ public interface TodoRepository extends JpaRepository<Todo, Integer> {
             @Param("planId") Integer planId,
             @Param("todoTypes") List<TodoType> todoTypes
     );
+
+    void delete(Todo todo);
 }

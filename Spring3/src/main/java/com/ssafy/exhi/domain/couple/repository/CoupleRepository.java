@@ -40,4 +40,5 @@ public interface CoupleRepository extends JpaRepository<Couple, Integer> {
             @Param("excludeId") Integer excludeId,
             Pageable pageable
     );
+
 }

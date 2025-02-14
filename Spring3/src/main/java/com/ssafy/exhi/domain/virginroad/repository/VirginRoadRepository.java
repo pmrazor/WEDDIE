@@ -33,4 +33,6 @@ public interface VirginRoadRepository extends JpaRepository<VirginRoad, Integer>
             WHERE vr.couple.id IN :coupleIds
         """)
     List<RoadPlanCapsuleDTO> findAllMinimalDataByCoupleIds(@Param("coupleIds") List<Integer> coupleIds);
+
+    Optional<VirginRoad> findVirginRoadByCoupleId(Integer coupleId);
 }

@@ -12,7 +12,9 @@ import com.ssafy.exhi.domain.recommendation.model.dto.RecommendationResponse;
 import com.ssafy.exhi.domain.recommendation.model.dto.RoadPlanCapsuleDTO;
 import com.ssafy.exhi.domain.recommendation.model.entity.*;
 import com.ssafy.exhi.domain.recommendation.repository.*;
+import com.ssafy.exhi.domain.todo.config.TodoInitializer;
 import com.ssafy.exhi.domain.todo.model.entity.DefaultTodo;
+import com.ssafy.exhi.domain.todo.model.entity.Todo;
 import com.ssafy.exhi.domain.todo.repository.DefaultTodoRepository;
 import com.ssafy.exhi.domain.user.model.entity.User;
 import com.ssafy.exhi.domain.user.model.entity.UserDetail;
@@ -55,6 +57,8 @@ public class RecommendationServiceImpl implements RecommendationService {
     private final VirginRoadRepository virginRoadRepository;
     private final DefaultTodoRepository defaultTodoRepository;
     private final ServiceTypeScheduler serviceTypeScheduler;
+
+    private final TodoInitializer todoInitializer;
 
     // ========== 캐시된 파라미터 ==========
     private volatile UserClusteringParameter userClusteringParam;
