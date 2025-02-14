@@ -8,13 +8,13 @@ import com.ssafy.exhi.domain.timecapsule.model.entity.TimeCapsule;
 import com.ssafy.exhi.domain.todo.model.entity.DefaultTodo;
 import com.ssafy.exhi.domain.todo.model.entity.Todo;
 import com.ssafy.exhi.domain.tip.model.entity.Tip;
-import com.ssafy.exhi.domain.TimeWrapper; // 시간 조작 클래스
 import com.ssafy.exhi.domain.virginroad.model.entity.VirginRoad;
 import com.ssafy.exhi.exception.ExceptionHandler;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -44,16 +44,24 @@ public class Plan extends BaseEntity {
     @Column(name = "visible")
     private boolean visible;
 
+    // 시작 날짜
+    @Column(name = "start_date")
+    private LocalDateTime startTime;
+
+    // 당일날짜
     @Column(name = "plan_time")
     private LocalDateTime planTime;
 
+    // 끝 날짜
     @Column(name = "end_time")
     private LocalDateTime endTime;
 
+    // 전, 중, 타입캡슐필요, 완전 끝
     @Column(name = "plan_status")
     @Enumerated(EnumType.STRING)
     private PlanStatus planStatus;
 
+    // 플랜들
     @OneToMany(mappedBy = "plan", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Todo> todos = new ArrayList<>();
 
@@ -70,6 +78,15 @@ public class Plan extends BaseEntity {
 
 
     /* 비즈니스 로직 */
+
+    // 서비스 로직에서 호출할 메서드, 엔티티에서 날짜를 계산하여 설정
+    public void calculateStartAndEndDates(int duration) {
+        if (planTime != null) {
+            // planTime에서 duration 만큼 빼고 더하기
+            this.startTime = planTime.minusDays(duration); // startDate는 planTime에서 30일 전
+            this.endTime = planTime.plusDays(duration); // endDate는 planTime에서 30일 후
+        }
+    }
 
     public void updateVirginRoad(VirginRoad virginRoad) {
         if (this.virginRoad != null) {

@@ -30,21 +30,24 @@ public class PlanController {
         return ResponseEntity.ok(ApiResponse.onSuccess(response));
     }
 
+    @GetMapping("/main")
+    public ResponseEntity<?> getAllPlans(
+            @RequestHeader("Authorization") String accessToken
+    ) {
+        Integer userId = jwtUtil.getUserId(accessToken);  // JWT에서 유저 ID 추출
+        log.info("getAllPlans coupleId: {}", userId);
+
+        // 유저에 해당하는 모든 플랜을 서비스에서 가져오기
+        PlanResponse.AllResultDTO response = planService.getAllPlans(userId);
+
+        // ApiResponse를 이용해서 정상적으로 응답 반환
+        return ResponseEntity.ok(ApiResponse.onSuccess(response));
+    }
+
+
     // TODO Plan의 상태를 변경하는 메서드
 
 
-    // IN_PROGRESS에서 필요한 plan과 tip 랜딩
-    @GetMapping("/now")
-    public ResponseEntity<?> getPlansForNow(
-            @RequestHeader("Authorization") String accessToken
-    ) {
-        // JWT에서 userId 추출
-        Integer userId = jwtUtil.getUserId(accessToken);
-        log.info("getPlansForNow userId: {}", userId);
 
-        // PlanService에서 IN_PROGRESS 상태인 Plan과 Tip을 가져옴
-        PlanResponse.DetailResultDTO response = planService.getPlansForStatus(PlanStatus.IN_PROGRESS, userId);
-        return ResponseEntity.ok(ApiResponse.onSuccess(response));
-    }
 
 }

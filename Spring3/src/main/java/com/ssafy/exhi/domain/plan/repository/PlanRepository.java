@@ -20,4 +20,7 @@ public interface PlanRepository extends JpaRepository<Plan, Long> {
         @Param("planId") Integer planId,
         @Param("todoTypes") List<TodoType> todoTypes
     );
+
+    // 유저 ID에 해당하는 플랜을 가져오는 쿼리 메서드
+    List<Plan> findByVirginRoad_Couple_Id(Integer coupleId);  // VirginRoad가 UserId를 가지고 있다고 가정
 }
