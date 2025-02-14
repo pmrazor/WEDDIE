@@ -20,6 +20,7 @@ import com.ssafy.exhi.domain.user.repository.UserRepository;
 import com.ssafy.exhi.domain.virginroad.model.entity.VirginRoad;
 import com.ssafy.exhi.domain.virginroad.repository.VirginRoadRepository;
 import com.ssafy.exhi.exception.ExceptionHandler;
+import com.ssafy.exhi.util.ServiceTypeScheduler;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
@@ -27,6 +28,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -52,6 +54,7 @@ public class RecommendationServiceImpl implements RecommendationService {
     private final CoupleClusteringParameterRepository coupleClusteringParameterRepository;
     private final VirginRoadRepository virginRoadRepository;
     private final DefaultTodoRepository defaultTodoRepository;
+    private final ServiceTypeScheduler serviceTypeScheduler;
 
     // ========== 캐시된 파라미터 ==========
     private volatile UserClusteringParameter userClusteringParam;
@@ -68,8 +71,8 @@ public class RecommendationServiceImpl implements RecommendationService {
             synchronized (lock) {
                 if (userClusteringParam == null) {
                     userClusteringParam = userClusteringParameterRepository
-                            .findFirstByOrderByCreatedAtDesc()
-                            .orElseThrow(() -> new ExceptionHandler(ErrorStatus.RECOMMENDATION_DATA_NOT_READY));
+                        .findFirstByOrderByCreatedAtDesc()
+                        .orElseThrow(() -> new ExceptionHandler(ErrorStatus.RECOMMENDATION_DATA_NOT_READY));
                 }
             }
         }
@@ -81,8 +84,8 @@ public class RecommendationServiceImpl implements RecommendationService {
             synchronized (lock) {
                 if (coupleClusteringParam == null) {
                     coupleClusteringParam = coupleClusteringParameterRepository
-                            .findFirstByOrderByCreatedAtDesc()
-                            .orElseThrow(() -> new ExceptionHandler(ErrorStatus.RECOMMENDATION_DATA_NOT_READY));
+                        .findFirstByOrderByCreatedAtDesc()
+                        .orElseThrow(() -> new ExceptionHandler(ErrorStatus.RECOMMENDATION_DATA_NOT_READY));
                 }
             }
         }
@@ -148,8 +151,8 @@ public class RecommendationServiceImpl implements RecommendationService {
 
         // 유사 커플들의 ID 모으기
         List<Integer> coupleIds = similarCouples.stream()
-                .map(Couple::getId)
-                .collect(Collectors.toList());
+            .map(Couple::getId)
+            .collect(Collectors.toList());
 
         // 하나의 쿼리로 RoadPlanCapsuleDTO 전부 가져오기
         if (!coupleIds.isEmpty()) {
@@ -157,7 +160,7 @@ public class RecommendationServiceImpl implements RecommendationService {
 
             // 커플ID → 해당 DTO들 매핑
             Map<Integer, List<RoadPlanCapsuleDTO>> roadPlanMapByCoupleId = allRoadPlanData.stream()
-                    .collect(Collectors.groupingBy(RoadPlanCapsuleDTO::getCoupleId));
+                .collect(Collectors.groupingBy(RoadPlanCapsuleDTO::getCoupleId));
 
             // 유사 커플의 플랜 분석
             analyzeSimilarCouplesPlans(similarCouples, couple, planWeights, roadPlanMapByCoupleId);
@@ -178,6 +181,7 @@ public class RecommendationServiceImpl implements RecommendationService {
     }
 
     // ========== (추가) 유저·커플 필수 정보 검증 메서드 ==========
+
     /**
      * 사용자(User)와 커플(Couple)에 반드시 필요한 정보(나이, 예산, 결혼예정일)에 대해
      * 값이 유효한지 검사합니다.
@@ -215,17 +219,19 @@ public class RecommendationServiceImpl implements RecommendationService {
         // (1) virginRoad가 없으면 새로 생성 + 기본 플랜/투두 등록
         if (virginRoad == null) {
             virginRoad = VirginRoad.builder()
-                    .couple(couple)
-                    .virginRoadStatus(PlanStatus.BEFORE_START)
-                    .plans(new ArrayList<>())
-                    .build();
+                .couple(couple)
+                .virginRoadStatus(PlanStatus.BEFORE_START)
+                .plans(new ArrayList<>())
+                .build();
 
-            virginRoad = virginRoadRepository.save(virginRoad);
-
-            // DefaultTodo를 ServiceType별로 그룹화
+//            // DefaultTodo를 ServiceType별로 그룹화
             Map<ServiceType, List<DefaultTodo>> defaultTodoMap = getAllDefaultTodosInMap();
             // Default Plan/Todo 구성
             virginRoad.setDefaultPlans(defaultTodoMap);
+
+            virginRoad.addPlans(setPlanDefaultDates(virginRoad.getPlans(), couple));
+
+            virginRoad = virginRoadRepository.save(virginRoad);
         }
 
         // (2) planWeights를 바탕으로 plan.visibility 설정
@@ -235,6 +241,29 @@ public class RecommendationServiceImpl implements RecommendationService {
         }
 
         return virginRoadRepository.saveAndFlush(virginRoad);
+    }
+
+    private List<Plan> setPlanDefaultDates(List<Plan> Plans, Couple couple) {
+
+        LocalDate marriageDate = coupleRepository.findCoupleByUserId(couple.getId())
+            .orElseThrow(() -> new ExceptionHandler(ErrorStatus.COUPLE_NOT_FOUND)).getMarriageDate();
+        LocalDate today = LocalDate.now();
+        long totalDays = ChronoUnit.DAYS.between(today, marriageDate);
+
+        Map<ServiceType, Double> scheduleDays = serviceTypeScheduler.getServiceTypeSchedule();
+        List<Plan> updatedPlans = new ArrayList<>();
+
+        for (Plan cur : Plans) {
+            double percentage = scheduleDays.getOrDefault(cur.getServiceType(), 0.3);
+
+            long daysBeforeWedding = (long) (totalDays * percentage);
+            LocalDate planDate = marriageDate.minusDays(daysBeforeWedding);
+            cur.setPlanTime(planDate.atStartOfDay());
+
+            updatedPlans.add(cur);
+        }
+
+        return updatedPlans;
     }
 
     private Map<ServiceType, List<DefaultTodo>> getAllDefaultTodosInMap() {
@@ -251,17 +280,17 @@ public class RecommendationServiceImpl implements RecommendationService {
 
     private UserCluster findOrCreateUserCluster(User user) {
         return userClusterRepository.findByUser(user)
-                .orElse(UserCluster.builder().user(user).build());
+            .orElse(UserCluster.builder().user(user).build());
     }
 
     private CoupleCluster findOrCreateCoupleCluster(Couple couple) {
         return coupleClusterRepository.findByCouple(couple)
-                .orElse(CoupleCluster.builder().couple(couple).build());
+            .orElse(CoupleCluster.builder().couple(couple).build());
     }
 
     private void assignUserToCluster(UserCluster userCluster, User user) {
         UserClusterCenters centers = userClusterCentersRepository.findFirstByOrderByCreatedAtDesc()
-                .orElseThrow(() -> new ExceptionHandler(ErrorStatus.RECOMMENDATION_NO_CLUSTER_CENTERS));
+            .orElseThrow(() -> new ExceptionHandler(ErrorStatus.RECOMMENDATION_NO_CLUSTER_CENTERS));
 
         // 사용자 좌표 계산
         calculateUserCoordinates(userCluster, user);
@@ -272,22 +301,22 @@ public class RecommendationServiceImpl implements RecommendationService {
 
         for (UserClusterCenter center : centers.getUserClusterCenterList()) {
             double distance = calculateEuclideanDistance(
-                    new double[]{
-                            userCluster.getAgeCoordinate(),
-                            userCluster.getBudgetCoordinate(),
-                            userCluster.getMbtiIeCoordinate(),
-                            userCluster.getMbtiSnCoordinate(),
-                            userCluster.getMbtiTfCoordinate(),
-                            userCluster.getMbtiJpCoordinate()
-                    },
-                    new double[]{
-                            center.getAgeCoordinate(),
-                            center.getBudgetCoordinate(),
-                            center.getMbtiIeCoordinate(),
-                            center.getMbtiSnCoordinate(),
-                            center.getMbtiTfCoordinate(),
-                            center.getMbtiJpCoordinate()
-                    }
+                new double[]{
+                    userCluster.getAgeCoordinate(),
+                    userCluster.getBudgetCoordinate(),
+                    userCluster.getMbtiIeCoordinate(),
+                    userCluster.getMbtiSnCoordinate(),
+                    userCluster.getMbtiTfCoordinate(),
+                    userCluster.getMbtiJpCoordinate()
+                },
+                new double[]{
+                    center.getAgeCoordinate(),
+                    center.getBudgetCoordinate(),
+                    center.getMbtiIeCoordinate(),
+                    center.getMbtiSnCoordinate(),
+                    center.getMbtiTfCoordinate(),
+                    center.getMbtiJpCoordinate()
+                }
             );
             if (distance < minDistance) {
                 minDistance = distance;
@@ -305,35 +334,35 @@ public class RecommendationServiceImpl implements RecommendationService {
 
     private void assignCoupleToCluster(CoupleCluster coupleCluster, Couple couple) {
         CoupleClusterCenters centers = coupleClusterCentersRepository.findFirstByOrderByCreatedAtDesc()
-                .orElseThrow(() -> new ExceptionHandler(ErrorStatus.RECOMMENDATION_NO_CLUSTER_CENTERS));
+            .orElseThrow(() -> new ExceptionHandler(ErrorStatus.RECOMMENDATION_NO_CLUSTER_CENTERS));
 
         double minDistance = Double.MAX_VALUE;
         int nearestClusterId = -1;
 
         for (CoupleClusterCenter center : centers.getCoupleClusterCenterList()) {
             double distance = calculateEuclideanDistance(
-                    new double[]{
-                            coupleCluster.getMaleAgeCoordinate(),
-                            coupleCluster.getFemaleAgeCoordinate(),
-                            coupleCluster.getAgeDiffCoordinate(),
-                            coupleCluster.getBudgetCoordinate(),
-                            coupleCluster.getMarriageMonthSinCoordinate(),
-                            coupleCluster.getMarriageMonthCosCoordinate(),
-                            coupleCluster.getMarriageDaySinCoordinate(),
-                            coupleCluster.getMarriageDayCosCoordinate(),
-                            coupleCluster.getUserClusterDistanceCoordinate()
-                    },
-                    new double[]{
-                            center.getMaleAgeCoordinate(),
-                            center.getFemaleAgeCoordinate(),
-                            center.getAgeDiffCoordinate(),
-                            center.getBudgetCoordinate(),
-                            center.getMarriageMonthSinCoordinate(),
-                            center.getMarriageMonthCosCoordinate(),
-                            center.getMarriageDaySinCoordinate(),
-                            center.getMarriageDayCosCoordinate(),
-                            center.getUserClusterDistanceCoordinate()
-                    }
+                new double[]{
+                    coupleCluster.getMaleAgeCoordinate(),
+                    coupleCluster.getFemaleAgeCoordinate(),
+                    coupleCluster.getAgeDiffCoordinate(),
+                    coupleCluster.getBudgetCoordinate(),
+                    coupleCluster.getMarriageMonthSinCoordinate(),
+                    coupleCluster.getMarriageMonthCosCoordinate(),
+                    coupleCluster.getMarriageDaySinCoordinate(),
+                    coupleCluster.getMarriageDayCosCoordinate(),
+                    coupleCluster.getUserClusterDistanceCoordinate()
+                },
+                new double[]{
+                    center.getMaleAgeCoordinate(),
+                    center.getFemaleAgeCoordinate(),
+                    center.getAgeDiffCoordinate(),
+                    center.getBudgetCoordinate(),
+                    center.getMarriageMonthSinCoordinate(),
+                    center.getMarriageMonthCosCoordinate(),
+                    center.getMarriageDaySinCoordinate(),
+                    center.getMarriageDayCosCoordinate(),
+                    center.getUserClusterDistanceCoordinate()
+                }
             );
             if (distance < minDistance) {
                 minDistance = distance;
@@ -372,19 +401,19 @@ public class RecommendationServiceImpl implements RecommendationService {
 
         // 나이 (z-score)
         userCluster.setAgeCoordinate(
-                scaleStandard(detail.getAge(), param.getAgeMean(), param.getAgeScale())
+            scaleStandard(detail.getAge(), param.getAgeMean(), param.getAgeScale())
         );
 
         // 예산 (Min-Max)
         int budget = getCoupleByUserId(user.getId()).getBudget();
         userCluster.setBudgetCoordinate(
-                scaleMinMaxWithRange(
-                        budget,
-                        param.getBudgetDataMin(),
-                        param.getBudgetDataMax(),
-                        param.getBudgetMin(),
-                        param.getBudgetScale()
-                )
+            scaleMinMaxWithRange(
+                budget,
+                param.getBudgetDataMin(),
+                param.getBudgetDataMax(),
+                param.getBudgetMin(),
+                param.getBudgetScale()
+            )
         );
 
         // MBTI
@@ -410,33 +439,33 @@ public class RecommendationServiceImpl implements RecommendationService {
         int femaleAge = couple.getFemale().getUserDetail().getAge();
 
         coupleCluster.setMaleAgeCoordinate(
-                scaleStandard(maleAge, param.getMaleAgeMean(), param.getMaleAgeScale())
+            scaleStandard(maleAge, param.getMaleAgeMean(), param.getMaleAgeScale())
         );
         coupleCluster.setFemaleAgeCoordinate(
-                scaleStandard(femaleAge, param.getFemaleAgeMean(), param.getFemaleAgeScale())
+            scaleStandard(femaleAge, param.getFemaleAgeMean(), param.getFemaleAgeScale())
         );
 
         // 나이 차이
         int ageDiff = maleAge - femaleAge;
         coupleCluster.setAgeDiffCoordinate(
-                scaleMinMaxWithRange(
-                        ageDiff,
-                        param.getAgeDiffDataMin(),
-                        param.getAgeDiffDataMax(),
-                        param.getAgeDiffMin(),
-                        param.getAgeDiffScale()
-                )
+            scaleMinMaxWithRange(
+                ageDiff,
+                param.getAgeDiffDataMin(),
+                param.getAgeDiffDataMax(),
+                param.getAgeDiffMin(),
+                param.getAgeDiffScale()
+            )
         );
 
         // 커플 예산
         coupleCluster.setBudgetCoordinate(
-                scaleMinMaxWithRange(
-                        couple.getBudget(),
-                        param.getBudgetDataMin(),
-                        param.getBudgetDataMax(),
-                        param.getBudgetMin(),
-                        param.getBudgetScale()
-                )
+            scaleMinMaxWithRange(
+                couple.getBudget(),
+                param.getBudgetDataMin(),
+                param.getBudgetDataMax(),
+                param.getBudgetMin(),
+                param.getBudgetScale()
+            )
         );
 
         // 결혼 날짜 → sin/cos
@@ -445,40 +474,40 @@ public class RecommendationServiceImpl implements RecommendationService {
         int day = md.getDayOfMonth();
 
         coupleCluster.setMarriageMonthSinCoordinate(
-                scaleMinMaxWithRange(
-                        Math.sin(2 * Math.PI * month / 12.0),
-                        param.getMarriageMonthSinDataMin(),
-                        param.getMarriageMonthSinDataMax(),
-                        param.getMarriageMonthSinMin(),
-                        param.getMarriageMonthSinScale()
-                )
+            scaleMinMaxWithRange(
+                Math.sin(2 * Math.PI * month / 12.0),
+                param.getMarriageMonthSinDataMin(),
+                param.getMarriageMonthSinDataMax(),
+                param.getMarriageMonthSinMin(),
+                param.getMarriageMonthSinScale()
+            )
         );
         coupleCluster.setMarriageMonthCosCoordinate(
-                scaleMinMaxWithRange(
-                        Math.cos(2 * Math.PI * month / 12.0),
-                        param.getMarriageMonthCosDataMin(),
-                        param.getMarriageMonthCosDataMax(),
-                        param.getMarriageMonthCosMin(),
-                        param.getMarriageMonthCosScale()
-                )
+            scaleMinMaxWithRange(
+                Math.cos(2 * Math.PI * month / 12.0),
+                param.getMarriageMonthCosDataMin(),
+                param.getMarriageMonthCosDataMax(),
+                param.getMarriageMonthCosMin(),
+                param.getMarriageMonthCosScale()
+            )
         );
         coupleCluster.setMarriageDaySinCoordinate(
-                scaleMinMaxWithRange(
-                        Math.sin(2 * Math.PI * day / 31.0),
-                        param.getMarriageDaySinDataMin(),
-                        param.getMarriageDaySinDataMax(),
-                        param.getMarriageDaySinMin(),
-                        param.getMarriageDaySinScale()
-                )
+            scaleMinMaxWithRange(
+                Math.sin(2 * Math.PI * day / 31.0),
+                param.getMarriageDaySinDataMin(),
+                param.getMarriageDaySinDataMax(),
+                param.getMarriageDaySinMin(),
+                param.getMarriageDaySinScale()
+            )
         );
         coupleCluster.setMarriageDayCosCoordinate(
-                scaleMinMaxWithRange(
-                        Math.cos(2 * Math.PI * day / 31.0),
-                        param.getMarriageDayCosDataMin(),
-                        param.getMarriageDayCosDataMax(),
-                        param.getMarriageDayCosMin(),
-                        param.getMarriageDayCosScale()
-                )
+            scaleMinMaxWithRange(
+                Math.cos(2 * Math.PI * day / 31.0),
+                param.getMarriageDayCosDataMin(),
+                param.getMarriageDayCosDataMax(),
+                param.getMarriageDayCosMin(),
+                param.getMarriageDayCosScale()
+            )
         );
 
         // 유저 클러스터 거리
@@ -491,29 +520,29 @@ public class RecommendationServiceImpl implements RecommendationService {
         UserCluster femaleCluster = getUserCluster(couple.getFemale());
 
         UserClusterCenters centers = userClusterCentersRepository
-                .findFirstByOrderByCreatedAtDesc()
-                .orElseThrow(() -> new ExceptionHandler(ErrorStatus.RECOMMENDATION_DATA_NOT_READY));
+            .findFirstByOrderByCreatedAtDesc()
+            .orElseThrow(() -> new ExceptionHandler(ErrorStatus.RECOMMENDATION_DATA_NOT_READY));
 
         UserClusterCenter maleCenter = centers.getUserClusterCenterList().stream()
-                .filter(c -> Objects.equals(c.getClusterId(), maleCluster.getClusterId()))
-                .findFirst()
-                .orElseThrow(() -> new ExceptionHandler(ErrorStatus.RECOMMENDATION_DATA_NOT_READY));
+            .filter(c -> Objects.equals(c.getClusterId(), maleCluster.getClusterId()))
+            .findFirst()
+            .orElseThrow(() -> new ExceptionHandler(ErrorStatus.RECOMMENDATION_DATA_NOT_READY));
 
         UserClusterCenter femaleCenter = centers.getUserClusterCenterList().stream()
-                .filter(c -> Objects.equals(c.getClusterId(), femaleCluster.getClusterId()))
-                .findFirst()
-                .orElseThrow(() -> new ExceptionHandler(ErrorStatus.RECOMMENDATION_DATA_NOT_READY));
+            .filter(c -> Objects.equals(c.getClusterId(), femaleCluster.getClusterId()))
+            .findFirst()
+            .orElseThrow(() -> new ExceptionHandler(ErrorStatus.RECOMMENDATION_DATA_NOT_READY));
 
         double maleDistance = calculateUserDistance(couple.getMale(), maleCenter);
         double femaleDistance = calculateUserDistance(couple.getFemale(), femaleCenter);
         double rawDistance = (maleDistance + femaleDistance) / 2.0;
 
         return scaleMinMaxWithRange(
-                rawDistance,
-                getCoupleClusteringParam().getUserClusterDistDataMin(),
-                getCoupleClusteringParam().getUserClusterDistDataMax(),
-                getCoupleClusteringParam().getUserClusterDistMin(),
-                getCoupleClusteringParam().getUserClusterDistScale()
+            rawDistance,
+            getCoupleClusteringParam().getUserClusterDistDataMin(),
+            getCoupleClusteringParam().getUserClusterDistDataMax(),
+            getCoupleClusteringParam().getUserClusterDistMin(),
+            getCoupleClusteringParam().getUserClusterDistScale()
         );
     }
 
@@ -521,21 +550,21 @@ public class RecommendationServiceImpl implements RecommendationService {
         UserCluster userCluster = getUserCluster(user);
 
         double ageDiff = (userCluster.getAgeCoordinate() - center.getAgeCoordinate())
-                * getUserClusteringParam().getAgeWeight();
+            * getUserClusteringParam().getAgeWeight();
         double mbtiIeDiff = (userCluster.getMbtiIeCoordinate() - center.getMbtiIeCoordinate())
-                * getUserClusteringParam().getMbtiIeWeight();
+            * getUserClusteringParam().getMbtiIeWeight();
         double mbtiSnDiff = (userCluster.getMbtiSnCoordinate() - center.getMbtiSnCoordinate())
-                * getUserClusteringParam().getMbtiSnWeight();
+            * getUserClusteringParam().getMbtiSnWeight();
         double mbtiTfDiff = (userCluster.getMbtiTfCoordinate() - center.getMbtiTfCoordinate())
-                * getUserClusteringParam().getMbtiTfWeight();
+            * getUserClusteringParam().getMbtiTfWeight();
         double mbtiJpDiff = (userCluster.getMbtiJpCoordinate() - center.getMbtiJpCoordinate())
-                * getUserClusteringParam().getMbtiJpWeight();
+            * getUserClusteringParam().getMbtiJpWeight();
         double budgetDiff = (userCluster.getBudgetCoordinate() - center.getBudgetCoordinate())
-                * getUserClusteringParam().getBudgetWeight();
+            * getUserClusteringParam().getBudgetWeight();
 
         double ageDistSq = ageDiff * ageDiff;
         double mbtiDistSq = mbtiIeDiff * mbtiIeDiff + mbtiSnDiff * mbtiSnDiff
-                + mbtiTfDiff * mbtiTfDiff + mbtiJpDiff * mbtiJpDiff;
+            + mbtiTfDiff * mbtiTfDiff + mbtiJpDiff * mbtiJpDiff;
         double budgetDistSq = budgetDiff * budgetDiff;
 
         return Math.sqrt(ageDistSq + mbtiDistSq + budgetDistSq);
@@ -547,9 +576,9 @@ public class RecommendationServiceImpl implements RecommendationService {
         // 같은 clusterId + 본인 제외, 최대 50개 랜덤
         PageRequest pageable = PageRequest.of(0, 50);
         return coupleRepository.findRandomSimilarCouples(
-                coupleCluster.getClusterId(),
-                coupleCluster.getCouple().getId(),
-                pageable
+            coupleCluster.getClusterId(),
+            coupleCluster.getCouple().getId(),
+            pageable
         ).getContent();
     }
 
@@ -611,7 +640,7 @@ public class RecommendationServiceImpl implements RecommendationService {
 
                 // (3) ServiceType별로 그룹화
                 Map<ServiceType, List<RoadPlanCapsuleDTO>> plansByType = scDTOs.stream()
-                        .collect(Collectors.groupingBy(RoadPlanCapsuleDTO::getServiceType));
+                    .collect(Collectors.groupingBy(RoadPlanCapsuleDTO::getServiceType));
 
                 // (4) 그 커플의 버진로드 상태
                 PlanStatus scVRStatus = scDTOs.get(0).getVirginRoadStatus();
@@ -628,8 +657,8 @@ public class RecommendationServiceImpl implements RecommendationService {
                     totalSimilarities.put(st, totalSimilarities.get(st) + similarity);
 
                     double planScore = recommendationConfig.computePlanScoreForDTOs(
-                            entry.getValue(),
-                            scVRStatus
+                        entry.getValue(),
+                        scVRStatus
                     );
                     // 유사도 가중치 곱
                     planWeights.get(st)[1] += (planScore * similarity);
@@ -648,15 +677,15 @@ public class RecommendationServiceImpl implements RecommendationService {
      */
     private double[] calculateCoupleVector(CoupleCluster cc) {
         return new double[]{
-                cc.getMaleAgeCoordinate(),
-                cc.getFemaleAgeCoordinate(),
-                cc.getAgeDiffCoordinate(),
-                cc.getBudgetCoordinate(),
-                cc.getMarriageMonthSinCoordinate(),
-                cc.getMarriageMonthCosCoordinate(),
-                cc.getMarriageDaySinCoordinate(),
-                cc.getMarriageDayCosCoordinate(),
-                cc.getUserClusterDistanceCoordinate()
+            cc.getMaleAgeCoordinate(),
+            cc.getFemaleAgeCoordinate(),
+            cc.getAgeDiffCoordinate(),
+            cc.getBudgetCoordinate(),
+            cc.getMarriageMonthSinCoordinate(),
+            cc.getMarriageMonthCosCoordinate(),
+            cc.getMarriageDaySinCoordinate(),
+            cc.getMarriageDayCosCoordinate(),
+            cc.getUserClusterDistanceCoordinate()
         };
     }
 
@@ -665,23 +694,23 @@ public class RecommendationServiceImpl implements RecommendationService {
     @Transactional(readOnly = true)
     protected User getUserById(Integer userId) {
         return userRepository.findUserById(userId)
-                .orElseThrow(() -> new ExceptionHandler(ErrorStatus.USER_NOT_FOUND));
+            .orElseThrow(() -> new ExceptionHandler(ErrorStatus.USER_NOT_FOUND));
     }
 
     @Transactional(readOnly = true)
     protected Couple getCoupleByUserId(Integer userId) {
         return coupleRepository.findCoupleByUserId(userId)
-                .orElseThrow(() -> new ExceptionHandler(ErrorStatus.RECOMMENDATION_DATA_NOT_READY));
+            .orElseThrow(() -> new ExceptionHandler(ErrorStatus.RECOMMENDATION_DATA_NOT_READY));
     }
 
     private UserCluster getUserCluster(User user) {
         return userClusterRepository.findByUser(user)
-                .orElseThrow(() -> new ExceptionHandler(ErrorStatus.RECOMMENDATION_CLUSTER_NOT_FOUND));
+            .orElseThrow(() -> new ExceptionHandler(ErrorStatus.RECOMMENDATION_CLUSTER_NOT_FOUND));
     }
 
     private CoupleCluster getCoupleCluster(Couple couple) {
         return coupleClusterRepository.findByCouple(couple)
-                .orElseThrow(() -> new ExceptionHandler(ErrorStatus.RECOMMENDATION_CLUSTER_NOT_FOUND));
+            .orElseThrow(() -> new ExceptionHandler(ErrorStatus.RECOMMENDATION_CLUSTER_NOT_FOUND));
     }
 
     private VirginRoad getVirginRoadByCouple(Couple couple) {
