@@ -5,11 +5,13 @@ import com.ssafy.exhi.domain.couple.model.entity.Couple;
 import com.ssafy.exhi.domain.couple.repository.CoupleRepository;
 import com.ssafy.exhi.domain.plan.converter.PlanConverter;
 import com.ssafy.exhi.domain.plan.model.entity.Plan;
+import com.ssafy.exhi.domain.plan.model.entity.PlanStatus; // enum 임포트
 import com.ssafy.exhi.domain.plan.repository.PlanRepository;
 import com.ssafy.exhi.domain.todo.model.entity.TodoType;
 import com.ssafy.exhi.domain.user.model.entity.Gender;
 import com.ssafy.exhi.domain.user.repository.UserDetailRepository;
 import com.ssafy.exhi.domain.virginroad.model.entity.VirginRoad;
+import com.ssafy.exhi.domain.TimeWrapper;
 import com.ssafy.exhi.exception.ExceptionHandler;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -17,7 +19,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
+import java.util.Map;
 import java.util.List;
+import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -33,6 +38,7 @@ public class PlanServiceImpl implements PlanService {
     private final PlanRepository planRepository;
     private final CoupleRepository coupleRepository;
     private final UserDetailRepository userDetailRepository;
+    private final TimeWrapper timeWrapper;
 
     @Override
     public DetailResultDTO getPlan(Integer userId, Integer planId) {
@@ -82,9 +88,6 @@ public class PlanServiceImpl implements PlanService {
         }
         return groupedPlans;
     }
-
-
-
 
 
     private Gender findGenderByUserId(Integer userId) {

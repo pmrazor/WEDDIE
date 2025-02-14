@@ -32,13 +32,14 @@ public class PlanController {
 
     @GetMapping("/main")
     public ResponseEntity<?> getAllPlans(
-            @RequestHeader("Authorization") String accessToken
+            @RequestHeader("Authorization") String accessToken,
+            @RequestParam Integer coupleId
     ) {
         Integer userId = jwtUtil.getUserId(accessToken);  // JWT에서 유저 ID 추출
-        log.info("getAllPlans coupleId: {}", userId);
+        log.info("getAllPlans coupleId: {}", coupleId);
 
         // 유저에 해당하는 모든 플랜을 서비스에서 가져오기
-        PlanResponse.AllResultDTO response = planService.getAllPlans(userId);
+        PlanResponse.AllResultDTO response = planService.getAllPlans(coupleId);
 
         // ApiResponse를 이용해서 정상적으로 응답 반환
         return ResponseEntity.ok(ApiResponse.onSuccess(response));

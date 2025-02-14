@@ -88,6 +88,23 @@ public class Plan extends BaseEntity {
         }
     }
 
+    // 플랜 Status를 업데이트하는 메서드, planTime 기준으로 계싼
+    public void updatePlanStatus(LocalDateTime currentDateTime, int duration) {
+        // planTime을 기준으로 상태를 결정
+        if (planTime.isAfter(currentDateTime.plusDays(duration))) {
+            this.planStatus = PlanStatus.BEFORE_START; // planTime이 30일 후면 BEFORE_START
+        } else if (planTime.isBefore(currentDateTime.minusDays(duration))) {
+            this.planStatus = PlanStatus.FINISHED; // planTime이 30일 전이면 FINISHED
+        } else if (planTime.isAfter(currentDateTime) && planTime.isBefore(currentDateTime.plusDays(duration))) {
+            this.planStatus = PlanStatus.IN_PROGRESS; // planTime이 현재보다 크고 30일 이내면 IN_PROGRESS
+        } else {
+            this.planStatus = PlanStatus.NOT_TIME_CAPSULE; // planTime이 현재보다 크고 30일 이내면 NOT_TIME_CAPSULE
+        }
+
+        log.info("Plan status updated to: {}", this.planStatus);
+    }
+
+
     public void updateVirginRoad(VirginRoad virginRoad) {
         if (this.virginRoad != null) {
             this.virginRoad.getPlans().remove(this);
