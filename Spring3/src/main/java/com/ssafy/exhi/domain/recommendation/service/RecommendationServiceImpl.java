@@ -6,6 +6,7 @@ import com.ssafy.exhi.domain.couple.model.entity.Couple;
 import com.ssafy.exhi.domain.couple.repository.CoupleRepository;
 import com.ssafy.exhi.domain.plan.model.entity.Plan;
 import com.ssafy.exhi.domain.plan.model.entity.PlanStatus;
+import com.ssafy.exhi.domain.plan.repository.PlanRepository;
 import com.ssafy.exhi.domain.recommendation.config.RecommendationConfig;
 import com.ssafy.exhi.domain.recommendation.converter.RecommendationConverter;
 import com.ssafy.exhi.domain.recommendation.model.dto.RecommendationResponse;
@@ -13,8 +14,6 @@ import com.ssafy.exhi.domain.recommendation.model.dto.RoadPlanCapsuleDTO;
 import com.ssafy.exhi.domain.recommendation.model.entity.*;
 import com.ssafy.exhi.domain.recommendation.repository.*;
 import com.ssafy.exhi.domain.todo.config.TodoInitializer;
-import com.ssafy.exhi.domain.todo.model.entity.DefaultTodo;
-import com.ssafy.exhi.domain.todo.model.entity.Todo;
 import com.ssafy.exhi.domain.todo.repository.DefaultTodoRepository;
 import com.ssafy.exhi.domain.user.model.entity.User;
 import com.ssafy.exhi.domain.user.model.entity.UserDetail;
@@ -55,7 +54,7 @@ public class RecommendationServiceImpl implements RecommendationService {
     private final CoupleClusterCentersRepository coupleClusterCentersRepository;
     private final CoupleClusteringParameterRepository coupleClusteringParameterRepository;
     private final VirginRoadRepository virginRoadRepository;
-    private final DefaultTodoRepository defaultTodoRepository;
+    private final PlanRepository planRepository;
     private final ServiceTypeScheduler serviceTypeScheduler;
 
     private final TodoInitializer todoInitializer;
@@ -228,14 +227,21 @@ public class RecommendationServiceImpl implements RecommendationService {
                 .plans(new ArrayList<>())
                 .build();
 
+            // 먼저 VirginRoad를 저장
+            virginRoad = virginRoadRepository.save(virginRoad);
+
             List<Plan> plans = new ArrayList<>();
             for (ServiceType serviceType : ServiceType.values()) {
                 Plan plan = Plan.createDefault(serviceType, virginRoad);
+                // Plan을 저장
+                plan = planRepository.save(plan);
                 todoInitializer.initializeTodosForPlan(plan);
                 plans.add(plan);
             }
 
-            virginRoad.addPlans(plans);
+            List<Plan> updatePlans = setPlanDefaultDates(plans, couple);
+
+            virginRoad.addPlans(updatePlans);
 
             virginRoad = virginRoadRepository.save(virginRoad);
         }
@@ -270,16 +276,6 @@ public class RecommendationServiceImpl implements RecommendationService {
         }
 
         return updatedPlans;
-    }
-
-    private Map<ServiceType, List<DefaultTodo>> getAllDefaultTodosInMap() {
-        List<DefaultTodo> allDefaultTodos = defaultTodoRepository.findAll();
-        Map<ServiceType, List<DefaultTodo>> map = new HashMap<>();
-
-        for (DefaultTodo defaultTodo : allDefaultTodos) {
-            map.computeIfAbsent(defaultTodo.getServiceType(), k -> new ArrayList<>()).add(defaultTodo);
-        }
-        return map;
     }
 
     // ========== 4) 클러스터 할당 로직 ==========
