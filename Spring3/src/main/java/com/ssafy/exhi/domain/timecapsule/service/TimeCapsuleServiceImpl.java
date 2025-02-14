@@ -1,6 +1,7 @@
 package com.ssafy.exhi.domain.timecapsule.service;
 
 import com.ssafy.exhi.base.status.ErrorStatus;
+import com.ssafy.exhi.domain.TimeWrapper;
 import com.ssafy.exhi.domain.couple.model.entity.Couple;
 import com.ssafy.exhi.domain.couple.repository.CoupleRepository;
 import com.ssafy.exhi.domain.notice.service.MinioImageService;
@@ -10,7 +11,6 @@ import com.ssafy.exhi.domain.plan.repository.PlanRepository;
 import com.ssafy.exhi.domain.timecapsule.converter.TimeCapsuleConverter;
 import com.ssafy.exhi.domain.timecapsule.model.dto.TimeCapsuleRequest;
 import com.ssafy.exhi.domain.timecapsule.model.dto.TimeCapsuleResponse;
-import com.ssafy.exhi.domain.timecapsule.model.dto.TimeCapsuleResponse.TimeCapsuleResponseDto;
 import com.ssafy.exhi.domain.timecapsule.model.entity.TimeCapsule;
 import com.ssafy.exhi.domain.timecapsule.repository.TimeCapsuleRepository;
 import com.ssafy.exhi.domain.user.model.entity.User;
@@ -21,7 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.stream.Collectors;
+
 @Service
 @Transactional
 @RequiredArgsConstructor
@@ -32,18 +32,18 @@ public class TimeCapsuleServiceImpl implements TimeCapsuleService {
     private final UserRepository userRepository;
     private final PlanRepository planRepository;
     private final CoupleRepository coupleRepository;
+    private final TimeWrapper timeWrapper;
 
     @Override
     public TimeCapsuleResponse.TimeCapsuleResponseDto createTimeCapsule(TimeCapsuleRequest.CreateDTO registTimeCapsule) {
         User user = findUserByUserId(registTimeCapsule.getUserId());
-        minioImageService.uploadImage(registTimeCapsule.getImage());
+        registTimeCapsule.setGoodImage(minioImageService.uploadImage(registTimeCapsule.getGoodImageFile()));
+        registTimeCapsule.setBadImage(minioImageService.uploadImage(registTimeCapsule.getBadImageFile()));
+
         Plan plan = planRepository.findById(Long.valueOf(registTimeCapsule.getPlanId()))
                 .orElseThrow(() -> new ExceptionHandler(ErrorStatus.PLAN_NOT_FOUND));
 
-        // 타임캡슐을 작성할 단계가 아닌 경우
-        if (plan.getPlanStatus() != PlanStatus.NOT_TIME_CAPSULE) {
-            throw new ExceptionHandler(ErrorStatus.INVALID_PLAN_STATUS);
-        }
+        plan.validateCreateTimeCapsule(timeWrapper);
 
         Couple couple = findCoupleByUserId(user.getId());
         registTimeCapsule.setCoupleId(couple.getId());
@@ -67,6 +67,14 @@ public class TimeCapsuleServiceImpl implements TimeCapsuleService {
         planRepository.save(plan);
 
         return TimeCapsuleConverter.toResponse(savedTimeCapsule);
+    }
+
+    private static void canCreateTimeCapsule(Plan plan) {
+        // 타임캡슐을 작성할 단계가 아닌 경우
+
+        if (plan.getPlanStatus() != PlanStatus.NOT_TIME_CAPSULE) {
+            throw new ExceptionHandler(ErrorStatus.INVALID_PLAN_STATUS);
+        }
     }
 
     // 커플 당 하나의 버진로드 가지니까 커플 아이디로 조회한 모든 캡슐 가져오면 되겠지?

@@ -3,10 +3,12 @@ package com.ssafy.exhi.domain.plan.model.entity;
 import com.ssafy.exhi.base.BaseEntity;
 import com.ssafy.exhi.base.status.ErrorStatus;
 import com.ssafy.exhi.domain.ServiceType;
+import com.ssafy.exhi.domain.TimeWrapper;
 import com.ssafy.exhi.domain.plan.model.dto.PlanRequest;
 import com.ssafy.exhi.domain.timecapsule.model.entity.TimeCapsule;
 import com.ssafy.exhi.domain.todo.model.entity.DefaultTodo;
 import com.ssafy.exhi.domain.todo.model.entity.Todo;
+import com.ssafy.exhi.domain.tip.model.model.Tip;
 import com.ssafy.exhi.domain.virginroad.model.entity.VirginRoad;
 import com.ssafy.exhi.exception.ExceptionHandler;
 import jakarta.persistence.*;
@@ -45,6 +47,9 @@ public class Plan extends BaseEntity {
     @Column(name = "plan_time")
     private LocalDateTime planTime;
 
+    @Column(name = "end_time")
+    private LocalDateTime endTime;
+
     @Column(name = "plan_status")
     @Enumerated(EnumType.STRING)
     private PlanStatus planStatus;
@@ -59,7 +64,17 @@ public class Plan extends BaseEntity {
     @OneToMany(mappedBy = "plan", cascade = CascadeType.ALL)
     private List<TimeCapsule> timeCapsules = new ArrayList<>();
 
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "tip_id", referencedColumnName = "tip_id")
+    private Tip tip;
+
+
     /* 비즈니스 로직 */
+    public void validateCreateTimeCapsule(TimeWrapper time) {
+        if (time.now().isAfter(planTime)) {
+            throw new ExceptionHandler(ErrorStatus.TIMECAPSULE_VALIDATE);
+        }
+    }
 
     public void updateVirginRoad(VirginRoad virginRoad) {
         if (this.virginRoad != null) {

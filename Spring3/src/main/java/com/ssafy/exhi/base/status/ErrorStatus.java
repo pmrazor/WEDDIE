@@ -97,6 +97,7 @@ public enum ErrorStatus implements BaseErrorCode {
 
     // 타임캡슐 관련 에러
     TIMECAPSULE_ALREADY_EXIST(HttpStatus.BAD_REQUEST, "TIME_CAPSULE_4001", "이미 작성된 타임캡슐입니다"),
+    TIMECAPSULE_VALIDATE(HttpStatus.BAD_REQUEST, "TIME_CAPSULE_4002", "타임캡슐 작성 조건이 달성되지않았습니다."),
 
     // 추천(클러스터링) 시스템 관련 에러
     // 1. 클러스터링 관련 오류
