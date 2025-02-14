@@ -16,10 +16,10 @@ public class AdviceController {
     private final AdviceService adviceService;
     private final JWTUtil jwtUtil;
 
-    @PostMapping("/{serviceType}")
-    public ResponseEntity<?> getAdvice(@RequestHeader("Authorization") String accessToken, @PathVariable("serviceType") ServiceType serviceType) {
+    @PostMapping("/{serviceType}/{messageType}")
+    public ResponseEntity<?> getAdvice(@RequestHeader("Authorization") String accessToken, @PathVariable("serviceType") ServiceType serviceType, @PathVariable("messageType") boolean messageType) {
         Integer userId = jwtUtil.getUserId(accessToken);
-        String advice = adviceService.getAdvice(userId, serviceType);
+        String advice = adviceService.getAdvice(userId, serviceType, messageType);
         return ResponseEntity.ok(ApiResponse.onSuccess(advice));
     }
 }
