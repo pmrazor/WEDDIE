@@ -11,7 +11,7 @@ public class ServiceTypeScheduler {
     public Map<ServiceType, Double> getServiceTypeSchedule() {
         Map<ServiceType, Double> scheduleDays = new HashMap<>();
 
-        scheduleDays.put(ServiceType.WEDDING_HALL, 1.0);   // 웨딩홀
+        scheduleDays.put(ServiceType.WEDDING_HALL, 0.95);   // 웨딩홀
         scheduleDays.put(ServiceType.DRESS_SHOP, 0.5);    // 드레스샵
         scheduleDays.put(ServiceType.STUDIO, 0.4);        // 스튜디오 촬영
         scheduleDays.put(ServiceType.SNAP, 0.3);         // 스냅 촬영
@@ -24,7 +24,5 @@ public class ServiceTypeScheduler {
         scheduleDays.put(ServiceType.WEDDING_DAY, 0.0);    // 결혼식 당일
 
         return scheduleDays;
-    }
-
-    ;
+    };
 };
