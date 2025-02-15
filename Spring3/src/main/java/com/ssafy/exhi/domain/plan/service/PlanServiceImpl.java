@@ -69,7 +69,7 @@ public class PlanServiceImpl implements PlanService {
                 .orElseThrow(() -> new ExceptionHandler(ErrorStatus.COUPLE_NOT_FOUND));
         Integer coupleId = couple.getId();  // coupleId를 가져옴
 
-        List<Plan> plans = planRepository.findByVirginRoad_Couple_Id(coupleId);
+        List<Plan> plans = planRepository.findByVirginRoadCoupleId(coupleId);
         if (plans.isEmpty()) {
             throw new ExceptionHandler(ErrorStatus.PLAN_NOT_FOUND);
         }
