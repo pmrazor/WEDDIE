@@ -84,12 +84,18 @@ public class PlanServiceImpl implements PlanService {
         return new AllResultDTO(groupedPlans);
     }
 
-
+    // 여기 문제 있나..?
     private Map<PlanStatus, List<Integer>> groupPlansByStatus(List<Plan> plans) {
         Map<PlanStatus, List<Integer>> groupedPlans = new HashMap<>();
         for (Plan plan : plans) {
+            PlanStatus status = plan.getPlanStatus();
             groupedPlans.computeIfAbsent(plan.getPlanStatus(), k -> new ArrayList<>()).add(plan.getId());
+
+            // 상태별로 어떤 플랜들이 그룹화되고 있는지 로그로 확인
+            log.info("Plan ID: {} - Grouped under Status: {}", plan.getId(), status);
         }
+        // 상태별 플랜 그룹화 후 로그 추가
+        log.info("Grouped Plans by Status: {}", groupedPlans);
         return groupedPlans;
     }
 

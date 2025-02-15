@@ -101,7 +101,7 @@ public class Plan extends BaseEntity {
             this.planStatus = PlanStatus.NOT_TIME_CAPSULE;  // planTime이 현재보다 크고 30일 이내면 NOT_TIME_CAPSULE
         }
 
-        log.info("Plan status updated to: {}", this.planStatus);
+        log.info("Plan ID: {} - Updated Status: {}", this.id, this.planStatus);  // 상태 업데이트 후 로그 추가
     }
 
     public void updateVirginRoad(VirginRoad virginRoad) {
