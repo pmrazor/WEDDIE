@@ -1,13 +1,11 @@
 package com.ssafy.exhi.domain;
 
-import java.time.LocalDateTime;
+import com.ssafy.exhi.base.ApiResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDateTime;
 
 @RestController
 @RequiredArgsConstructor
@@ -23,9 +21,7 @@ public class TimeController {
 
     // 현재 시간에 일수를 추가하는 API
     @PostMapping
-    public void addDays(@RequestParam long days) {
-        timeWrapper.addDays(days);
+    public ResponseEntity<?> addDays(@RequestParam(name="days") Integer days) {
+        return ResponseEntity.ok().body(ApiResponse.onSuccess(timeWrapper.addDays(days)));
     }
-
-
 }

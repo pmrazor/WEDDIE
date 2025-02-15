@@ -1,8 +1,9 @@
 package com.ssafy.exhi.domain;
 
+import org.springframework.stereotype.Component;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import org.springframework.stereotype.Component;
 
 @Component
 public class TimeWrapper {
@@ -25,8 +26,9 @@ public class TimeWrapper {
     }
 
     // 일수 더하는 메서드
-    public void addDays(long days) {
+    public LocalDateTime addDays(long days) {
         currentDateTime = currentDateTime.plusDays(days);
+        return currentDateTime;
     }
 
     // 시간 더하는 메서드 (현재 시간 기준으로 시간 '만' 추가)
