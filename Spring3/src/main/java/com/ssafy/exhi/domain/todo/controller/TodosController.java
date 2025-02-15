@@ -1,13 +1,15 @@
 package com.ssafy.exhi.domain.todo.controller;
 
-import com.ssafy.exhi.base.ApiResponse;
 import com.ssafy.exhi.base.status.ErrorStatus;
 import com.ssafy.exhi.domain.ServiceType;
+import com.ssafy.exhi.domain.plan.repository.PlanRepository;
 import com.ssafy.exhi.domain.todo.model.dto.TodoRequest;
 import com.ssafy.exhi.domain.todo.model.dto.TodoResponse;
-import com.ssafy.exhi.domain.todo.model.entity.StageType;
+import com.ssafy.exhi.domain.todo.model.entity.TodoType;
 import com.ssafy.exhi.domain.todo.service.TodoService;
 import com.ssafy.exhi.domain.todo.service.TodosService;
+import com.ssafy.exhi.domain.user.repository.UserDetailRepository;
+import com.ssafy.exhi.exception.ExceptionHandler;
 import com.ssafy.exhi.util.JWTUtil;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -27,24 +29,30 @@ public class TodosController {
     private final JWTUtil jwtUtil;
     private final TodosService todosService;
     private final TodoService todoService;
+    private final PlanRepository planRepository;
+    private final UserDetailRepository userDetailRepository;
 
     @PostMapping("/createTodo")
     public ResponseEntity<?> createTodo(
             @RequestHeader(name = "Authorization") String accessToken,
-            @RequestBody Map<String, String> requestBody
+            @RequestBody TodoRequest.CreateTodosDTO createDTO
     ) {
         try {
-            if (!requestBody.containsKey("serviceType") || !requestBody.containsKey("content") || !requestBody.containsKey("stageType")) {
+            if (createDTO.getContent() == null || createDTO.getStageType() == null || createDTO.getPlanId() == null ) {
                 return ResponseEntity.badRequest().body(ErrorStatus.NOT_ENOUGH_REQUEST_BODY_ERROR.getReason());
             }
 
-            ServiceType serviceType = ServiceType.valueOf(requestBody.get("serviceType").toUpperCase());
-            StageType stageType = StageType.valueOf(requestBody.get("stageType").toUpperCase());
-            String content = requestBody.get("content");
-
             Integer userId = jwtUtil.getUserId(accessToken);
             Integer coupleId = jwtUtil.getCoupleId(accessToken);
-            TodoResponse.DetailResultDTO response = todosService.createTodo(userId, coupleId, serviceType, stageType, content);
+
+            ServiceType serviceType = planRepository.findPlanById(createDTO.getPlanId()).orElseThrow(() -> new ExceptionHandler(ErrorStatus.PLAN_NOT_FOUND)).getServiceType();
+            createDTO.setServiceType(serviceType);
+
+            String gender = userDetailRepository.findByUser_Id(userId).orElseThrow(() -> new ExceptionHandler(ErrorStatus.USER_NOT_FOUND)).getGender().toString();
+            TodoType todoType = createDTO.isTogether() ? TodoType.COMMON : TodoType.valueOf(gender);
+            createDTO.setTodoType(todoType);
+
+            TodoResponse.DetailResultDTO response = todosService.createTodo(userId, coupleId, createDTO);
             return ResponseEntity.ok(response);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(ErrorStatus._BAD_REQUEST.getReason());

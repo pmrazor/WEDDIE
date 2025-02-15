@@ -3,8 +3,8 @@ package com.ssafy.exhi.domain.todo.service;
 import com.ssafy.exhi.base.status.ErrorStatus;
 import com.ssafy.exhi.domain.ServiceType;
 import com.ssafy.exhi.domain.plan.model.entity.Plan;
+import com.ssafy.exhi.domain.todo.model.dto.TodoRequest;
 import com.ssafy.exhi.domain.todo.model.dto.TodoResponse;
-import com.ssafy.exhi.domain.todo.model.entity.StageType;
 import com.ssafy.exhi.domain.todo.model.entity.Todo;
 import com.ssafy.exhi.domain.todo.model.entity.TodoType;
 import com.ssafy.exhi.domain.todo.repository.TodoRepository;
@@ -17,6 +17,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -35,18 +36,17 @@ public class TodosServiceImpl implements TodosService {
      * 투두 생성 로직
      */
     @Override
-    public TodoResponse.DetailResultDTO createTodo(Integer userId, Integer coupleId,
-                                                   ServiceType serviceType, StageType stageType,
-                                                   String content) {
+    public TodoResponse.DetailResultDTO createTodo(Integer userId, Integer coupleId, TodoRequest.CreateTodosDTO createDTO) {
         // 유저가 속한 버진로드에서 해당 서비스 타입의 Plan 가져오기
-        Plan plan = getPlanByServiceType(userId, coupleId, serviceType);
+        Plan plan = getPlanByServiceType(userId, coupleId, createDTO.getServiceType());
 
         // 새로운 투두 엔티티 생성 후 저장
         Todo newTodo = Todo.builder()
                 .plan(plan)
-                .serviceType(serviceType)
-                .stage(stageType)
-                .content(content)
+                .serviceType(createDTO.getServiceType())
+                .stage(createDTO.getStageType())
+                .content(createDTO.getContent())
+                .todoType(createDTO.getTodoType())
                 .isCompleted(false)
                 .build();
         todoRepository.save(newTodo);
