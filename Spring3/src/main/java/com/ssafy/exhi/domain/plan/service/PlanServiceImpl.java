@@ -64,7 +64,13 @@ public class PlanServiceImpl implements PlanService {
 
     @Override
     public AllResultDTO getAllPlans(String header) {
-        Integer coupleId = jwtUtil.getCoupleId(header);
+//        Integer coupleId = jwtUtil.getCoupleId(header);
+        Integer userId = jwtUtil.getUserId(header);
+
+        // userId를 기반으로 coupleId를 찾기
+        Couple couple = coupleRepository.findCoupleByUserId(userId)
+                .orElseThrow(() -> new ExceptionHandler(ErrorStatus.COUPLE_NOT_FOUND));
+        Integer coupleId = couple.getId();  // coupleId를 가져옴
 
         List<Plan> plans = planRepository.findByVirginRoad_Couple_Id(coupleId);
         if (plans.isEmpty()) {
@@ -81,12 +87,6 @@ public class PlanServiceImpl implements PlanService {
         return new AllResultDTO(groupedPlans);
     }
 
-//    // userId를 통해 coupleId를 가져오는 메서드
-//    private Integer getCoupleIdByUserId(Integer userId) {
-//        VirginRoad virginRoad =  virginRoadRepository.findByCouple_UserId(userId) // VirginRoadRepository에서 userId로 VirginRoad를 찾기
-//                .orElseThrow(() -> new ExceptionHandler(ErrorStatus.COUPLE_NOT_FOUND));
-//        return virginRoad.getCouple().getId();  // coupleId 반환
-//    }
 
     private Map<PlanStatus, List<Integer>> groupPlansByStatus(List<Plan> plans) {
         Map<PlanStatus, List<Integer>> groupedPlans = new HashMap<>();

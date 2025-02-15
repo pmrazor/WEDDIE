@@ -73,6 +73,7 @@ public class JWTUtil {
         String token = getToken(header);
         Jws<Claims> claims = getClaimsJws(token);
 
+
         Map<String, Object> value = claims.getBody();
         log.info("value : {}", value);
 
