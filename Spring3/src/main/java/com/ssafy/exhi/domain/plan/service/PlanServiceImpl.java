@@ -60,11 +60,8 @@ public class PlanServiceImpl implements PlanService {
         return PlanConverter.toDetailDTO(plan);
     }
 
-    private static final int DURATION = 30;  // 상수 DURATION 30일 설정
-
     @Override
     public AllResultDTO getAllPlans(String header) {
-//        Integer coupleId = jwtUtil.getCoupleId(header);
         Integer userId = jwtUtil.getUserId(header);
 
         // userId를 기반으로 coupleId를 찾기
@@ -79,8 +76,8 @@ public class PlanServiceImpl implements PlanService {
 
         // TimeWrapper로 currentDateTime을 얻어 플랜들에 대한 상태 및 날짜 계산
         for (Plan plan : plans) {
-            plan.calculateStartAndEndDates(DURATION);
-            plan.updatePlanStatus(timeWrapper.now(), DURATION);  // TimeWrapper를 통해 현재 시간 설정
+            plan.calculateStartAndEndDates();
+            plan.updatePlanStatus(timeWrapper.now());  // TimeWrapper를 통해 현재 시간 설정
         }
 
         Map<PlanStatus, List<Integer>> groupedPlans = groupPlansByStatus(plans);

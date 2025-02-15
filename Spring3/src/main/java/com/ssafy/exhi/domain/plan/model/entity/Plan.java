@@ -73,27 +73,29 @@ public class Plan extends BaseEntity {
 
     /* 비즈니스 로직 */
 
+    private static final int DURATION = 30;
+
     // calculate start and end dates using planTime and duration
-    public void calculateStartAndEndDates(int duration) {
+    public void calculateStartAndEndDates() {
         if (planTime != null) {
-            this.startTime = planTime.minusDays(duration);  // 시작 시간은 planTime에서 30일 전
-            this.endTime = planTime.plusDays(duration);     // 종료 시간은 planTime에서 30일 후
+            this.startTime = planTime.minusDays(DURATION);  // 시작 시간은 planTime에서 30일 전
+            this.endTime = planTime.plusDays(DURATION);     // 종료 시간은 planTime에서 30일 후
         }
     }
 
     // 플랜 Status를 업데이트하는 메서드, planTime 기준으로 계산
-    public void updatePlanStatus(LocalDateTime currentDateTime, int duration) {
+    public void updatePlanStatus(LocalDateTime currentDateTime) {
         if (planTime == null) {
             log.warn("planTime is null for Plan ID: {}. Setting default value.", this.id);
             planTime = currentDateTime;  // currentDateTime을 기본값으로 설정
         }
 
         // planTime을 기준으로 상태를 결정
-        if (planTime.isAfter(currentDateTime.plusDays(duration))) {
+        if (planTime.isAfter(currentDateTime.plusDays(DURATION))) {
             this.planStatus = PlanStatus.BEFORE_START;  // planTime이 30일 후면 BEFORE_START
-        } else if (planTime.isBefore(currentDateTime.minusDays(duration))) {
+        } else if (planTime.isBefore(currentDateTime.minusDays(DURATION))) {
             this.planStatus = PlanStatus.FINISHED;  // planTime이 30일 전이면 FINISHED
-        } else if (planTime.isAfter(currentDateTime) && planTime.isBefore(currentDateTime.plusDays(duration))) {
+        } else if (planTime.isAfter(currentDateTime) && planTime.isBefore(currentDateTime.plusDays(DURATION))) {
             this.planStatus = PlanStatus.IN_PROGRESS;  // planTime이 현재보다 크고 30일 이내면 IN_PROGRESS
         } else {
             this.planStatus = PlanStatus.NOT_TIME_CAPSULE;  // planTime이 현재보다 크고 30일 이내면 NOT_TIME_CAPSULE
