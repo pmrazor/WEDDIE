@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 public class PlanResponse {
 
@@ -46,4 +47,13 @@ public class PlanResponse {
 
         private PlanStatus planStatus;
     }
+
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class AllResultDTO {
+        private Map<PlanStatus, List<Integer>> groupedPlans;
+    }
+
 }

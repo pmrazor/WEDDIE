@@ -7,7 +7,7 @@ import com.ssafy.exhi.domain.plan.repository.PlanRepository;
 import com.ssafy.exhi.domain.tip.converter.TipConverter;
 import com.ssafy.exhi.domain.tip.model.dto.TipRequest;
 import com.ssafy.exhi.domain.tip.model.dto.TipResponse;
-import com.ssafy.exhi.domain.tip.model.model.Tip;
+import com.ssafy.exhi.domain.tip.model.entity.Tip;
 import com.ssafy.exhi.domain.tip.repository.TipRepository;
 import com.ssafy.exhi.domain.user.model.entity.User;
 import com.ssafy.exhi.domain.user.repository.UserRepository;
