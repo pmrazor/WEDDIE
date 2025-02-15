@@ -5,7 +5,7 @@ const BASE_URL = import.meta.env.VITE_API_URL;
 
 const instance = axios.create({
   baseURL: BASE_URL,
-  timeout: 5000,
+  timeout: 15000,
 });
 
 // 요청 인터셉터

@@ -1,8 +1,8 @@
 package com.ssafy.exhi.domain.recommendation.config;
 
+import com.ssafy.exhi.domain.ServiceType;
 import com.ssafy.exhi.domain.plan.model.entity.PlanStatus;
 import com.ssafy.exhi.domain.recommendation.model.dto.RoadPlanCapsuleDTO;
-import com.ssafy.exhi.domain.ServiceType;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Configuration;
@@ -29,10 +29,10 @@ public class RecommendationConfig {
     private double virginRoadFinishedFactor = 1.3;     // 버진로드 완료 시 추가 가중치
 
     // ※ 타임캡슐 사용 여부 및 가중치
-    private boolean useTimeCapsuleFactor = true;       // 타임캡슐 점수를 사용할지 여부
+    private boolean useTimeCapsuleFactor = false;       // 타임캡슐 점수를 사용할지 여부
     private double timeCapsuleFactor = 1.2;            // 타임캡슐 가중치 (예: 1.2 → 20% 가중)
 
-    private double recommendationThreshold = 30.0;     // 추천 임계값 (%). 이를 넘으면 추천
+    private double recommendationThreshold = 20.0;     // 추천 임계값 (%). 이를 넘으면 추천
 
     // ──────────────── (2) 유사도 계산 파라미터 ────────────────
     private double cosineSimilarityWeight = 0.3;
@@ -68,7 +68,7 @@ public class RecommendationConfig {
         }
 
         log.debug("PlanStatus: {}, BaseScore: {}, VirginRoadStatus: {}, FinalScore: {}",
-                planStatus, getPlanStatusBaseScore(planStatus), virginRoadStatus, score);
+            planStatus, getPlanStatusBaseScore(planStatus), virginRoadStatus, score);
 
         return score;
     }
@@ -88,7 +88,7 @@ public class RecommendationConfig {
     /**
      * (추가) 타임캡슐 점수를 계산합니다.
      * - planGrade가 TRUE면 +2, FALSE(null 포함)면 -1 정도로 가중치를 줘서,
-     *   일정 범위 내 [0 ~ 1]로 정규화해보는 예시 로직
+     * 일정 범위 내 [0 ~ 1]로 정규화해보는 예시 로직
      */
     public double computeTimeCapsuleScore(List<RoadPlanCapsuleDTO> capsules) {
         if (capsules == null || capsules.isEmpty()) return 0.0;
@@ -152,7 +152,7 @@ public class RecommendationConfig {
         double cosSim = computeCosineSimilarity(v1, v2);
         double distSim = computeDistanceSimilarity(v1, v2);
         double finalSim = (cosineSimilarityWeight * cosSim) +
-                ((1 - cosineSimilarityWeight) * distSim);
+            ((1 - cosineSimilarityWeight) * distSim);
 
         log.debug("Cosine Sim: {}, Distance Sim: {}, Final Sim: {}", cosSim, distSim, finalSim);
 
@@ -167,9 +167,9 @@ public class RecommendationConfig {
      * totalPlans는 각 ServiceType별 플랜 수, totalSimilarities는 유사도 합 등을 담습니다.
      */
     public void determineRecommendations(
-            Map<ServiceType, double[]> planWeights,
-            Map<ServiceType, Integer> totalPlans,
-            Map<ServiceType, Double> totalSimilarities
+        Map<ServiceType, double[]> planWeights,
+        Map<ServiceType, Integer> totalPlans,
+        Map<ServiceType, Double> totalSimilarities
     ) {
         for (Map.Entry<ServiceType, double[]> entry : planWeights.entrySet()) {
             ServiceType serviceType = entry.getKey();
@@ -195,10 +195,10 @@ public class RecommendationConfig {
             double percentage = (finalScore / maxScore) * 100.0;
 
             log.debug("ServiceType: {}, 평균 플랜점수: {}, 평균 유사도: {}, 최종점수: {}, 비율: {}",
-                    serviceType, avgScore, avgSimilarity, finalScore, percentage);
+                serviceType, avgScore, avgSimilarity, finalScore, percentage);
 
             // (5) recommendationThreshold(%) 이상이면 추천 상태(1)로 세팅
-            if (percentage >= recommendationThreshold) {
+            if (finalScore >= recommendationThreshold) {
                 weights[0] = 1;
                 log.info("ServiceType {} → 추천됨! (최종점수: {})", serviceType, finalScore);
             } else {

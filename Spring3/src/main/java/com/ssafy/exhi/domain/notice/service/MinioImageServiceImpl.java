@@ -5,8 +5,17 @@ import io.minio.GetPresignedObjectUrlArgs;
 import io.minio.MakeBucketArgs;
 import io.minio.MinioClient;
 import io.minio.PutObjectArgs;
+import io.minio.errors.ErrorResponseException;
+import io.minio.errors.InsufficientDataException;
+import io.minio.errors.InternalException;
+import io.minio.errors.InvalidResponseException;
+import io.minio.errors.ServerException;
+import io.minio.errors.XmlParserException;
 import io.minio.http.Method;
 import jakarta.transaction.Transactional;
+import java.io.IOException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,23 +38,26 @@ public class MinioImageServiceImpl implements MinioImageService {
     public String uploadImage(MultipartFile file) {
         try {
             createBucket(); // 버킷이 없다면 생성
-
             String filename = UUID.randomUUID() + "_" + file.getOriginalFilename();
-
-            // 파일 업로드
-            minioClient.putObject(
-                    PutObjectArgs.builder()
-                            .bucket(bucketName)
-                            .object(filename)
-                            .stream(file.getInputStream(), file.getSize(), -1)
-                            .contentType(file.getContentType())
-                            .build());
+            fileUpload(file, filename);
 
             return filename;
         } catch (Exception e) {
             log.error("Error occurred while uploading file", e);
             throw new RuntimeException("Error occurred while uploading file", e);
         }
+    }
+
+    private void fileUpload(MultipartFile file, String filename)
+            throws ErrorResponseException, InsufficientDataException, InternalException, InvalidKeyException, InvalidResponseException, IOException, NoSuchAlgorithmException, ServerException, XmlParserException {
+        // 파일 업로드
+        minioClient.putObject(
+                PutObjectArgs.builder()
+                        .bucket(bucketName)
+                        .object(filename)
+                        .stream(file.getInputStream(), file.getSize(), -1)
+                        .contentType(file.getContentType())
+                        .build());
     }
 
     private void createBucket() {

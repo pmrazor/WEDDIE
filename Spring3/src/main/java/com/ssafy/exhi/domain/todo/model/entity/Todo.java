@@ -39,6 +39,12 @@ public class Todo {
     @Column(name = "todo_type")
     private TodoType todoType;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "stage")
+    private StageType stage;
+
+
+
     public void patch(TodoRequest.UpdateDTO updateDTO) {
         this.content = updateDTO.getContent();
         this.todoType = updateDTO.getTodoType();
@@ -46,5 +52,9 @@ public class Todo {
 
     public void check(TodoRequest.CheckDTO checkDTO) {
         this.isCompleted = checkDTO.getIsCompleted();
+    }
+
+    public void setCompleted(boolean completed) {
+        this.isCompleted = completed;
     }
 }

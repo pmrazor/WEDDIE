@@ -121,12 +121,12 @@ public class Plan extends BaseEntity {
 
     public static Plan createDefault(ServiceType serviceType, VirginRoad virginRoad) {
         return Plan.builder()
-                .virginRoad(virginRoad)
-                .serviceType(serviceType)
-                .visible(false) // 디폴트 값 설정 (예: isVisible = false)
-                .planStatus(PlanStatus.BEFORE_START)
-                .todos(new ArrayList<>())
-                .build();
+            .virginRoad(virginRoad)
+            .serviceType(serviceType)
+            .visible(false) // 디폴트 값 설정 (예: isVisible = false)
+            .planStatus(PlanStatus.BEFORE_START)
+            .todos(new ArrayList<>())
+            .build();
     }
 
     public void setDefaultTodos(ServiceType serviceType, Map<ServiceType, List<DefaultTodo>> defaultTodos) {
