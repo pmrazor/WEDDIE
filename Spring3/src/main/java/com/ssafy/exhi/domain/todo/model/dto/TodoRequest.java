@@ -1,5 +1,7 @@
 package com.ssafy.exhi.domain.todo.model.dto;
 
+import com.ssafy.exhi.domain.ServiceType;
+import com.ssafy.exhi.domain.todo.model.entity.StageType;
 import com.ssafy.exhi.domain.todo.model.entity.TodoType;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -21,6 +23,21 @@ public class TodoRequest {
         private String content;
 
         private boolean together;
+    }
+
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class CreateTodosDTO {
+        private Integer planId;
+
+        @NotBlank
+        private String content;
+        private StageType stageType;
+        private boolean together;
+        private ServiceType serviceType;
+        private TodoType todoType;
     }
 
     @Data
