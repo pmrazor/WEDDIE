@@ -2,7 +2,7 @@ package com.ssafy.exhi.domain.tip.converter;
 
 import com.ssafy.exhi.domain.tip.model.dto.TipRequest;
 import com.ssafy.exhi.domain.tip.model.dto.TipResponse;
-import com.ssafy.exhi.domain.tip.model.model.Tip;
+import com.ssafy.exhi.domain.tip.model.entity.Tip;
 
 import java.util.List;
 import java.util.stream.Collectors;

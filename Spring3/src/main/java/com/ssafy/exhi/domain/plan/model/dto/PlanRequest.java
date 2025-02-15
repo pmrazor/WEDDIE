@@ -50,4 +50,14 @@ public class PlanRequest {
 
         private boolean visible;
     }
+
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class TimeDTO {
+        private Integer coupleId;
+    }
+
+
 }

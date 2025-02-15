@@ -2,6 +2,7 @@ package com.ssafy.exhi.domain.plan.controller;
 
 import com.ssafy.exhi.base.ApiResponse;
 import com.ssafy.exhi.domain.plan.model.dto.PlanResponse;
+import com.ssafy.exhi.domain.plan.model.dto.PlanRequest;
 import com.ssafy.exhi.domain.plan.service.PlanService;
 import com.ssafy.exhi.util.JWTUtil;
 import lombok.RequiredArgsConstructor;
@@ -30,5 +31,24 @@ public class PlanController {
         return ResponseEntity.ok(ApiResponse.onSuccess(response));
     }
 
-    // TODO Plan의 상태를 변경하는 메서드 
+    @GetMapping("/main")
+    public ResponseEntity<?> getAllPlans(
+            @RequestHeader("Authorization") String accessToken
+    ) {
+        Integer coupleId = jwtUtil.getCoupleId(accessToken);  // JWT에서 유저 ID 추출
+        log.info("getAllPlans userId: {}", coupleId);
+
+        // 유저에 해당하는 모든 플랜을 서비스에서 가져오기
+        PlanResponse.AllResultDTO response = planService.getAllPlans(accessToken);
+
+        // ApiResponse를 이용해서 정상적으로 응답 반환
+        return ResponseEntity.ok(ApiResponse.onSuccess(response));
+    }
+
+
+    // TODO Plan의 상태를 변경하는 메서드
+
+
+
+
 }
