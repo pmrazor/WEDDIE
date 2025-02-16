@@ -2,6 +2,7 @@ package com.ssafy.exhi.domain.plan.model.dto;
 
 import com.ssafy.exhi.domain.ServiceType;
 import com.ssafy.exhi.domain.plan.model.entity.PlanStatus;
+import com.ssafy.exhi.domain.user.model.entity.Gender;
 import com.ssafy.exhi.domain.todo.model.dto.TodoResponse;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -75,5 +76,4 @@ public class PlanResponse {
         private Integer tipId;
         private String tipContent;
     }
-
 }

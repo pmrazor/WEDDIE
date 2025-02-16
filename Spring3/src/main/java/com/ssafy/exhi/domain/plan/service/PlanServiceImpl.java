@@ -1,6 +1,8 @@
 package com.ssafy.exhi.domain.plan.service;
 
 import com.ssafy.exhi.base.status.ErrorStatus;
+import com.ssafy.exhi.domain.user.model.entity.User;
+import com.ssafy.exhi.domain.user.repository.UserRepository;
 import com.ssafy.exhi.domain.couple.model.entity.Couple;
 import com.ssafy.exhi.domain.couple.repository.CoupleRepository;
 import com.ssafy.exhi.domain.plan.converter.PlanConverter;
@@ -9,6 +11,7 @@ import com.ssafy.exhi.domain.tip.model.entity.Tip;
 import com.ssafy.exhi.domain.tip.repository.TipRepository;
 import com.ssafy.exhi.domain.plan.model.entity.PlanStatus; // enum 임포트
 import com.ssafy.exhi.domain.plan.repository.PlanRepository;
+import com.ssafy.exhi.domain.tip.model.dto.TipResponse;
 import com.ssafy.exhi.domain.plan.model.dto.PlanResponse;
 import com.ssafy.exhi.domain.virginroad.repository.VirginRoadRepository; // 버진로드에서 커플ID 찾기
 import com.ssafy.exhi.domain.todo.model.entity.TodoType;
@@ -41,6 +44,7 @@ import static com.ssafy.exhi.domain.plan.model.dto.PlanResponse.AllResultDTO;
 @RequiredArgsConstructor
 public class PlanServiceImpl implements PlanService {
 
+    private final UserRepository userRepository;
     private final TipRepository tipRepository;
     private final PlanRepository planRepository;
     private final CoupleRepository coupleRepository;
@@ -53,6 +57,9 @@ public class PlanServiceImpl implements PlanService {
     public DetailResultDTO getPlan(Integer userId, Integer planId) {
         Couple couple = getCoupleByUserId(userId);
         Gender gender = findGenderByUserId(userId);
+
+//        log.debug("User ID: {} - Gender: {}", userId, gender); // 성별 확인 로그 추가
+
 
         TodoType type = gender.equals(Gender.FEMALE) ? TodoType.FEMALE : TodoType.MALE;
         List<TodoType> list = Arrays.asList(TodoType.COMMON, type);
@@ -84,7 +91,7 @@ public class PlanServiceImpl implements PlanService {
             plan.updatePlanStatus(timeWrapper.now());  // TimeWrapper를 통해 현재 시간 설정
 
             // assignTipToPlan 메서드 호출 - Plan과 Tip 연결
-            assignTipToPlan(plan); // 여기에서 Plan에 Tip을 할당하는 메서드 호출
+            assignTipToPlan(plan, userId); // 여기에서 Plan에 Tip을 할당하는 메서드 호출
         }
 
         Map<PlanStatus, List<PlanResponse.PlanDTO>> groupedPlans = groupPlansByStatus(plans);
@@ -93,10 +100,15 @@ public class PlanServiceImpl implements PlanService {
 
 
     // Tip을 할당하는 메서드
-    public void assignTipToPlan(Plan plan) {
-        // Tip을 찾기
-        Tip tip = tipRepository.findTipsByServiceType(plan.getServiceType())
-                .stream()
+    public void assignTipToPlan(Plan plan, Integer userId) {
+        // 사용자 성별을 findGenderByUserId로 가져옴
+        Gender gender = findGenderByUserId(userId);  // 이미 구현된 메서드 사용
+//        log.debug("Assigning Tip for Plan ID: {} - User ID: {} with Gender: {}", plan.getId(), userId, gender); // 로그 추가
+        // Tip을 찾기 (성별 필터링은 TipRepository에서 처리)
+        List<Tip> tips = tipRepository.findTipsByServiceTypeAndUserDetail_Gender(plan.getServiceType(), gender);
+
+        // 첫 번째 Tip을 선택 (없으면 null)
+        Tip tip = tips.stream()
                 .findFirst()
                 .orElse(null);  // Tip이 없으면 null로 설정
 
@@ -107,33 +119,28 @@ public class PlanServiceImpl implements PlanService {
         planRepository.save(plan);
     }
 
-    // 여기 문제 있나..?
     private Map<PlanStatus, List<PlanResponse.PlanDTO>> groupPlansByStatus(List<Plan> plans) {
         Map<PlanStatus, List<PlanResponse.PlanDTO>> groupedPlans = new HashMap<>();
+
         for (Plan plan : plans) {
             PlanStatus status = plan.getPlanStatus();
 
-// TipDTO 생성 (null 체크 추가)
+            // Tip 정보를 TipDTO 객체로 변환
             PlanResponse.TipDTO tipDTO;
 
             if (plan.getTip() != null) {
                 tipDTO = new PlanResponse.TipDTO(
                         plan.getTip().getId(),
-                        plan.getTip().getTipContent()  // Tip이 있을 경우 getTip() 사용
+                        plan.getTip().getTipContent()
                 );
+                log.info("Tip found for Plan ID: {} - Tip Content: {}", plan.getId(), plan.getTip().getTipContent());
             } else {
                 // Tip이 없을 경우에도 TipDTO 객체 생성
                 tipDTO = new PlanResponse.TipDTO(
                         null,            // tipId가 없으면 null
                         "정보가 없습니다"  // tipContent가 없으면 기본 메시지
                 );
-            }
-
-            if (plan.getTip() != null) {
-                tipDTO = new PlanResponse.TipDTO(
-                        plan.getTip().getId(),
-                        plan.getTip().getTipContent()  // Tip이 있을 경우 getTip() 사용
-                );
+                log.info("No Tip found for Plan ID: {}", plan.getId());
             }
 
             // PlanDTO 생성
@@ -141,16 +148,15 @@ public class PlanServiceImpl implements PlanService {
                     plan.getId(),
                     plan.getShopName(),
                     plan.getServiceType(),
-                    tipDTO  // TipDTO 변환 (null일 수 있음)
+                    tipDTO  // tip 객체 추가
             );
 
             groupedPlans.computeIfAbsent(status, k -> new ArrayList<>()).add(planDTO);
 
             // 상태별로 어떤 플랜들이 그룹화되고 있는지 로그로 확인
-            log.info("Plan ID: {} - Grouped under Status: {}", plan.getId(), status);
+//            log.info("Plan ID: {} - Grouped under Status: {}", plan.getId(), status);
         }
-        // 상태별 플랜 그룹화 후 로그 추가
-        log.info("Grouped Plans by Status: {}", groupedPlans);
+
         return groupedPlans;
     }
 

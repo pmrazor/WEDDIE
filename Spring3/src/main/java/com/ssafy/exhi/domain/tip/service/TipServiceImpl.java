@@ -3,6 +3,7 @@ package com.ssafy.exhi.domain.tip.service;
 import com.ssafy.exhi.base.status.ErrorStatus;
 import com.ssafy.exhi.domain.ServiceType;
 import com.ssafy.exhi.domain.plan.model.entity.Plan;
+import com.ssafy.exhi.domain.user.model.entity.Gender;
 import com.ssafy.exhi.domain.plan.repository.PlanRepository;
 import com.ssafy.exhi.domain.tip.converter.TipConverter;
 import com.ssafy.exhi.domain.tip.model.dto.TipRequest;
@@ -17,7 +18,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Service
 @Transactional
 @RequiredArgsConstructor
@@ -32,7 +35,9 @@ public class TipServiceImpl implements TipService {
         Plan plan = findPlanByPlanId(planId);
         User user = findUserByUserId(userId);
         ServiceType serviceType = plan.getServiceType();
-        List<Tip> tips = tipRepository.findTipsByServiceType(serviceType);
+        Gender gender = user.getUserDetail().getGender(); // 유저의 성별을 가져옴
+
+        List<Tip> tips = tipRepository.findTipsByServiceTypeAndUserDetail_Gender(serviceType, gender);  // 성별에 맞는 팁 찾기
 
         return TipConverter.toDTO(tips);
     }
@@ -57,5 +62,6 @@ public class TipServiceImpl implements TipService {
             () -> new ExceptionHandler(ErrorStatus.PLAN_NOT_FOUND)
         );
     }
+
 
 }
