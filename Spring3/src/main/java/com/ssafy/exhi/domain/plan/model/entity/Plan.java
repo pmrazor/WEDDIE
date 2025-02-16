@@ -3,22 +3,38 @@ package com.ssafy.exhi.domain.plan.model.entity;
 import com.ssafy.exhi.base.BaseEntity;
 import com.ssafy.exhi.base.status.ErrorStatus;
 import com.ssafy.exhi.domain.ServiceType;
+import com.ssafy.exhi.domain.TimeWrapper;
 import com.ssafy.exhi.domain.plan.model.dto.PlanRequest;
 import com.ssafy.exhi.domain.timecapsule.model.entity.TimeCapsule;
+import com.ssafy.exhi.domain.tip.model.entity.Tip;
 import com.ssafy.exhi.domain.todo.model.entity.DefaultTodo;
 import com.ssafy.exhi.domain.todo.model.entity.Todo;
-import com.ssafy.exhi.domain.tip.model.entity.Tip;
 import com.ssafy.exhi.domain.virginroad.model.entity.VirginRoad;
 import com.ssafy.exhi.exception.ExceptionHandler;
-import jakarta.persistence.*;
-import lombok.*;
-import lombok.extern.slf4j.Slf4j;
-
-import java.time.LocalDate;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Entity
@@ -72,6 +88,11 @@ public class Plan extends BaseEntity {
     private Tip tip;
 
     /* 비즈니스 로직 */
+    public void validateCreateTimeCapsule(TimeWrapper time) {
+        if (time.now().isAfter(planTime)) {
+            throw new ExceptionHandler(ErrorStatus.TIMECAPSULE_VALIDATE);
+        }
+    }
 
     private static final int DURATION = 30;
 
@@ -146,4 +167,3 @@ public class Plan extends BaseEntity {
 
     /* 비즈니스 로직 */
 }
-

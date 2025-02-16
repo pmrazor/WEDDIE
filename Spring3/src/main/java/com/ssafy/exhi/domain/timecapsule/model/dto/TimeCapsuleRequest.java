@@ -40,6 +40,9 @@ public class TimeCapsuleRequest {
         // 해당 플랜에 대한 만족도 평가
         private boolean planGrade;
 
+        private MultipartFile goodImageFile;
+
+        private MultipartFile badImageFile;
         private MultipartFile image;
     }
 }

@@ -9,7 +9,11 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class TimeCapsuleConverter {
-    public static TimeCapsule toEntity (TimeCapsuleRequest.CreateDTO request, Plan plan, PlanStatus timeCapeulsStatus) {
+    public static TimeCapsule toEntity (
+            TimeCapsuleRequest.CreateDTO request,
+            Plan plan,
+            PlanStatus timeCapsuleStatus
+    ) {
         return TimeCapsule.builder()
                 .userId(request.getUserId())
                 .coupleId(request.getCoupleId())
@@ -18,7 +22,7 @@ public class TimeCapsuleConverter {
                 .goodImage(request.getGoodImage())
                 .badContent(request.getBadContent())
                 .badImage(request.getBadImage())
-                .timeCapsuleStatus(timeCapeulsStatus)
+                .timeCapsuleStatus(timeCapsuleStatus)
                 .planGrade(request.isPlanGrade())
                 .build();
     }

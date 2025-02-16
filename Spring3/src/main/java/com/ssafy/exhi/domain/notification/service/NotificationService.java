@@ -1,23 +1,31 @@
 package com.ssafy.exhi.domain.notification.service;
 
 import com.ssafy.exhi.base.status.ErrorStatus;
+import com.ssafy.exhi.domain.couple.model.entity.Couple;
+import com.ssafy.exhi.domain.couple.repository.CoupleRepository;
+import com.ssafy.exhi.domain.couplemail.model.dto.CoupleMailRequest;
+import com.ssafy.exhi.domain.couplemail.model.dto.CoupleMailRequest.CreateDTO;
+import com.ssafy.exhi.domain.couplemail.model.entity.CoupleMail;
+import com.ssafy.exhi.domain.couplemail.repository.CoupleMailRepository;
 import com.ssafy.exhi.domain.notification.converter.NotificationConverter;
 import com.ssafy.exhi.domain.notification.model.dto.NotificationRequest;
 import com.ssafy.exhi.domain.notification.model.dto.NotificationResponse;
+import com.ssafy.exhi.domain.notification.model.dto.NotificationResponse.CoupleMatchingDTO;
+import com.ssafy.exhi.domain.notification.model.dto.NotificationResponse.MailDTO;
 import com.ssafy.exhi.domain.notification.model.dto.NotificationResponse.PageDTO;
+import com.ssafy.exhi.domain.notification.model.entity.CoupleMailNotification;
 import com.ssafy.exhi.domain.notification.model.entity.CoupleMatchingNotification;
 import com.ssafy.exhi.domain.notification.model.entity.MatchingStatus;
-import com.ssafy.exhi.domain.notification.repository.CoupleNotificationRepository;
+import com.ssafy.exhi.domain.notification.model.entity.Notification;
+import com.ssafy.exhi.domain.notification.model.entity.SseEmitterManager;
+import com.ssafy.exhi.domain.notification.repository.NotificationRepository;
 import com.ssafy.exhi.domain.user.model.entity.Gender;
 import com.ssafy.exhi.domain.user.model.entity.User;
 import com.ssafy.exhi.domain.user.model.entity.UserDetail;
 import com.ssafy.exhi.domain.user.repository.UserRepository;
 import com.ssafy.exhi.exception.ExceptionHandler;
 import jakarta.transaction.Transactional;
-import java.io.IOException;
-import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -29,85 +37,71 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 @Service
 @RequiredArgsConstructor
 public class NotificationService {
-    // 각 사용자별 SSE Emitter를 저장
-    private final Map<Integer, SseEmitter> emitters = new ConcurrentHashMap<>();
-    private final CoupleNotificationRepository coupleNotificationRepository;
+    private final SseEmitterManager sseEmitterManager;
+    private final NotificationRepository notificationRepository;
+    private final CoupleRepository coupleRepository;
     private final UserRepository userRepository;
+    private final CoupleMailRepository coupleMailRepository;
 
-    // 사용자가 접속할 때 호출되는 메서드
     public SseEmitter subscribe(Integer userId) {
-        // 1시간 동안 연결 유지
-        SseEmitter emitter = new SseEmitter(3600000L);
+        return sseEmitterManager.subscribe(userId);
+    }
 
-        // 연결이 종료될 때 정리
-        emitter.onCompletion(() ->
-                emitters.remove(userId)
+    @Transactional
+    public MailDTO sendCoupleMailNotification(CoupleMailRequest.CreateDTO mailDTO) {
+        // 1. 발신자 정보 조회 및 검증
+        User sender = findUserByUserId(mailDTO.getUserId());
+        Couple couple = findCoupleByUserId(mailDTO.getUserId());
+        CoupleMail mail = findMailWithAuth(mailDTO, sender);
+
+        // 2. 수신자 결정 (커플 중 발신자가 아닌 사람)
+        User receiver = sender.equals(couple.getMale()) ?
+                couple.getFemale() : couple.getMale();
+
+        CoupleMailNotification entity = NotificationConverter.toEntity(mailDTO, receiver, sender, mail);
+        CoupleMailNotification saved = notificationRepository.save(entity);
+
+        MailDTO dto = NotificationConverter.toDTO(saved);
+        sseEmitterManager.sendNotification(receiver.getId(), dto);
+        return dto;
+    }
+
+    private CoupleMail findMailWithAuth(CreateDTO mailDTO, User sender) {
+        return coupleMailRepository.findMailWithAuth(mailDTO.getMailId(), sender.getId()).orElseThrow(
+                () -> new ExceptionHandler(ErrorStatus.MAIL_NOT_FOUND)
         );
+    }
 
-        // 타임아웃 시 정리
-        emitter.onTimeout(() ->
-                emitters.remove(userId)
-        );
+    private Couple findCoupleByUserId(Integer userId) {
+        return coupleRepository.findCoupleByUserId(userId)
+                .orElseThrow(() -> new ExceptionHandler(ErrorStatus.COUPLE_NOT_FOUND));
+    }
 
-        // 에러 발생 시 정리
-        emitter.onError(ex ->
-                emitters.remove(userId)
-        );
+    @Transactional
+    public CoupleMatchingDTO sendCoupleRequest(
+            NotificationRequest.CoupleMatchingDTO notificationDTO) {
+        User receiver = getUserById(notificationDTO.getReceiverId());
+        User sender = getUserById(notificationDTO.getSenderId());
+        validateUsers(receiver, sender);
 
-        // 기존 연결이 있다면 제거
-        SseEmitter oldEmitter = emitters.get(userId);
-        if (oldEmitter != null) {
-            oldEmitter.complete();
-        }
+        CoupleMatchingNotification entity = NotificationConverter.toEntity(notificationDTO, receiver, sender);
+        CoupleMatchingNotification saved = notificationRepository.save(entity);
 
-        emitters.put(userId, emitter);
-
-        // 연결 즉시 테스트 이벤트 전송
-        try {
-            emitter.send(SseEmitter.event()
-                    .name("connect")
-                    .data("연결되었습니다!"));
-        } catch (IOException e) {
-            emitters.remove(userId);
-        }
-
-        return emitter;
+        CoupleMatchingDTO dto = NotificationConverter.toDTO(saved);
+        sseEmitterManager.sendNotification(receiver.getId(), dto);
+        return dto;
     }
 
     @Transactional
     public void sendCoupleResponse(Integer requestId, MatchingStatus status) {
-        // PENDING 상태인 알림만 응답 허용
         CoupleMatchingNotification notification = findNotificationByRequestId(requestId);
         validateNotification(notification);
 
         notification.updateMatchingStatus(status);
         User receiver = notification.getSender();
 
-        sendNotification(receiver, notification);
-    }
-
-    private CoupleMatchingNotification findNotificationByRequestId(Integer requestId) {
-        return coupleNotificationRepository.
-                findCoupleMatchingNotificationById(requestId).orElseThrow(
-                        () -> new ExceptionHandler(ErrorStatus.NOTIFICATION_NOT_FOUND)
-                );
-    }
-
-    // 특정 사용자에게 알림을 보내는 메서드
-    public NotificationResponse.CoupleMatchingDTO sendCoupleRequest(
-            NotificationRequest.CoupleMatchingDTO notificationDTO
-    ) {
-        User receiver = getUserById(notificationDTO.getReceiverId());
-        User sender = getUserById(notificationDTO.getSenderId());
-        validateUsers(receiver, sender);
-        log.info("emmiter size -> {}, 보낸 사람 -> {}, 받는 사람 -> {}", emitters.size(), sender.getName(), receiver.getName());
-
-        // 알림 리포지토리 저장
-        CoupleMatchingNotification entity = NotificationConverter.toEntity(notificationDTO, receiver, sender);
-        CoupleMatchingNotification saved = coupleNotificationRepository.save(entity);
-
-        sendNotification(receiver, saved);
-        return NotificationConverter.toDTO(saved);
+        NotificationResponse.CoupleMatchingDTO payload = NotificationConverter.toDTO(notification);
+        sseEmitterManager.sendNotification(receiver.getId(), payload);
     }
 
     private void validateUsers(User receiver, User sender) {
@@ -126,32 +120,15 @@ public class NotificationService {
         }
     }
 
-    private void sendNotification(User receiver, CoupleMatchingNotification notification) {
-        // 키가 없으면 메시지를 보내지않음
-        if (!emitters.containsKey(receiver.getId())) {
-            return;
-        }
-
-        SseEmitter emitter = Optional.ofNullable(emitters.get(receiver.getId())).orElseThrow(
-                () -> new ExceptionHandler(ErrorStatus.SSR_SUBSCRIBE_NOT_FOUND)
-        );
-
-        // 알림 전송
-        NotificationResponse.CoupleMatchingDTO payload = NotificationConverter.toDTO(notification);
-        try {
-            emitter.send(SseEmitter.event()
-                    .name(payload.getNotificationType().toString())
-                    .data(payload));
-
-        } catch (IOException e) {
-            throw new ExceptionHandler(ErrorStatus.SSR_SUBSCRIBE_NOT_FOUND);
-        }
+    private CoupleMatchingNotification findNotificationByRequestId(Integer requestId) {
+        return notificationRepository
+                .findCoupleMatchingNotificationById(requestId)
+                .orElseThrow(() -> new ExceptionHandler(ErrorStatus.NOTIFICATION_NOT_FOUND));
     }
 
     private User getUserById(Integer userId) {
-        return userRepository.findUserById(userId).orElseThrow(
-                () -> new ExceptionHandler(ErrorStatus.USER_NOT_FOUND)
-        );
+        return userRepository.findUserById(userId)
+                .orElseThrow(() -> new ExceptionHandler(ErrorStatus.USER_NOT_FOUND));
     }
 
     private void validateNotification(CoupleMatchingNotification notification) {
@@ -162,15 +139,13 @@ public class NotificationService {
 
     public PageDTO getNotifications(Integer userId, Pageable pageable) {
         User user = findUserByUserId(userId);
-        Page<CoupleMatchingNotification> page = coupleNotificationRepository
+        Page<Notification> page = notificationRepository
                 .findNotificationByReceiver(user, pageable);
-
         return NotificationConverter.toPageDTO(page);
     }
 
     private User findUserByUserId(Integer userId) {
-        return userRepository.findById(userId).orElseThrow(
-                () -> new ExceptionHandler(ErrorStatus.USER_NOT_FOUND)
-        );
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new ExceptionHandler(ErrorStatus.USER_NOT_FOUND));
     }
 }

@@ -39,4 +39,22 @@ public class NotificationRequest {
         private NotificationType notificationType;
     }
 
+    @Data
+    @SuperBuilder
+    @ToString
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class MailDTO {
+        @NotNull
+        private Integer receiverId;
+
+        private Integer senderId;
+
+        private String title;
+
+        private boolean isRead;
+
+        private NotificationType notificationType;
+    }
+
 }
