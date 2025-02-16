@@ -53,7 +53,27 @@ public class PlanResponse {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class AllResultDTO {
-        private Map<PlanStatus, List<Integer>> groupedPlans;
+        private Map<PlanStatus, List<PlanDTO>> groupedPlans;
+    }
+
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class PlanDTO {
+        private Integer planId;
+        private String shopName;
+        private ServiceType serviceType;
+        private TipDTO tip; // TipDTO 포함
+    }
+
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class TipDTO {
+        private Integer tipId;
+        private String tipContent;
     }
 
 }
