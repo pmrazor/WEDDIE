@@ -4,6 +4,7 @@ import com.ssafy.exhi.base.BaseEntity;
 import com.ssafy.exhi.base.status.ErrorStatus;
 import com.ssafy.exhi.domain.ServiceType;
 import com.ssafy.exhi.domain.plan.model.dto.PlanRequest;
+import com.ssafy.exhi.domain.plan.repository.PlanRepository;
 import com.ssafy.exhi.domain.timecapsule.model.entity.TimeCapsule;
 import com.ssafy.exhi.domain.todo.model.entity.DefaultTodo;
 import com.ssafy.exhi.domain.todo.model.entity.Todo;
@@ -67,11 +68,20 @@ public class Plan extends BaseEntity {
     @OneToMany(mappedBy = "plan", cascade = CascadeType.ALL)
     private List<TimeCapsule> timeCapsules = new ArrayList<>();
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "tip_id", referencedColumnName = "tip_id")
     private Tip tip;
 
     /* 비즈니스 로직 */
+
+    public void assignTipToPlan(Integer planId, Integer tipId) {
+        Plan plan = planRepository.findById(planId).orElseThrow(() -> new ExceptionHandler(ErrorStatus.PLAN_NOT_FOUND));
+        Tip tip = tipRepository.findById(tipId).orElseThrow(() -> new ExceptionHandler(ErrorStatus.TIP_NOT_FOUND));
+
+        plan.setTip(tip);
+        planRepository.save(plan);
+    }
+
 
     private static final int DURATION = 30;
 
