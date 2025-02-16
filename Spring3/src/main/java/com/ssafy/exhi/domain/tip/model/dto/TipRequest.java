@@ -16,7 +16,7 @@ public class TipRequest {
     public static class CreateDTO {
 
         @NotBlank
-        private String tip;
+        private String tipContent;
 
         @NotNull
         private ServiceType serviceType;

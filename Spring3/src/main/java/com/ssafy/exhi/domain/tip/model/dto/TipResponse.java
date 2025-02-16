@@ -16,6 +16,6 @@ public class TipResponse {
 
         private ServiceType serviceType;
 
-        private String tip;
+        private String tipContent;
     }
 }

@@ -22,8 +22,8 @@ public class Tip {
     @Column(name = "service_type")
     private ServiceType serviceType;
 
-    @Column(name = "tip", length = 2000)
-    private String tip;
+    @Column(name = "tip_content", length = 2000)
+    private String tipContent;
 
     @OneToOne(mappedBy = "tip", fetch = FetchType.LAZY)
     private Plan plan;

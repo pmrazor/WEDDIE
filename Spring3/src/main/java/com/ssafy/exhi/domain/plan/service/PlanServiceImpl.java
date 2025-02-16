@@ -119,7 +119,7 @@ public class PlanServiceImpl implements PlanService {
             if (plan.getTip() != null) {
                 tipDTO = new PlanResponse.TipDTO(
                         plan.getTip().getId(),
-                        plan.getTip().getTip()  // Tip이 있을 경우 getTip() 사용
+                        plan.getTip().getTipContent()  // Tip이 있을 경우 getTip() 사용
                 );
             } else {
                 // Tip이 없을 경우에도 TipDTO 객체 생성
@@ -132,7 +132,7 @@ public class PlanServiceImpl implements PlanService {
             if (plan.getTip() != null) {
                 tipDTO = new PlanResponse.TipDTO(
                         plan.getTip().getId(),
-                        plan.getTip().getTip()  // Tip이 있을 경우 getTip() 사용
+                        plan.getTip().getTipContent()  // Tip이 있을 경우 getTip() 사용
                 );
             }
 
