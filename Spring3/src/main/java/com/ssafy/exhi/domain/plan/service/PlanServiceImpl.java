@@ -41,6 +41,7 @@ import static com.ssafy.exhi.domain.plan.model.dto.PlanResponse.AllResultDTO;
 @RequiredArgsConstructor
 public class PlanServiceImpl implements PlanService {
 
+    private final TipRepository tipRepository;
     private final PlanRepository planRepository;
     private final CoupleRepository coupleRepository;
     private final UserDetailRepository userDetailRepository;
@@ -83,7 +84,7 @@ public class PlanServiceImpl implements PlanService {
             plan.updatePlanStatus(timeWrapper.now());  // TimeWrapper를 통해 현재 시간 설정
 
             // assignTipToPlan 메서드 호출 - Plan과 Tip 연결
-            assignTipToPlan(plan.getId()); // 여기에서 Plan에 Tip을 할당하는 메서드 호출
+            assignTipToPlan(plan); // 여기에서 Plan에 Tip을 할당하는 메서드 호출
         }
 
         Map<PlanStatus, List<PlanResponse.PlanDTO>> groupedPlans = groupPlansByStatus(plans);
@@ -92,12 +93,12 @@ public class PlanServiceImpl implements PlanService {
 
 
     // Tip을 할당하는 메서드
-    public void assignTipToPlan(Integer planId) {
-        Plan plan = planRepository.findPlanById(planId).orElseThrow(() -> new ExceptionHandler(ErrorStatus.PLAN_NOT_FOUND));
-
+    public void assignTipToPlan(Plan plan) {
         // Tip을 찾기
-        Tip tip = tipRepository.findByServiceType(plan.getServiceType())
-                .orElseThrow(() -> new ExceptionHandler(ErrorStatus.TIP_NOT_FOUND));
+        Tip tip = tipRepository.findTipsByServiceType(plan.getServiceType())
+                .stream()
+                .findFirst()
+                .orElse(null);  // Tip이 없으면 null로 설정
 
         // Plan에 Tip 설정
         plan.setTip(tip);

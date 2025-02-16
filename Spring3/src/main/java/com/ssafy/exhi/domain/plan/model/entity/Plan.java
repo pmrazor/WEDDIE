@@ -74,14 +74,6 @@ public class Plan extends BaseEntity {
 
     /* 비즈니스 로직 */
 
-    public void assignTipToPlan(Integer planId, Integer tipId) {
-        Plan plan = planRepository.findById(planId).orElseThrow(() -> new ExceptionHandler(ErrorStatus.PLAN_NOT_FOUND));
-        Tip tip = tipRepository.findById(tipId).orElseThrow(() -> new ExceptionHandler(ErrorStatus.TIP_NOT_FOUND));
-
-        plan.setTip(tip);
-        planRepository.save(plan);
-    }
-
 
     private static final int DURATION = 30;
 
