@@ -1,6 +1,7 @@
 package com.ssafy.exhi.config;
 
 import com.ssafy.exhi.interceptor.JWTInterceptor;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,9 +10,6 @@ import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-
-import java.util.Arrays;
-import java.util.List;
 
 
 @Slf4j
@@ -29,7 +27,8 @@ public class WebMvcConfiguration implements WebMvcConfigurer {
 	public void addCorsMappings(CorsRegistry registry) {
 		registry
 			.addMapping("/**")
-			.allowedOrigins("https://weddie.ssafy.me")
+				.allowedOrigins("https://weddie.ssafy.me")
+//			.allowedOrigins("http://localhost:3000")
 //				.allowedMethods(HttpMethod.GET.name(), HttpMethod.POST.name(), HttpMethod.PUT.name(),
 //						HttpMethod.DELETE.name(), HttpMethod.HEAD.name(), HttpMethod.OPTIONS.name(),
 //						HttpMethod.PATCH.name())

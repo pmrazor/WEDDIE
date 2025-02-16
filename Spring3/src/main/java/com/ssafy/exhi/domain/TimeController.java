@@ -1,27 +1,33 @@
+
 package com.ssafy.exhi.domain;
 
 import com.ssafy.exhi.base.ApiResponse;
+import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-import java.time.LocalDateTime;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/time")
 public class TimeController {
-    private final TimeWrapper timeWrapper; // 객체 주입
+    private final TimeWrapper timeWrapper;
 
     // 현재 시간 설정하는 get API
-    @GetMapping
-    public void setDemoTime(@RequestBody LocalDateTime demoTime) {
-        timeWrapper.setCurrentTime(demoTime);
+    @PostMapping("/set")
+    public ResponseEntity<?> setDemoTime(@RequestBody LocalDateTime setDay) {
+        timeWrapper.setCurrentTime(setDay);
+        return ResponseEntity.ok(ApiResponse.onSuccess(timeWrapper.now()));
     }
 
     // 현재 시간에 일수를 추가하는 API
-    @PostMapping
-    public ResponseEntity<?> addDays(@RequestParam(name="days") Integer days) {
-        return ResponseEntity.ok().body(ApiResponse.onSuccess(timeWrapper.addDays(days)));
+    @PostMapping("/plus")
+    public ResponseEntity<?> plusDays(@RequestBody Integer plusDays) {
+        timeWrapper.addDays(plusDays);
+        return ResponseEntity.ok(ApiResponse.onSuccess(timeWrapper.now()));
     }
+
 }

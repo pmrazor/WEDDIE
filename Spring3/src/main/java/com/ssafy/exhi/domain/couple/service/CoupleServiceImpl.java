@@ -9,18 +9,17 @@ import com.ssafy.exhi.domain.couple.model.entity.Couple;
 import com.ssafy.exhi.domain.couple.repository.CoupleRepository;
 import com.ssafy.exhi.domain.notification.model.entity.CoupleMatchingNotification;
 import com.ssafy.exhi.domain.notification.model.entity.MatchingStatus;
-import com.ssafy.exhi.domain.notification.repository.CoupleNotificationRepository;
+import com.ssafy.exhi.domain.notification.repository.NotificationRepository;
 import com.ssafy.exhi.domain.user.model.entity.Gender;
 import com.ssafy.exhi.domain.user.model.entity.User;
 import com.ssafy.exhi.domain.user.model.entity.UserDetail;
 import com.ssafy.exhi.domain.user.repository.UserRepository;
 import com.ssafy.exhi.exception.ExceptionHandler;
 import jakarta.transaction.Transactional;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-
-import java.util.Optional;
 
 @Slf4j
 @Service
@@ -28,14 +27,14 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class CoupleServiceImpl implements CoupleService {
 
-    private final CoupleNotificationRepository coupleNotificationRepository;
+    private final NotificationRepository notificationRepository;
     private final CoupleRepository coupleRepository;
     private final UserRepository userRepository;
 
     @Override
     public CoupleResponse.SimpleResultDTO createCouple(CoupleRequest.CreateDTO coupleDTO) {
         User user = findUserByUserId(coupleDTO.getUserId());
-        User opposite = findUserByUserId(coupleDTO.getCoupleId());
+        User opposite = findUserByUserId(coupleDTO.getOppositeId());
 
         Couple couple = CoupleConverter.toEntity(coupleDTO, user, opposite);
         Couple saved = coupleRepository.save(couple);
@@ -48,9 +47,6 @@ public class CoupleServiceImpl implements CoupleService {
         CoupleMatchingNotification notification = findNotificationByRequestId(requestId);
         validateNotification(notification);
         validateCouple(notification);
-
-        log.info("sender: {}, receiver: {}, status: {}", notification.getSender(), notification.getReceiver(),
-            notification.getMatchingStatus());
 
         Couple couple = CoupleConverter.toEntity(notification);
         Couple saved = coupleRepository.save(couple);
@@ -80,7 +76,7 @@ public class CoupleServiceImpl implements CoupleService {
     }
 
     private CoupleMatchingNotification findNotificationByRequestId(Integer requestId) {
-        return coupleNotificationRepository.findCoupleMatchingNotificationById(requestId)
+        return notificationRepository.findCoupleMatchingNotificationById(requestId)
             .orElseThrow(
                 () -> new ExceptionHandler(ErrorStatus.NOTIFICATION_NOT_FOUND)
             );

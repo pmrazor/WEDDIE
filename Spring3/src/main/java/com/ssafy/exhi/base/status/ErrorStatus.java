@@ -97,6 +97,7 @@ public enum ErrorStatus implements BaseErrorCode {
 
     // 타임캡슐 관련 에러
     TIMECAPSULE_ALREADY_EXIST(HttpStatus.BAD_REQUEST, "TIME_CAPSULE_4001", "이미 작성된 타임캡슐입니다"),
+    TIMECAPSULE_VALIDATE(HttpStatus.BAD_REQUEST, "TIME_CAPSULE_4002", "타임캡슐 작성 조건이 달성되지않았습니다."),
 
     // 추천(클러스터링) 시스템 관련 에러
     // 1. 클러스터링 관련 오류
@@ -118,7 +119,10 @@ public enum ErrorStatus implements BaseErrorCode {
     RECOMMENDATION_INVALID_USER(HttpStatus.BAD_REQUEST, "RECOMMEND4005", "추천 대상 사용자 정보가 유효하지 않습니다"),
 
     // 조언 관련 에러
-    ADVICE_API_ERROR(HttpStatus.BAD_REQUEST, "ADVICE4001", "조언 서비스 실행 중 오류가 발생했습니다");
+    ADVICE_API_ERROR(HttpStatus.BAD_REQUEST, "ADVICE4001", "조언 서비스 실행 중 오류가 발생했습니다"),
+    INVALID_FILE_TYPE(HttpStatus.BAD_REQUEST, "FILE4001", "파일의 형식이 잘못되었습니다."),
+    MAIL_NOT_FOUND(HttpStatus.BAD_REQUEST, "MAIL4001", "메일을 찾을 수 없습니다."),
+    TEMPLATE_NOT_FOUND(HttpStatus.BAD_REQUEST, "TEMPLATE4001", "템플릿을 찾을 수 없습니다.");
 
     private final HttpStatus httpStatus;
     private final String code;

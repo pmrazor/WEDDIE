@@ -1,11 +1,10 @@
 package com.ssafy.exhi.domain.couple.model.dto;
 
+import java.time.LocalDate;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.time.LocalDate;
 
 public class CoupleRequest {
     @Data
@@ -14,7 +13,7 @@ public class CoupleRequest {
     @AllArgsConstructor
     public static class CreateDTO {
         private Integer userId;
-        private Integer coupleId;
+        private Integer oppositeId;
         private String coupleName;
     }
 
