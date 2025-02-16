@@ -1,0 +1,76 @@
+### 환경 변수
+@base_url = {{base_url}}
+@maleAccessToken = {{maleAccessToken}}
+@femaleAccessToken = {{femaleAccessToken}}
+@maleLoginId = {{maleLoginId}}
+@femaleLoginId = {{femaleLoginId}}
+@honeymoonPlanId = {{honeymoonPlanId}}
+
+### 남자 로그인
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "loginId": "{{maleLoginId}}",
+  "password": "q!w2e3r4t5"
+}
+
+> {%
+    client.global.set("maleAccessToken", response.body.result.accessToken);
+%}
+
+### 여성 로그인
+POST {{base_url}}/api/auth/login
+Content-Type: application/json
+
+{
+    "loginId": "{{femaleLoginId}}",
+    "password": "q!w2e3r4t5"
+}
+
+### 웨딩데이 투두 조회
+GET {{base_url}}/api/plan/{{honeymoonPlanId}}
+Authorization: Bearer {{maleAccessToken}}
+
+### 시간에 따른 플랜과 팁 조회
+GET {{base_url}}/api/plan/main
+Authorization: Bearer {{maleAccessToken}}
+
+### 시간 설정 (추가)
+POST {{base_url}}/time/plus
+Content-Type: application/json
+
+10
+
+### 타임캡슐 작성
+POST {{base_url}}/api/timeCapsule
+Authorization: Bearer {{maleAccessToken}}
+Content-Type: multipart/form-data; boundary=boundary
+
+--boundary
+Content-Disposition: form-data; name="planId"
+
+{{honeymoonPlanId}}
+--boundary
+Content-Disposition: form-data; name="goodContent"
+
+분위기가 좋았어요
+--boundary
+Content-Disposition: form-data; name="goodImageFile"; filename="cat.png"
+Content-Type: image/png
+
+< cat.jpg
+--boundary
+Content-Disposition: form-data; name="badContent"
+
+남친이 너무 귀여워서 짜증났음
+--boundary
+Content-Disposition: form-data; name="badImageFile"; filename="cat.png"
+Content-Type: image/png
+
+< cat.jpg
+--boundary
+Content-Disposition: form-data; name="planGrade"
+
+1
+--boundary--
