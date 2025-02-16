@@ -1,11 +1,15 @@
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState, useMemo } from "react";
+import { colors } from "@/constants/colors";
 import useVirginRoadStore from "@/store/virginroad";
 import useTodoStore from "@/store/todo";
+import useTimeCapsuleStore from "@/store/timecapsule";
+import TimeCapsuleModal from "./TimecapsuleModal";
+import useAuthStore from "@/store/auth";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-import { Plus, Edit2, Trash2, Check, X } from "lucide-react"; // 아이콘 추가
+import { Plus, Edit2, Trash2, Check, X, Heart } from "lucide-react"; // 아이콘 추가
 import { motion, AnimatePresence } from "framer-motion";
 
 const LoadingAnimation = () => {
@@ -60,6 +64,7 @@ const LoadingAnimation = () => {
 
 const VirginRoad = () => {
   const nav = useNavigate();
+  const { createTimeCapsule } = useTimeCapsuleStore();
   const {
     plans = [],
     getVirginRoad,
@@ -84,166 +89,223 @@ const VirginRoad = () => {
   const [editContent, setEditContent] = useState("");
   const [isAddingNew, setIsAddingNew] = useState(false);
   const [newTodoContent, setNewTodoContent] = useState("");
+  const [newTodoStage, setNewTodoStage] = useState("ON");
+  const [newTodoIsTogether, setNewTodoIsTogether] = useState(false);
+  const [showTimeCapsule, setShowTimeCapsule] = useState(false);
+  const [selectedServiceType, setSelectedServiceType] = useState(null);
+
+  const handleSaveTimeCapsule = async (data) => {
+    try {
+      await createTimeCapsule({
+        planId: selectedPlan,
+        goodContent: data.goodContent,
+        goodImage: data.goodImage,
+        badContent: data.badContent,
+        badImage: data.badImage,
+        planGrade: data.planGrade,
+      });
+      setShowTimeCapsule(false);
+    } catch (error) {
+      console.error("Failed to save time capsule:", error);
+    }
+  };
 
   const renderTodos = () => {
-    const selectedTodos = todos[selectedPlan];
-    if (!selectedTodos || !selectedTodos.todos) {
-      return <p>No todos found.</p>;
+    const selectedPlanData = plans.find((plan) => plan.planId === selectedPlan);
+    if (!selectedPlanData) {
+      return <p>이 ID의 플랜을 찾지 못했어요.</p>;
     }
 
-    return (
-      <ul className="space-y-2">
-        {selectedTodos.todos.map((todo) => (
-          <li
-            key={todo.todoId}
-            className="flex items-center gap-2 p-2 bg-white rounded-lg shadow"
-          >
-            <input
-              type="checkbox"
-              checked={todo.completed}
-              onChange={() =>
-                handleTodoToggle(selectedPlan, todo.todoId, !todo.completed)
-              }
-              className="shrink-0"
-            />
+    const serviceType = selectedPlanData.serviceType;
+    const selectedTodos = todos[serviceType];
 
-            {editingTodoId === todo.todoId ? (
-              <div className="flex-1 flex gap-2 items-center min-w-0">
-                {" "}
-                {/* min-w-0 추가 */}
+    const renderTodoList = (todos, title) => {
+      if (!todos || todos.length === 0) return null;
+
+      return (
+        <div className="mb-4">
+          <h3 className="text-lg font-semibold mb-2">{title}</h3>
+          <ul className="space-y-2">
+            {todos.map((todo) => (
+              <li
+                key={todo.todoId}
+                className="flex items-center gap-2 p-2 bg-white rounded-lg shadow"
+              >
                 <input
-                  type="text"
-                  value={editContent}
-                  onChange={(e) => setEditContent(e.target.value)}
-                  onKeyDown={async (e) => {
-                    if (e.key === "Enter" && editContent.trim()) {
-                      await handleUpdateTodo(
-                        selectedPlan,
-                        todo.todoId,
-                        editContent
-                      );
-                      setEditingTodoId(null);
-                    }
-                  }}
-                  className="flex-1 min-w-0 px-2 py-0.5 border rounded-md text-sm h-7"
-                  autoFocus
+                  type="checkbox"
+                  checked={todo.completed}
+                  onChange={() =>
+                    handleTodoToggle(selectedPlan, todo.todoId, !todo.completed)
+                  }
+                  className="shrink-0"
                 />
-                <div className="flex gap-1 shrink-0">
-                  {" "}
-                  {/* 버튼들은 크기 고정 */}
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-6 w-6 p-0 shrink-0"
-                    onClick={async () => {
-                      if (editContent.trim()) {
-                        await handleUpdateTodo(
-                          selectedPlan,
-                          todo.todoId,
-                          editContent
-                        );
-                        setEditingTodoId(null);
+                {editingTodoId === todo.todoId ? (
+                  <div className="flex-1 flex gap-2 items-center min-w-0">
+                    <input
+                      type="text"
+                      value={editContent}
+                      onChange={(e) => setEditContent(e.target.value)}
+                      onKeyDown={async (e) => {
+                        if (e.key === "Enter" && editContent.trim()) {
+                          await handleUpdateTodo(
+                            selectedPlan,
+                            todo.todoId,
+                            editContent
+                          );
+                          setEditingTodoId(null);
+                        }
+                      }}
+                      className="flex-1 min-w-0 px-2 py-0.5 border rounded-md text-sm h-7"
+                      autoFocus
+                    />
+                    <div className="flex gap-1 shrink-0">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-6 w-6 p-0 shrink-0"
+                        onClick={async () => {
+                          if (editContent.trim()) {
+                            await handleUpdateTodo(
+                              selectedPlan,
+                              todo.todoId,
+                              editContent
+                            );
+                            setEditingTodoId(null);
+                          }
+                        }}
+                      >
+                        <Check className="w-3 h-3 text-green-500" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-6 w-6 p-0 shrink-0"
+                        onClick={() => setEditingTodoId(null)}
+                      >
+                        <X className="w-3 h-3 text-red-500" />
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <span className="flex-1 min-w-0 truncate">
+                    {todo.content}
+                  </span>
+                )}
+                {isEditMode && editingTodoId !== todo.todoId && (
+                  <div className="flex gap-1 shrink-0">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-6 w-6 p-0"
+                      onClick={() => {
+                        setEditingTodoId(todo.todoId);
+                        setEditContent(todo.content);
+                      }}
+                    >
+                      <Edit2 className="w-3 h-3" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-6 w-6 p-0"
+                      onClick={() =>
+                        handleDeleteTodo(selectedPlan, todo.todoId)
                       }
-                    }}
-                  >
-                    <Check className="w-3 h-3 text-green-500" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-6 w-6 p-0 shrink-0"
-                    onClick={() => setEditingTodoId(null)}
-                  >
-                    <X className="w-3 h-3 text-red-500" />
-                  </Button>
-                </div>
-              </div>
-            ) : (
-              <span className="flex-1 min-w-0 truncate">{todo.content}</span>
-            )}
+                    >
+                      <Trash2 className="w-3 h-3 text-red-500" />
+                    </Button>
+                  </div>
+                )}
+              </li>
+            ))}
+          </ul>
+        </div>
+      );
+    };
 
-            {isEditMode && !editingTodoId && (
-              <div className="flex gap-1 shrink-0">
-                {" "}
-                {/* 편집/삭제 버튼도 크기 고정 */}
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-6 w-6 p-0"
-                  onClick={() => {
-                    setEditingTodoId(todo.todoId);
-                    setEditContent(todo.content);
-                  }}
-                >
-                  <Edit2 className="w-3 h-3" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-6 w-6 p-0"
-                  onClick={() => handleDeleteTodo(selectedPlan, todo.todoId)}
-                >
-                  <Trash2 className="w-3 h-3 text-red-500" />
-                </Button>
-              </div>
-            )}
-          </li>
-        ))}
+    return (
+      <div>
+        {!selectedTodos ||
+        !selectedTodos.todos ||
+        (selectedTodos.todos.pre.length === 0 &&
+          selectedTodos.todos.on.length === 0 &&
+          selectedTodos.todos.post.length === 0) ? (
+          <p>아무런 할일이 없습니다! 오른쪽 밑 + 버튼으로 추가해보세요!</p>
+        ) : (
+          <>
+            {renderTodoList(selectedTodos.todos.pre, "전에 할 일")}
+            {renderTodoList(selectedTodos.todos.on, "지금 할 일")}
+            {renderTodoList(selectedTodos.todos.post, "나중에 할 일")}
+          </>
+        )}
 
-        {/* 새 Todo 추가 입력 필드 */}
+        {/* 새 Todo 추가 입력 필드 - isAddingNew가 true일 때만 표시 */}
         {isAddingNew && (
-          <li className="flex items-center gap-2 p-2 bg-white rounded-lg shadow">
-            <input type="checkbox" disabled className="shrink-0" />
-            <div className="flex-1 flex gap-2 items-center min-w-0">
-              <input
-                type="text"
-                value={newTodoContent}
-                onChange={(e) => setNewTodoContent(e.target.value)}
-                onKeyDown={async (e) => {
-                  if (e.key === "Enter" && newTodoContent.trim()) {
-                    await handleCreateTodo(selectedPlan, newTodoContent);
+          <div className="mt-4 space-y-4">
+            <input
+              type="text"
+              value={newTodoContent}
+              onChange={(e) => setNewTodoContent(e.target.value)}
+              placeholder="새로운 할 일을 입력하세요"
+              className="w-full px-3 py-2 border rounded-md"
+            />
+            <div className="flex items-center space-x-2">
+              <select
+                value={newTodoStage}
+                onChange={(e) => setNewTodoStage(e.target.value)}
+                className="px-2 py-2 border rounded-md text-sm"
+              >
+                <option value="PRE">전에</option>
+                <option value="ON">지금</option>
+                <option value="POST">나중에</option>
+              </select>
+              <Button
+                size="sm"
+                variant={newTodoIsTogether ? "default" : "outline"}
+                onClick={() => setNewTodoIsTogether(!newTodoIsTogether)}
+                className="p-1"
+              >
+                <Heart
+                  className={`h-4 w-4 ${
+                    newTodoIsTogether ? "fill-current" : ""
+                  }`}
+                />
+              </Button>
+              <Button
+                size="sm"
+                onClick={async () => {
+                  if (newTodoContent.trim()) {
+                    await handleCreateTodo(selectedPlan, {
+                      serviceType: selectedPlanData.serviceType,
+                      stageType: newTodoStage,
+                      content: newTodoContent,
+                      isTogether: newTodoIsTogether,
+                    });
                     setIsAddingNew(false);
                     setNewTodoContent("");
+                    setNewTodoStage("ON");
+                    setNewTodoIsTogether(false);
                   }
                 }}
-                placeholder="새로운 할 일을 입력하세요"
-                className="flex-1 min-w-0 px-2 py-0.5 border rounded-md text-sm h-7"
-                autoFocus
-              />
-              <div className="flex gap-1 shrink-0">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-6 w-6 p-0"
-                  onClick={async () => {
-                    if (newTodoContent.trim()) {
-                      await handleCreateTodo(selectedPlan, newTodoContent); // content 값 전달
-                      setIsAddingNew(false);
-                      setNewTodoContent("");
-                    }
-                  }}
-                >
-                  <Check className="w-3 h-3 text-green-500" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-6 w-6 p-0"
-                  onClick={async () => {
-                    if (newTodoContent.trim()) {
-                      await handleCreateTodo(selectedPlan, newTodoContent);
-                      setIsAddingNew(false);
-                      setNewTodoContent("");
-                    }
-                  }}
-                >
-                  <X className="w-3 h-3 text-red-500" />
-                </Button>
-              </div>
+              >
+                저장
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => {
+                  setIsAddingNew(false);
+                  setNewTodoContent("");
+                  setNewTodoStage("ON");
+                  setNewTodoIsTogether(false);
+                }}
+              >
+                취소
+              </Button>
             </div>
-          </li>
+          </div>
         )}
-      </ul>
+      </div>
     );
   };
 
@@ -265,9 +327,46 @@ const VirginRoad = () => {
   }, [plans]);
 
   useEffect(() => {
-    console.log("Plans updated:", plans);
-    console.log("EditablePlans updated:", editablePlans);
-  }, [plans, editablePlans]);
+    if (selectedPlan && todos[selectedPlan]) {
+      const allCompleted = isAllTodosCompleted();
+    }
+  }, [todos, selectedPlan]);
+
+  useEffect(() => {}, [plans, editablePlans]);
+
+  useEffect(() => {
+    if (selectedPlan) {
+      const selectedPlanData = plans.find(
+        (plan) => plan.planId === selectedPlan
+      );
+      if (selectedPlanData) {
+        const serviceType = selectedPlanData.serviceType;
+        if (!todos[serviceType]) {
+          getTodos(serviceType);
+        }
+      }
+    }
+  }, [selectedPlan, plans, todos, getTodos]);
+
+  const gender = useAuthStore((state) => state.gender);
+  console.log("Gender :" + gender);
+  // 이거 엠티로 나와서 색 지정이 안됨 고쳐야함
+  console.log(
+    getComputedStyle(document.documentElement).getPropertyValue(
+      "--genderColors-Male-PRIMARY_EXTRADEEP"
+    )
+  );
+
+  const genderBack = () => {
+    switch (gender) {
+      case "Male":
+        return "male";
+      case "Female":
+        return "female";
+      default:
+        return "default";
+    }
+  };
 
   const handleCancel = () => {
     if (Array.isArray(plans)) {
@@ -277,7 +376,6 @@ const VirginRoad = () => {
   };
 
   const displayPlans = useMemo(() => {
-    console.log("Calculating displayPlans:", { isEditing, editablePlans });
     if (!Array.isArray(editablePlans)) return [];
     return isEditing
       ? editablePlans
@@ -342,43 +440,68 @@ const VirginRoad = () => {
       handleToggleVisible(planId);
     } else {
       setSelectedPlan(planId);
-      if (!todos[planId]) {
-        await getTodos(planId);
+      const selectedPlanData = plans.find((plan) => plan.planId === planId);
+      if (selectedPlanData) {
+        const serviceType = selectedPlanData.serviceType;
+        if (!todos[serviceType]) {
+          try {
+            await getTodos(serviceType);
+          } catch (error) {
+            console.error("Error fetching todos:", error);
+            // 에러 처리 로직 (예: 사용자에게 에러 메시지 표시)
+          }
+        }
+      } else {
+        console.error("No plan found for planId:", planId);
       }
     }
   };
 
-  const handleTodoToggle = async (planId, todoId, newState) => {
+  const handleTodoToggle = async (serviceType, todoId, newState) => {
     try {
-      await toggleTodoCompletion(planId, todoId, newState);
+      await toggleTodoCompletion(serviceType, todoId, newState);
     } catch (error) {
       console.error("Todo 토글 실패:", error);
     }
   };
 
   // Todo 관리 함수들 추가
-  const handleDeleteTodo = async (planId, todoId) => {
+  const handleDeleteTodo = async (serviceType, todoId) => {
     try {
-      await deleteTodo(planId, todoId);
+      await deleteTodo(serviceType, todoId);
     } catch (error) {
       console.error("Todo 삭제 실패:", error);
     }
   };
 
-  const handleUpdateTodo = async (planId, todoId, content) => {
+  const handleUpdateTodo = async (serviceType, todoId, content) => {
     try {
-      await updateTodo(planId, todoId, content);
+      await updateTodo(serviceType, todoId, content);
     } catch (error) {
       console.error("Todo 수정 실패:", error);
     }
   };
 
-  const handleCreateTodo = async (planId, content) => {
+  const handleCreateTodo = async (planId, todoData) => {
     try {
-      await createTodo(planId, content, false); // content와 together 값 모두 전달
+      await createTodo(planId, todoData);
     } catch (error) {
       console.error("Todo 생성 실패:", error);
     }
+  };
+
+  const isAllTodosCompleted = () => {
+    const selectedPlanData = plans.find((plan) => plan.planId === selectedPlan);
+    if (!selectedPlanData) return false;
+
+    const serviceType = selectedPlanData.serviceType;
+    const selectedTodos = todos[serviceType];
+
+    if (!selectedTodos || !selectedTodos.todos) return false;
+
+    return ["pre", "on", "post"].every((stage) =>
+      selectedTodos.todos[stage].every((todo) => todo.completed)
+    );
   };
 
   // 떨리는 효과를 위한 애니메이션 설정
@@ -395,7 +518,7 @@ const VirginRoad = () => {
     : {};
 
   return (
-    <div className="p-4 w-full">
+    <div className="p-4 mb-16 w-full">
       {isSaving && <LoadingAnimation />}
 
       <div className="flex justify-between items-center mb-4">
@@ -522,6 +645,33 @@ const VirginRoad = () => {
             <Plus className="w-6 h-6" />
           </Button>
         </motion.div>
+        {/* 완료 표시 버튼 - 조건부 렌더링 */}
+        <AnimatePresence>
+          {selectedPlan && isAllTodosCompleted() && (
+            <motion.div
+              initial={{ scale: 0, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0, opacity: 0 }}
+              transition={{ duration: 0.2 }}
+            >
+              <Button
+                className="w-14 h-14 rounded-full bg-green-500 hover:bg-green-600 text-white shadow-lg"
+                onClick={() => setShowTimeCapsule(true)}
+              >
+                <Check className="w-6 h-6" />
+              </Button>
+            </motion.div>
+          )}
+        </AnimatePresence>
+        <TimeCapsuleModal
+          isOpen={showTimeCapsule}
+          onClose={() => setShowTimeCapsule(false)}
+          planId={selectedPlan} // planId 전달
+          planName={getStepName(
+            plans.find((p) => p.planId === selectedPlan)?.serviceType
+          )}
+          onSave={handleSaveTimeCapsule}
+        />
       </div>
     </div>
   );
