@@ -103,9 +103,11 @@ public class PlanServiceImpl implements PlanService {
     public void assignTipToPlan(Plan plan, Integer userId) {
         // 사용자 성별을 findGenderByUserId로 가져옴
         Gender gender = findGenderByUserId(userId);  // 이미 구현된 메서드 사용
+        log.debug("Assigning Tip for Plan ID: {} - User ID: {} with Gender: {}", plan.getId(), userId, gender); // 로그 추가
 //        log.debug("Assigning Tip for Plan ID: {} - User ID: {} with Gender: {}", plan.getId(), userId, gender); // 로그 추가
         // Tip을 찾기 (성별 필터링은 TipRepository에서 처리)
         List<Tip> tips = tipRepository.findTipsByServiceTypeAndUserDetail_Gender(plan.getServiceType(), gender);
+        log.debug("Found {} tips for Plan ID: {} with Service Type: {} and Gender: {}", tips.size(), plan.getId(), plan.getServiceType(), gender); // 추가된 로그
 
         // 첫 번째 Tip을 선택 (없으면 null)
         Tip tip = tips.stream()
