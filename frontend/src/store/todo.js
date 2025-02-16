@@ -5,33 +5,43 @@ const useTodoStore = create(
   (set, get) => {
     // 내부에서 사용할 API 호출 함수들을 먼저 정의
     const apiCalls = {
-      async getTodos(planId) {
-        const response = await instance.get(`/api/plan/${planId}`, {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        });
-        console.log("할 일 목록 조회 api 호출", response);
+      async getTodos(serviceType) {
+        const response = await instance.get(
+          `/api/todo/getTodos/${serviceType}`,
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          }
+        );
         return response.data;
       },
-      async createTodo(planId, content, together) {
+      async createTodo(planId, todoData) {
+        const { serviceType, stageType, content, isTogether } = todoData;
+
+        const requestBody = {
+          planId,
+          serviceType,
+          stageType,
+          content,
+          isTogether,
+        };
+
         const response = await instance.post(
-          `/api/plan/${planId}/todo`,
-          {
-            content,
-            together,
-          },
+          "/api/todo/createTodo",
+          requestBody,
           {
             headers: {
               "Content-Type": "application/json",
             },
           }
         );
+
         return response.data;
       },
       async updateTodo(planId, todoId, content) {
         const response = await instance.patch(
-          `/api/plan/${planId}/todo/${todoId}`,
+          `/api/todo/${planId}/${todoId}`,
           { content }, // 요청 바디
           {
             headers: {
@@ -39,24 +49,19 @@ const useTodoStore = create(
             },
           }
         );
-        console.log("할 일 수정 api 호출", response);
         return response.data;
       },
       async deleteTodo(planId, todoId) {
-        const response = await instance.delete(
-          `/api/plan/${planId}/todo/${todoId}`,
-          {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("token")}`,
-            },
-          }
-        );
-        console.log("할 일 삭제 api 호출", response);
+        const response = await instance.delete(`/api/todo/${todoId}`, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        });
         return response.data;
       },
       async toggleTodoCompletion(planId, todoId, isCompleted) {
-        const response = await instance.put(
-          `/api/plan/${planId}/todo/${todoId}`,
+        const response = await instance.patch(
+          `/api/todo/${todoId}`,
           { isCompleted }, // 요청 바디
           {
             headers: {
@@ -75,66 +80,71 @@ const useTodoStore = create(
       error: null,
 
       // 할 일 목록 조회
-      getTodos: async (planId) => {
+      getTodos: async (serviceType) => {
         try {
           set({ isLoading: true });
-          const data = await apiCalls.getTodos(planId);
-          // 서버에서 받은 데이터로 직접 업데이트
+          const data = await apiCalls.getTodos(serviceType);
           set((state) => ({
             todos: {
               ...state.todos,
-              [planId]: data.result, // 서버 응답 그대로 저장
+              [serviceType]: data,
             },
             isLoading: false,
           }));
-          return data.result;
+          return data;
         } catch (error) {
+          console.error("할 일 목록 조회 실패:", error);
           set({ error: error.message, isLoading: false });
           throw error;
         }
       },
 
       // 할 일 생성
-      createTodo: async (planId, content, together = false) => {
+      createTodo: async (planId, todoData) => {
         try {
           set({ isLoading: true });
-          const data = await apiCalls.createTodo(planId, content, together);
-          set((state) => ({
-            todos: {
-              ...state.todos,
-              [planId]: {
-                ...state.todos[planId],
-                todos: [...state.todos[planId].todos, data],
-              },
-            },
-            isLoading: false,
-          }));
-          return data;
+          const newTodo = await apiCalls.createTodo(planId, todoData);
+          set((state) => {
+            const updatedTodos = { ...state.todos };
+            if (!updatedTodos[todoData.serviceType]) {
+              updatedTodos[todoData.serviceType] = {
+                todos: { pre: [], on: [], post: [] },
+              };
+            }
+            updatedTodos[todoData.serviceType].todos[
+              todoData.stageType.toLowerCase()
+            ].push(newTodo);
+            return { todos: updatedTodos, isLoading: false };
+          });
+          return newTodo;
         } catch (error) {
+          console.error("Todo 생성 실패:", error);
           set({ error: error.message, isLoading: false });
           throw error;
         }
       },
 
       // 할 일 수정
+      // 할 일 수정
       updateTodo: async (planId, todoId, content) => {
         try {
           set({ isLoading: true });
           const data = await apiCalls.updateTodo(planId, todoId, content);
-          set((state) => ({
-            todos: {
-              ...state.todos,
-              [planId]: {
-                ...state.todos[planId],
-                todos: state.todos[planId].todos.map(
-                  (
-                    todo // todos 배열에 접근
-                  ) => (todo.todoId === todoId ? { ...todo, ...data } : todo)
-                ),
-              },
-            },
-            isLoading: false,
-          }));
+          set((state) => {
+            const updatedTodos = { ...state.todos };
+            Object.keys(updatedTodos).forEach((serviceType) => {
+              ["pre", "on", "post"].forEach((stage) => {
+                if (updatedTodos[serviceType].todos[stage]) {
+                  updatedTodos[serviceType].todos[stage] = updatedTodos[
+                    serviceType
+                  ].todos[stage].map((todo) =>
+                    todo.todoId === todoId ? { ...todo, content } : todo
+                  );
+                }
+              });
+            });
+            return { todos: updatedTodos, isLoading: false };
+          });
           return data;
         } catch (error) {
           set({ error: error.message, isLoading: false });
@@ -147,20 +157,21 @@ const useTodoStore = create(
         try {
           set({ isLoading: true });
           await apiCalls.deleteTodo(planId, todoId);
-          set((state) => ({
-            todos: {
-              ...state.todos,
-              [planId]: {
-                ...state.todos[planId],
-                todos: state.todos[planId].todos.filter(
-                  // todos 배열에 접근
-                  (todo) => todo.todoId !== todoId
-                ),
-              },
-            },
-            isLoading: false,
-          }));
+          set((state) => {
+            const updatedTodos = { ...state.todos };
+            Object.keys(updatedTodos).forEach((serviceType) => {
+              ["pre", "on", "post"].forEach((stage) => {
+                if (updatedTodos[serviceType].todos[stage]) {
+                  updatedTodos[serviceType].todos[stage] = updatedTodos[
+                    serviceType
+                  ].todos[stage].filter((todo) => todo.todoId !== todoId);
+                }
+              });
+            });
+            return { todos: updatedTodos, isLoading: false };
+          });
         } catch (error) {
+          console.error("Todo 삭제 실패:", error);
           set({ error: error.message, isLoading: false });
           throw error;
         }
@@ -170,27 +181,31 @@ const useTodoStore = create(
       toggleTodoCompletion: async (planId, todoId, isCompleted) => {
         try {
           set({ isLoading: true });
-          const data = await apiCalls.toggleTodoCompletion(
+          const updatedTodo = await apiCalls.toggleTodoCompletion(
             planId,
             todoId,
             isCompleted
           );
-          set((state) => ({
-            todos: {
-              ...state.todos,
-              [planId]: {
-                ...state.todos[planId],
-                todos: state.todos[planId].todos.map((todo) =>
-                  todo.todoId === todoId
-                    ? { ...todo, completed: data.completed }
-                    : todo
-                ),
-              },
-            },
-            isLoading: false,
-          }));
-          return data;
+          set((state) => {
+            const updatedTodos = { ...state.todos };
+            Object.keys(updatedTodos).forEach((serviceType) => {
+              ["pre", "on", "post"].forEach((stage) => {
+                if (updatedTodos[serviceType].todos[stage]) {
+                  updatedTodos[serviceType].todos[stage] = updatedTodos[
+                    serviceType
+                  ].todos[stage].map((todo) =>
+                    todo.todoId === todoId
+                      ? { ...todo, completed: isCompleted }
+                      : todo
+                  );
+                }
+              });
+            });
+            return { todos: updatedTodos, isLoading: false };
+          });
+          return updatedTodo;
         } catch (error) {
+          console.error("Todo 완료 상태 토글 실패:", error);
           set({ error: error.message, isLoading: false });
           throw error;
         }
