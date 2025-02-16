@@ -12,7 +12,7 @@ public class TipConverter {
         return TipResponse.DetailResultDTO.builder()
                 .tipId(tip.getId())
                 .serviceType(tip.getServiceType())
-                .tip(tip.getTip())
+                .tipContent(tip.getTipContent())
                 .build();
     }
 
@@ -23,7 +23,7 @@ public class TipConverter {
     public static Tip toEntity(TipRequest.CreateDTO createDTO) {
         return Tip.builder()
                 .serviceType(createDTO.getServiceType())
-                .tip(createDTO.getTip())
+                .tipContent(createDTO.getTipContent())
                 .build();
     }
 }
