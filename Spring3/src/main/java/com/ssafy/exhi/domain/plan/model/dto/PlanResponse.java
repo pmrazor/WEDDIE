@@ -73,7 +73,7 @@ public class PlanResponse {
     @AllArgsConstructor
     public static class TipDTO {
         private Integer tipId;
-        private String tip;
+        private String tipContent;
     }
 
 }
