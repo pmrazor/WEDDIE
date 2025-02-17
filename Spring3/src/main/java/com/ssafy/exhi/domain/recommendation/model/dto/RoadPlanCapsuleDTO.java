@@ -15,5 +15,5 @@ public class RoadPlanCapsuleDTO {
     private final ServiceType serviceType;       // 서비스 타입
     private final PlanStatus planStatus;         // Plan 상태
     private final Integer timeCapsuleId;         // TimeCapsule 식별자
-    private final Boolean planGrade;             // 긍정/부정 평가
+    private final Integer planGrade;             // 긍정/부정 평가
 }

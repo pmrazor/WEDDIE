@@ -4,7 +4,7 @@
 @femaleAccessToken = {{femaleAccessToken}}
 @maleLoginId = {{maleLoginId}}
 @femaleLoginId = {{femaleLoginId}}
-@honeymoonPlanId = {{honeymoonPlanId}}
+@weddingPlanId = {{weddingPlanId}}
 
 ### 남자 로그인
 POST http://localhost:8080/api/auth/login
@@ -17,6 +17,9 @@ Content-Type: application/json
 
 > {%
     client.global.set("maleAccessToken", response.body.result.accessToken);
+    client.test("Validate", function () {
+        client.assert(response.status === 201, "Response status is not 200");
+    });
 %}
 
 ### 여성 로그인
@@ -28,19 +31,36 @@ Content-Type: application/json
     "password": "q!w2e3r4t5"
 }
 
-### 웨딩데이 투두 조회
-GET {{base_url}}/api/plan/{{honeymoonPlanId}}
-Authorization: Bearer {{maleAccessToken}}
+> {%
+    client.global.set("femaleAccessToken", response.body.result.accessToken);
+    client.test("Validate", function () {
+        client.assert(response.status === 201, "Response status is not 200");
+    });
+%}
 
 ### 시간에 따른 플랜과 팁 조회
 GET {{base_url}}/api/plan/main
-Authorization: Bearer {{maleAccessToken}}
+Authorization: Bearer {{femaleAccessToken}}
+
+> {%
+    client.test("Validate", function () {
+        client.assert(response.status === 200, "Response status is not 200");
+    });
+%}
 
 ### 시간 설정 (추가)
 POST {{base_url}}/time/plus
 Content-Type: application/json
 
-10
+200
+
+> {%
+    client.test("Validate", function () {
+        client.assert(response.status === 200, "Response status is not 200");
+    });
+%}
+
+
 
 ### 타임캡슐 작성
 POST {{base_url}}/api/timeCapsule
@@ -50,7 +70,8 @@ Content-Type: multipart/form-data; boundary=boundary
 --boundary
 Content-Disposition: form-data; name="planId"
 
-{{honeymoonPlanId}}
+{{weddingPlanId}}
+
 --boundary
 Content-Disposition: form-data; name="goodContent"
 
@@ -72,5 +93,9 @@ Content-Type: image/png
 --boundary
 Content-Disposition: form-data; name="planGrade"
 
-1
+5
 --boundary--
+
+### 타임캡슐 조회
+GET {{base_url}}/api/timeCapsule
+Authorization: Bearer {{maleAccessToken}}

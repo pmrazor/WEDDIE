@@ -3,10 +3,24 @@ package com.ssafy.exhi.domain.timecapsule.model.entity;
 import com.ssafy.exhi.base.BaseEntity;
 import com.ssafy.exhi.domain.plan.model.entity.Plan;
 import com.ssafy.exhi.domain.plan.model.entity.PlanStatus;
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Transient;
 import jakarta.validation.constraints.Size;
 import jdk.jfr.Description;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 
 @Entity
 @Builder
@@ -58,5 +72,5 @@ public class TimeCapsule extends BaseEntity {
 
     @Description("Good = 0, Bad = 1")
     @Column(name="plan_grade")
-    private boolean planGrade;
+    private Integer planGrade;
 }

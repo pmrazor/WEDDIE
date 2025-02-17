@@ -11,17 +11,15 @@ import com.ssafy.exhi.domain.plan.repository.PlanRepository;
 import com.ssafy.exhi.domain.timecapsule.converter.TimeCapsuleConverter;
 import com.ssafy.exhi.domain.timecapsule.model.dto.TimeCapsuleRequest;
 import com.ssafy.exhi.domain.timecapsule.model.dto.TimeCapsuleResponse;
-import com.ssafy.exhi.domain.timecapsule.model.dto.TimeCapsuleResponse.TimeCapsuleResponseDto;
 import com.ssafy.exhi.domain.timecapsule.model.entity.TimeCapsule;
 import com.ssafy.exhi.domain.timecapsule.repository.TimeCapsuleRepository;
 import com.ssafy.exhi.domain.user.model.entity.User;
 import com.ssafy.exhi.domain.user.repository.UserRepository;
 import com.ssafy.exhi.exception.ExceptionHandler;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 @Service
 @Transactional
@@ -88,8 +86,12 @@ public class TimeCapsuleServiceImpl implements TimeCapsuleService {
         List<TimeCapsule> timeCapsules = timeCapsuleRepository.findAllByCoupleId(couple.getId());
 
         timeCapsules.forEach(timeCapsule -> {
-            timeCapsule.setBadImagePath(minioImageService.getImageUrl(timeCapsule.getBadImagePath()));
-            timeCapsule.setGoodImagePath(minioImageService.getImageUrl(timeCapsule.getGoodImagePath()));
+            if (timeCapsule.getBadImagePath() != null) {
+                timeCapsule.setBadImagePath(minioImageService.getImageUrl(timeCapsule.getBadImagePath()));
+            }
+            if (timeCapsule.getGoodImagePath() != null) {
+                timeCapsule.setGoodImagePath(minioImageService.getImageUrl(timeCapsule.getGoodImagePath()));
+            }
         });
 
         return TimeCapsuleConverter.toResponse(timeCapsules);
@@ -103,3 +105,4 @@ public class TimeCapsuleServiceImpl implements TimeCapsuleService {
                 .orElseThrow(() -> new ExceptionHandler(ErrorStatus.COUPLE_NOT_FOUND));
     }
 }
+

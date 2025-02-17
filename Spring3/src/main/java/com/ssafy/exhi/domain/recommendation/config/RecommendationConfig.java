@@ -3,12 +3,11 @@ package com.ssafy.exhi.domain.recommendation.config;
 import com.ssafy.exhi.domain.ServiceType;
 import com.ssafy.exhi.domain.plan.model.entity.PlanStatus;
 import com.ssafy.exhi.domain.recommendation.model.dto.RoadPlanCapsuleDTO;
+import java.util.List;
+import java.util.Map;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Configuration;
-
-import java.util.List;
-import java.util.Map;
 
 /**
  * 추천 시스템 설정 클래스
@@ -97,8 +96,8 @@ public class RecommendationConfig {
         for (RoadPlanCapsuleDTO c : capsules) {
             // timeCapsuleId가 존재한다면 타임캡슐이 있는 것으로 간주
             if (c.getTimeCapsuleId() != null) {
-                boolean isPositive = (c.getPlanGrade() != null && c.getPlanGrade());
-                if (isPositive) {
+                Integer planGrade = c.getPlanGrade();
+                if (planGrade > 3) {
                     weight += 2;   // 긍정적 평가
                 } else {
                     weight -= 1;   // 부정적 평가

@@ -26,5 +26,7 @@ public class TimeCapsuleResponse {
         private String badContent;
 
         private String badImage;
+
+        private Integer planGrade;
     }
 }

@@ -6,7 +6,6 @@ import com.ssafy.exhi.domain.timecapsule.model.dto.TimeCapsuleRequest;
 import com.ssafy.exhi.domain.timecapsule.model.dto.TimeCapsuleResponse;
 import com.ssafy.exhi.domain.timecapsule.model.entity.TimeCapsule;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class TimeCapsuleConverter {
     public static TimeCapsule toEntity (
@@ -23,7 +22,7 @@ public class TimeCapsuleConverter {
                 .badContent(request.getBadContent())
                 .badImage(request.getBadImage())
                 .timeCapsuleStatus(timeCapsuleStatus)
-                .planGrade(request.isPlanGrade())
+                .planGrade(request.getPlanGrade())
                 .build();
     }
 
@@ -36,6 +35,7 @@ public class TimeCapsuleConverter {
                 .goodImage(timeCapsule.getGoodImage())
                 .badContent(timeCapsule.getBadContent())
                 .badImage(timeCapsule.getBadImage())
+                .planGrade(timeCapsule.getPlanGrade())
                 .build();
     }
 
