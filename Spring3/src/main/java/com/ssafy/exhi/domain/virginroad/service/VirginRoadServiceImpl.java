@@ -2,6 +2,7 @@ package com.ssafy.exhi.domain.virginroad.service;
 
 import com.ssafy.exhi.base.status.ErrorStatus;
 import com.ssafy.exhi.domain.ServiceType;
+import com.ssafy.exhi.domain.TimeWrapper;
 import com.ssafy.exhi.domain.couple.model.entity.Couple;
 import com.ssafy.exhi.domain.couple.repository.CoupleRepository;
 import com.ssafy.exhi.domain.plan.converter.PlanConverter;
@@ -44,7 +45,8 @@ public class VirginRoadServiceImpl implements VirginRoadService {
     private final DefaultTodoRepository defaultTodoRepository;
     private final TodoRepository todoRepository;
     private final ServiceTypeScheduler serviceTypeScheduler;
-
+    private final TimeWrapper timeWrapper;
+    
     /**
      * 플랜과 버진로드를 동시에 생성하기
      * 버진로드가 비어있는 값은 디폴트로 생성 (visible이 false로 설정)
@@ -83,7 +85,7 @@ public class VirginRoadServiceImpl implements VirginRoadService {
 
     private List<PlanRequest.CreateDTO> setPlanDefaultDates(VirginRoadRequest.CreateDTO createDTO) {
         LocalDate marriageDate = coupleRepository.findCoupleByUserId(createDTO.getUserId())
-                .orElseThrow(() -> new ExceptionHandler(ErrorStatus.COUPLE_NOT_FOUND)).getMarriageDate();
+            .orElseThrow(() -> new ExceptionHandler(ErrorStatus.COUPLE_NOT_FOUND)).getMarriageDate();
         LocalDate today = LocalDate.now();
         long totalDays = ChronoUnit.DAYS.between(today, marriageDate);
 
@@ -91,7 +93,7 @@ public class VirginRoadServiceImpl implements VirginRoadService {
 
         List<PlanRequest.CreateDTO> updatedPlans = new ArrayList<>();
 
-        for(PlanRequest.CreateDTO cur : createDTO.getPlans()) {
+        for (PlanRequest.CreateDTO cur : createDTO.getPlans()) {
             Plan plan = PlanConverter.toEntity(cur);
 
             double percentage = scheduleDays.getOrDefault(cur.getServiceType(), 0.3);
@@ -126,6 +128,11 @@ public class VirginRoadServiceImpl implements VirginRoadService {
     public VirginRoadResponse.SimpleResultDTO getVirginRoad(Integer userId) {
         Couple couple = findCoupleByUserId(userId);
         VirginRoad virginRoad = findVirginRoadByCouple(couple);
+
+        for (Plan plan : virginRoad.getPlans()) {
+            plan.calculateStartAndEndDates();
+            plan.updatePlanStatus(timeWrapper.now());
+        }
 
         return VirginRoadConverter.toDTO(virginRoad);
     }
