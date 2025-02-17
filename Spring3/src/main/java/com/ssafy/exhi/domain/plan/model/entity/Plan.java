@@ -90,7 +90,7 @@ public class Plan extends BaseEntity {
 
     /* 비즈니스 로직 */
     public void validateCreateTimeCapsule(TimeWrapper time) {
-        if (time.now().isAfter(planTime)) {
+        if (!time.now().isAfter(planTime)) {
             throw new ExceptionHandler(ErrorStatus.TIMECAPSULE_VALIDATE);
         }
     }
