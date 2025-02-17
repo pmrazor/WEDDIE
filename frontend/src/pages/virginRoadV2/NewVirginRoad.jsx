@@ -407,7 +407,8 @@ const VirginRoad = () => {
     }
     const styles = {
       IN_PROGRESS: "bg-blue-100 hover:bg-blue-200",
-      COMPLETED: "bg-green-100 hover:bg-green-200",
+      NOT_TIME_CAPSULE: "bg-purple-100 hover:bg-purple-200",
+      FINISHED: "bg-green-100 hover:bg-green-200",
       BEFORE_START: "bg-gray-100 hover:bg-gray-200",
     };
     return styles[status] || "bg-gray-100";
@@ -494,14 +495,8 @@ const VirginRoad = () => {
     const selectedPlanData = plans.find((plan) => plan.planId === selectedPlan);
     if (!selectedPlanData) return false;
 
-    const serviceType = selectedPlanData.serviceType;
-    const selectedTodos = todos[serviceType];
-
-    if (!selectedTodos || !selectedTodos.todos) return false;
-
-    return ["pre", "on", "post"].every((stage) =>
-      selectedTodos.todos[stage].every((todo) => todo.completed)
-    );
+    // planStatus가 NOT_TIME_CAPSULE일 때만 true 반환
+    return selectedPlanData.planStatus === "NOT_TIME_CAPSULE";
   };
 
   // 떨리는 효과를 위한 애니메이션 설정

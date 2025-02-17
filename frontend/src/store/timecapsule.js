@@ -7,8 +7,26 @@ const useTimeCapsuleStore = create(
     (set) => {
       const apiCalls = {
         async createTimeCapsule(capsuleData) {
-          // FormData 대신 JSON 형식으로 직접 전송
-          const response = await instance.post("/api/timeCapsule", capsuleData);
+          // FormData 형식으로 변경
+          const formData = new FormData();
+          formData.append("planId", capsuleData.planId);
+          formData.append("goodContent", capsuleData.goodContent);
+          formData.append("badContent", capsuleData.badContent);
+          formData.append("planGrade", capsuleData.planGrade);
+
+          // 이미지 파일이 있는 경우에만 추가
+          if (capsuleData.goodImageFile) {
+            formData.append("goodImageFile", capsuleData.goodImageFile);
+          }
+          if (capsuleData.badImageFile) {
+            formData.append("badImageFile", capsuleData.badImageFile);
+          }
+
+          const response = await instance.post("/api/timeCapsule", formData, {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          });
           console.log("타임캡슐 생성 api 호출", response);
           return response.data;
         },
@@ -28,13 +46,12 @@ const useTimeCapsuleStore = create(
         createTimeCapsule: async (capsuleData) => {
           try {
             set({ isLoading: true });
-            // JSON 형식으로 데이터 전송
             const data = await apiCalls.createTimeCapsule({
               planId: capsuleData.planId,
               goodContent: capsuleData.goodContent,
-              goodImage: capsuleData.goodImage,
+              goodImageFile: capsuleData.goodImage,
               badContent: capsuleData.badContent,
-              badImage: capsuleData.badImage,
+              badImageFile: capsuleData.badImage,
               planGrade: capsuleData.planGrade,
             });
 
