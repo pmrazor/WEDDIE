@@ -225,13 +225,11 @@ const BeforeOnBoarding = () => {
           sub_text1={"우리 부부만의 AI 비서가"}
           sub_text2={"결혼과 이후 과정까지 책임질게요"}
           icon={<img src={man} alt="man icon" />}
-          style={
-            {
-              // backgroundColor: colors.genderColors["Male"].PRIMARY_EXTRALIGHT,
-              // padding : "100px 10px"
-              // gap : "50px"
-            }
-          }
+          style={{
+            backgroundColor: colors.genderColors["Male"].PRIMARY_EXTRALIGHT,
+            // padding : "100px 10px"
+            // gap : "50px"
+          }}
         />
         {/* <div className="joint">아래로</div> */}
         <IconCard
@@ -241,13 +239,11 @@ const BeforeOnBoarding = () => {
           sub_text1={"AI 비서가 우리 부부의 상황을 분석해"}
           sub_text2={"최적의 로드를 설계해 드릴게요"}
           icon={<img src={flowerbouquet} alt="flower-bouquet icon" />}
-          style={
-            {
-              // backgroundColor: colors.genderColors["Female"].PRIMARY_EXTRALIGHT,
-              // padding : "100px 10px"
-              // gap : "50px"
-            }
-          }
+          style={{
+            backgroundColor: colors.genderColors["Female"].PRIMARY_EXTRALIGHT,
+            // padding : "100px 10px"
+            // gap : "50px"
+          }}
         />
         {/* <div className="joint">아래로</div> */}
         <IconCard
@@ -256,14 +252,12 @@ const BeforeOnBoarding = () => {
           head_text2={"서로를 조금 더 생각해요"}
           sub_text1={"귀찮고 어려운 건 Weddie가 도와 드릴게요"}
           sub_text2={"아름다운 버진 로드, 서로 사랑만 하며 만들어가요"}
-          icon={<img src={heartwithribbon} alt="heartwithribbon icon" />}
-          style={
-            {
-              // backgroundColor: colors.genderColors["Default"].PRIMARY_EXTRALIGHT,
-              // padding : "100px 10px"
-              // gap : "50px"
-            }
-          }
+          icon={ <img src={heartwithribbon} alt="heartwithribbon icon" /> }
+          style={{
+            backgroundColor: colors.genderColors["Default"].PRIMARY_EXTRALIGHT,
+            // padding : "100px 10px"
+            // gap : "50px"
+          }}
         />
         <IconCard
           // type={"OnBoarding"}
@@ -276,22 +270,20 @@ const BeforeOnBoarding = () => {
               onClick={onClickButton}
               // stickyType={"MID"}
               text={"우리 부부만의 버진 로드 시작하기"}
-              style={{
+              style={{ 
                 backgroundColor: colors.genderColors["Default"].PRIMARY,
+                color : "white"
               }}
             />
-          }
+          }    
           style={{
-            // backgroundColor: colors.genderColors["Default"].PRIMARY_EXTRALIGHT,
-            padding: "100px 20px",
-            marginBottom: "20px",
+            // backgroundColor: colors.genderColors[gender].PRIMARY_EXTRALIGHT,
+            // padding : "100px 20px", 
+            // marginBottom : "20px"
             // gap : "50px"
           }}
         />
-        {/* <IconCard 
-          // icon = {}
-          style={{opacity : 1, backgroundImage : dummy02}}
-        /> */}
+        
         <div className="footer">
           <img className="logo" src={logo} alt="Logo" />
           <span>with Weddie</span>
