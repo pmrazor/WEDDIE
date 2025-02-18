@@ -31,9 +31,26 @@ const useTimeCapsuleStore = create(
           return response.data;
         },
         async getTimeCapsule() {
-          const response = await instance.get("/api/timeCapsule");
-          console.log("타임캡슐 조회 api 호출", response);
-          return response.data;
+          try {
+            const response = await instance.get("/api/timeCapsule");
+            // 응답 데이터 형식에 맞게 가공
+            const formattedData = response.data.map((capsule) => ({
+              timeCapsuleId: capsule.timeCapsuleId,
+              planId: capsule.planId,
+              userId: capsule.userId,
+              goodContent: capsule.goodContent,
+              goodImage: capsule.goodImage,
+              badContent: capsule.badContent,
+              badImage: capsule.badImage,
+              planGrade: capsule.planGrade,
+            }));
+
+            console.log("타임캡슐 조회 api 호출", formattedData);
+            return formattedData;
+          } catch (error) {
+            console.error("타임캡슐 조회 실패:", error);
+            throw error;
+          }
         },
       };
 
@@ -73,10 +90,15 @@ const useTimeCapsuleStore = create(
             set({
               timeCapsules: data,
               isLoading: false,
+              error: null,
             });
             return data;
           } catch (error) {
-            set({ error: error.message, isLoading: false });
+            set({
+              error: error.message,
+              isLoading: false,
+              timeCapsules: [],
+            });
             throw error;
           }
         },

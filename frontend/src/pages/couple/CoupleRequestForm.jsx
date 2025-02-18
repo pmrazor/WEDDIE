@@ -112,7 +112,7 @@ const CoupleRequestForm = () => {
           htmlFor="message"
           className="block text-sm font-medium text-gray-700 mb-1"
         >
-          메시지
+          커플 이름
         </label>
         <Textarea
           id="message"
