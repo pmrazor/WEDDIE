@@ -14,9 +14,9 @@ import heartwithribbon from "@/assets/BeforeOnBoarding/heartwithribbon.svg";
 import flowerbouquet from "@/assets/BeforeOnBoarding/flower-bouquet.png";
 import useOnboardingStore from "@/store/onboarding";
 import useVirginRoadStore from "@/store/virginroad";
-import "@/style/page/BeforeOnBoarding.css"
-import dummy02 from "/Advertisement/dummy02.jpg"
-import logo from "@/assets/logo.png"
+import "@/style/page/BeforeOnBoarding.css";
+import dummy02 from "/Advertisement/dummy02.jpg";
+import logo from "@/assets/logo.png";
 
 const BeforeOnBoarding = () => {
   const { isAuthenticated } = useAuthStore();
@@ -24,6 +24,8 @@ const BeforeOnBoarding = () => {
   const [isOnBoarded, setIsOnBoarded] = useState(false);
   const [hasCoupleInfo, setHasCoupleInfo] = useState(false);
   const [hasVirginRoad, setHasVirginRoad] = useState(false);
+  const [hasBudget, setHasBudget] = useState(false);
+  const [hasMarriageDate, setHasMarriageDate] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [modalMessage, setModalMessage] = useState("");
   const [pendingNavigation, setPendingNavigation] = useState("");
@@ -42,6 +44,14 @@ const BeforeOnBoarding = () => {
           const coupleDetails = await coupleApi.getCoupleDetails();
           console.log("Couple details:", coupleDetails);
           setHasCoupleInfo(true);
+
+          if (
+            coupleDetails.budget !== null &&
+            coupleDetails.marriageDate !== null
+          ) {
+            setHasBudget(true);
+            setHasMarriageDate(true);
+          }
 
           // 버진로드 존재 여부 확인
           try {
@@ -82,6 +92,12 @@ const BeforeOnBoarding = () => {
       );
       setShowModal(true);
       setPendingNavigation("/couple");
+    } else if (!hasBudget && !hasMarriageDate) {
+      setModalMessage(
+        "커플 상세 정보가 설정되어 있지 않습니다. 설정하러 가시겠습니까?"
+      );
+      setShowModal(true);
+      setPendingNavigation("/couple");
     } else if (!hasVirginRoad) {
       setModalMessage(
         "버진로드가 아직 생성되지 않았습니다. AI 추천 로드를 생성하러 가시겠습니까?"
@@ -105,14 +121,14 @@ const BeforeOnBoarding = () => {
     setPendingNavigation("");
   };
 
-  // // 폭죽 이펙트 
+  // // 폭죽 이펙트
   // const createFireworks = (x, y) => {
   //   const firework = document.createElement("div");
   //   firework.classList.add("firework");
   //   firework.style.left = `${x - 50}px`;  // 폭죽의 중심 위치 조정
   //   firework.style.top = `${y - 50}px`;   // 폭죽의 중심 위치 조정
   //   document.body.appendChild(firework);
-  
+
   //   setTimeout(() => {
   //     firework.remove();
   //   }, 1000); // 1초 후에 폭죽 제거
@@ -126,10 +142,10 @@ const BeforeOnBoarding = () => {
         const windowHeight = window.innerHeight;
         const offset = rect.top - windowHeight * 0.2; // 조금 더 부드럽게 보이도록 조절
 
-        // 이미 1로 보이는 건 수정하지 않음 
-        if (card.style.opacity === "1") return 
+        // 이미 1로 보이는 건 수정하지 않음
+        if (card.style.opacity === "1") return;
 
-        // 화면 중앙보다 위에 있을 때 === 스크롤 아래로 내릴 때 
+        // 화면 중앙보다 위에 있을 때 === 스크롤 아래로 내릴 때
         if (offset < 0) {
           // card.classList.add("show")
           let opacity = 1 - Math.abs(offset) / 200; // 200px 이상 넘어가면 최대 opacity 1
@@ -137,16 +153,16 @@ const BeforeOnBoarding = () => {
           card.style.opacity = opacity;
 
           if (opacity >= 0.5) {
-            card.style.opacity = "1"
+            card.style.opacity = "1";
             if (!card.classList.contains("show")) {
-              card.classList.add("show")
-              // // card 위치 기준 폭죽 터트리기 
+              card.classList.add("show");
+              // // card 위치 기준 폭죽 터트리기
               // const cardRect = card.getBoundingClientRect()
               // createFireworks(cardRect.left + cardRect.width / 2, cardRect.top + cardRect.height / 2)
             }
           }
         } else {
-          card.style.opacity = 0; // 화면 아래 있을 때는 
+          card.style.opacity = 0; // 화면 아래 있을 때는
         }
       });
     };
@@ -159,9 +175,9 @@ const BeforeOnBoarding = () => {
     };
   }, []);
 
-  // // 보이면 나타나게 하는 기능 
+  // // 보이면 나타나게 하는 기능
   // useEffect(() => {
-  //   const observer = new IntersectionObserver((entries) => { 
+  //   const observer = new IntersectionObserver((entries) => {
   //     entries.forEach((entry) => {
   //       if (entry.isIntersecting) {
   //         entry.target.classList.add("show")
@@ -184,10 +200,6 @@ const BeforeOnBoarding = () => {
   // const { theme } = useTheme()
   // console.log("[from BeforeOnBoarding.jsx] theme.PRIMARY : ", theme.PRIMARY)
 
-  
-
-
-
   const gender = "Male";
 
   return (
@@ -198,9 +210,7 @@ const BeforeOnBoarding = () => {
         {!isAuthenticated && <button onClick={() => nav("/register")}>Register</button>} <br />
         <button onClick={() => nav("/onboarding")}>onBoarding</button>
       </div>   */}
-      <div>
-        
-      </div>
+      <div></div>
       <Modal
         isOpen={showModal}
         onClose={handleModalClose}
@@ -215,11 +225,13 @@ const BeforeOnBoarding = () => {
           sub_text1={"우리 부부만의 AI 비서가"}
           sub_text2={"결혼과 이후 과정까지 책임질게요"}
           icon={<img src={man} alt="man icon" />}
-          style={{
-            // backgroundColor: colors.genderColors["Male"].PRIMARY_EXTRALIGHT,
-            // padding : "100px 10px"
-            // gap : "50px"
-          }}
+          style={
+            {
+              // backgroundColor: colors.genderColors["Male"].PRIMARY_EXTRALIGHT,
+              // padding : "100px 10px"
+              // gap : "50px"
+            }
+          }
         />
         {/* <div className="joint">아래로</div> */}
         <IconCard
@@ -229,11 +241,13 @@ const BeforeOnBoarding = () => {
           sub_text1={"AI 비서가 우리 부부의 상황을 분석해"}
           sub_text2={"최적의 로드를 설계해 드릴게요"}
           icon={<img src={flowerbouquet} alt="flower-bouquet icon" />}
-          style={{
-            // backgroundColor: colors.genderColors["Female"].PRIMARY_EXTRALIGHT,
-            // padding : "100px 10px"
-            // gap : "50px"
-          }}
+          style={
+            {
+              // backgroundColor: colors.genderColors["Female"].PRIMARY_EXTRALIGHT,
+              // padding : "100px 10px"
+              // gap : "50px"
+            }
+          }
         />
         {/* <div className="joint">아래로</div> */}
         <IconCard
@@ -242,12 +256,14 @@ const BeforeOnBoarding = () => {
           head_text2={"서로를 조금 더 생각해요"}
           sub_text1={"귀찮고 어려운 건 Weddie가 도와 드릴게요"}
           sub_text2={"아름다운 버진 로드, 서로 사랑만 하며 만들어가요"}
-          icon={ <img src={heartwithribbon} alt="heartwithribbon icon" /> }
-          style={{
-            // backgroundColor: colors.genderColors["Default"].PRIMARY_EXTRALIGHT,
-            // padding : "100px 10px"
-            // gap : "50px"
-          }}
+          icon={<img src={heartwithribbon} alt="heartwithribbon icon" />}
+          style={
+            {
+              // backgroundColor: colors.genderColors["Default"].PRIMARY_EXTRALIGHT,
+              // padding : "100px 10px"
+              // gap : "50px"
+            }
+          }
         />
         <IconCard
           // type={"OnBoarding"}
@@ -260,13 +276,15 @@ const BeforeOnBoarding = () => {
               onClick={onClickButton}
               // stickyType={"MID"}
               text={"우리 부부만의 버진 로드 시작하기"}
-              style={{ backgroundColor: colors.genderColors["Default"].PRIMARY }}
+              style={{
+                backgroundColor: colors.genderColors["Default"].PRIMARY,
+              }}
             />
           }
           style={{
             // backgroundColor: colors.genderColors["Default"].PRIMARY_EXTRALIGHT,
-            padding : "100px 20px", 
-            marginBottom : "20px"
+            padding: "100px 20px",
+            marginBottom: "20px",
             // gap : "50px"
           }}
         />
@@ -289,6 +307,6 @@ const BeforeOnBoarding = () => {
       {/* <div style={{paddingBlockEnd:"15vh"}}></div> */}
     </div>
   );
-}
+};
 
-export default BeforeOnBoarding
+export default BeforeOnBoarding;

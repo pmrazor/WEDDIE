@@ -123,7 +123,7 @@ const coupleApi = {
     const token = getAuthToken();
     if (!token) throw new Error("인증 토큰이 없습니다.");
 
-    console.log("Sending details:", details); // 디버깅용 로그
+    console.log("Sending details:", details);
 
     const response = await fetch(`${BASE_URL}/api/couple`, {
       method: "PATCH",
@@ -135,13 +135,18 @@ const coupleApi = {
     });
 
     const data = await response.json();
-    console.log("Response data:", data); // 디버깅용 로그
+    console.log("Response data:", data);
 
-    if (!data.isSuccess) {
+    // response가 정상적으로 왔고 데이터가 있다면 성공으로 간주
+    if (response.ok && data) {
+      return {
+        isSuccess: true,
+        result: data,
+        message: "성공입니다.",
+      };
+    } else {
       throw new Error(data.message || "커플 정보 업데이트에 실패했습니다.");
     }
-
-    return data.result;
   },
   addUserToRecommendation: async () => {
     const token = getAuthToken();
@@ -154,12 +159,21 @@ const coupleApi = {
       },
     });
 
-    const data = await response.json();
-    if (!data.isSuccess) {
-      throw new Error(data.message || "추천 시스템 등록에 실패했습니다.");
+    // 204 상태 코드 체크
+    if (response.status === 204) {
+      return {
+        isSuccess: true,
+        message: "추천 시스템에 성공적으로 등록되었습니다.",
+      };
     }
 
-    return data.result;
+    // 204가 아닌 경우 에러 응답 처리
+    try {
+      const data = await response.json();
+      throw new Error(data.message || "추천 시스템 등록에 실패했습니다.");
+    } catch (error) {
+      throw new Error("추천 시스템 등록에 실패했습니다.");
+    }
   },
 };
 

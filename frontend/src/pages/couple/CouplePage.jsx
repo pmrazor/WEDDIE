@@ -32,7 +32,7 @@ const CouplePage = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const [budget, setBudget] = useState("");
-  const [merriageDate, setmerriageDate] = useState();
+  const [marriageDate, setmarriageDate] = useState();
   const [isEditing, setIsEditing] = useState(false);
 
   useEffect(() => {
@@ -41,7 +41,7 @@ const CouplePage = () => {
         const data = await coupleApi.getCoupleDetails();
         setCoupleDetails(data);
         setBudget(data.budget || "");
-        setmerriageDate(data.merriageDate ? new Date(data.merriageDate) : null);
+        setmarriageDate(data.marriageDate ? new Date(data.marriageDate) : null);
       } catch (error) {
         setCoupleDetails(null);
       } finally {
@@ -53,20 +53,28 @@ const CouplePage = () => {
 
   const handleUpdateCoupleDetails = async () => {
     try {
-      console.log("merriageDate", merriageDate);
-      console.log("format", format(merriageDate, "yyyy-MM-dd"));
-      await coupleApi.updateCoupleDetails({
+      console.log("marriageDate", marriageDate);
+      console.log("format", format(marriageDate, "yyyy-MM-dd"));
+
+      const response = await coupleApi.updateCoupleDetails({
         budget: parseInt(budget),
-        marriageDate: merriageDate ? format(merriageDate, "yyyy-MM-dd") : null,
+        marriageDate: marriageDate ? format(marriageDate, "yyyy-MM-dd") : null,
       });
+
+      console.log("API Response:", response); // API 응답 전체 로깅
+
+      if (!response.isSuccess) {
+        console.error("Update failed:", response); // 실패 시 상세 정보 로깅
+        throw new Error(response.message || "업데이트에 실패했습니다");
+      }
 
       toast({
         title: "커플 정보 업데이트",
         description: "커플 정보가 성공적으로 업데이트되었습니다.",
       });
-
       setIsEditing(false);
     } catch (error) {
+      console.error("Error details:", error); // 에러 상세 정보 로깅
       toast({
         title: "오류 발생",
         description: error.message,
@@ -149,7 +157,7 @@ const CouplePage = () => {
           {isEditing ? (
             <>
               <div className="space-y-2">
-                <label className="text-sm font-medium">월 데이트 예산</label>
+                <label className="text-sm font-medium">웨딩 예산</label>
                 <Input
                   type="number"
                   value={budget}
@@ -160,27 +168,27 @@ const CouplePage = () => {
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-medium">처음 만난 날</label>
+                <label className="text-sm font-medium">결혼 예정일</label>
                 <Popover>
                   <PopoverTrigger asChild>
                     <Button
                       variant="outline"
                       className={cn(
                         "w-full justify-start text-left font-normal",
-                        !merriageDate && "text-muted-foreground"
+                        !marriageDate && "text-muted-foreground"
                       )}
                     >
                       <CalendarIcon className="mr-2 h-4 w-4" />
-                      {merriageDate
-                        ? format(merriageDate, "PPP")
+                      {marriageDate
+                        ? format(marriageDate, "PPP")
                         : "날짜를 선택하세요"}
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0">
                     <Calendar
                       mode="single"
-                      selected={merriageDate}
-                      onSelect={setmerriageDate}
+                      selected={marriageDate}
+                      onSelect={setmarriageDate}
                       initialFocus
                     />
                   </PopoverContent>
@@ -197,15 +205,15 @@ const CouplePage = () => {
           ) : (
             <>
               <div className="flex justify-between items-center py-2 border-b">
-                <span className="font-medium">월 데이트 예산</span>
+                <span className="font-medium">웨딩 예산</span>
                 <span>
-                  {budget ? `${budget.toLocaleString()}원` : "미설정"}
+                  {budget ? `${budget.toLocaleString()} 원` : "미설정"}
                 </span>
               </div>
               <div className="flex justify-between items-center py-2 border-b">
-                <span className="font-medium">처음 만난 날</span>
+                <span className="font-medium">결혼 예정일</span>
                 <span>
-                  {merriageDate ? format(merriageDate, "PPP") : "미설정"}
+                  {marriageDate ? format(marriageDate, "PPP") : "미설정"}
                 </span>
               </div>
               <div className="flex flex-col gap-2 mt-4">
@@ -230,7 +238,7 @@ const CouplePage = () => {
       </div>
 
       {/* 커플 삭제 버튼 및 확인 다이얼로그 */}
-      <div className="absolute bottom-6 right-6">
+      <div className="absolute bottom-6 right-6 mb-20">
         <AlertDialog>
           <AlertDialogTrigger asChild>
             <Button variant="destructive">커플 관계 삭제</Button>

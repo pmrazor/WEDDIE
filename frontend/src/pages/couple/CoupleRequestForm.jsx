@@ -118,7 +118,7 @@ const CoupleRequestForm = () => {
           id="message"
           value={message}
           onChange={(e) => setMessage(e.target.value)}
-          placeholder="커플 요청 메시지를 입력하세요"
+          placeholder="커플 이름을 적어주세요"
           required
         />
       </div>
