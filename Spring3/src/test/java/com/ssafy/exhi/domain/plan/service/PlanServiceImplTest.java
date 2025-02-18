@@ -8,6 +8,7 @@ import com.ssafy.exhi.domain.plan.model.dto.PlanResponse;
 import com.ssafy.exhi.domain.plan.model.entity.Plan;
 import com.ssafy.exhi.domain.plan.model.entity.PlanStatus;
 import com.ssafy.exhi.domain.plan.repository.PlanRepository;
+import com.ssafy.exhi.domain.timecapsule.model.entity.TimeCapsule;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -25,8 +26,8 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-//가현테스트
 import com.ssafy.exhi.domain.couple.repository.CoupleRepository;
+import com.ssafy.exhi.domain.tip.repository.TipRepository;
 import com.ssafy.exhi.util.JWTUtil;
 import org.junit.jupiter.api.BeforeEach;
 import com.ssafy.exhi.domain.user.model.entity.User;
@@ -38,6 +39,9 @@ import com.ssafy.exhi.domain.TimeWrapper;
 
 @ExtendWith(MockitoExtension.class)
 class PlanServiceImplTest {
+
+    @Mock
+    private TipRepository tiprepository;
 
     @Mock
     private PlanRepository planRepository;
@@ -149,13 +153,7 @@ class PlanServiceImplTest {
         plan3.updatePlanStatus(LocalDateTime.now());
         plan3.setPlanStatus(PlanStatus.BEFORE_START);
 
-        Plan plan4 = new Plan();
-        plan4.setId(4);
-        plan4.setPlanTime(LocalDateTime.now().minusDays(40));  // 계획 시간이 현재보다 10일 전으로 설정
-        plan4.updatePlanStatus(LocalDateTime.now());
-        plan4.setPlanStatus(PlanStatus.FINISHED);
-
-        List<Plan> plans = Arrays.asList(plan1, plan2, plan3, plan4); // plan4 추가
+        List<Plan> plans = Arrays.asList(plan1, plan2, plan3); // plan4 추가
 
         // Mock 설정
         when(jwtUtil.getUserId(header)).thenReturn(userId);
@@ -174,11 +172,76 @@ class PlanServiceImplTest {
         assertTrue(result.getGroupedPlans().containsKey(PlanStatus.BEFORE_START)); // BEFORE_START 상태 존재 확인
         assertTrue(result.getGroupedPlans().containsKey(PlanStatus.NOT_TIME_CAPSULE)); // NOT_TIME_CAPSULE 상태 존재 확인
         assertTrue(result.getGroupedPlans().containsKey(PlanStatus.IN_PROGRESS)); // IN_PROGRESS 상태 존재 확인
-        assertTrue(result.getGroupedPlans().containsKey(PlanStatus.FINISHED));  // FINISHED 상태 존재 확인
 
         assertEquals(1, result.getGroupedPlans().get(PlanStatus.BEFORE_START).size());  // BEFORE_START 상태의 플랜 수 확인
         assertEquals(1, result.getGroupedPlans().get(PlanStatus.NOT_TIME_CAPSULE).size()); // NOT_TIME_CAPSULE 상태의 플랜 수 확인
         assertEquals(1, result.getGroupedPlans().get(PlanStatus.IN_PROGRESS).size()); // IN_PROGRESS 상태의 플랜 수 확인
-        assertEquals(1, result.getGroupedPlans().get(PlanStatus.FINISHED).size());  // FINISHED 상태의 플랜 수 확인
+        }
+
+    @Test
+    @DisplayName("커플 두 명이 모두 타임캡슐을 작성하면 FINISHED 상태가 되어야 한다")
+    void testPlanStatusBecomesFinishedIfBothUsersWriteTimeCapsules() {
+        // Given: 현재 시간보다 40일 전의 planTime 설정
+        LocalDateTime currentDateTime = LocalDateTime.now();
+        LocalDateTime planTimePast40Days = currentDateTime.minusDays(40);
+
+        // 40일이 지난 Plan 객체 생성
+        Plan plan = new Plan();
+        plan.setId(1);
+        plan.setPlanTime(planTimePast40Days);
+
+        // 가정: 원래는 타임캡슐을 작성하지 않음
+        assertTrue(plan.getTimeCapsules().isEmpty()); // 🟢 타임캡슐이 비어 있는지 확인
+
+        // When: 두 명의 유저가 타임캡슐을 작성했다고 가정
+        plan.getTimeCapsules().add(new TimeCapsule());  // 첫 번째 유저 작성
+        plan.getTimeCapsules().add(new TimeCapsule());  // 두 번째 유저 작성
+
+        // 타임캡슐 개수 검증 (2개인지 확인)
+        assertEquals(2, plan.getTimeCapsules().size());
+
+        // 상태 업데이트 실행
+        plan.updateTimeCapsuleStatus();  // ✅ 타임캡슐을 작성했으므로 FINISHED가 되어야 함
+
+        // Then: 상태가 FINISHED로 변경되었는지 검증
+        assertEquals(PlanStatus.FINISHED, plan.getPlanStatus());  // ✅ 검증
     }
+
+    @Test
+    @DisplayName("타임캡슐 개수가 0개 또는 1개일 때 FINISHED가 되지 않고 NOT_TIME_CAPSULE을 유지해야 한다")
+    void testPlanStatusRemainsNotTimeCapsuleIfLessThanTwoCapsules() {
+        // Given: 현재 시간보다 40일 전의 planTime 설정
+        LocalDateTime currentDateTime = LocalDateTime.now();
+        LocalDateTime planTimePast40Days = currentDateTime.minusDays(40);
+
+        Plan plan = new Plan();
+        plan.setId(2);
+        plan.setPlanTime(planTimePast40Days);
+
+        // 초기 상태 확인
+        System.out.println("🚀 초기 PlanStatus: " + plan.getPlanStatus());
+        assertTrue(plan.getTimeCapsules().isEmpty()); // 처음엔 비어 있어야 함
+
+        // Case 1: 타임캡슐이 0개일 때 (변경 없음)
+        plan.updateTimeCapsuleStatus();
+        System.out.println("🟡 TimeCapsule 0개 -> PlanStatus: " + plan.getPlanStatus());
+        assertEquals(PlanStatus.NOT_TIME_CAPSULE, plan.getPlanStatus());
+
+        // Case 2: 타임캡슐이 1개일 때 (변경 없음)
+        plan.getTimeCapsules().add(new TimeCapsule());
+        assertEquals(1, plan.getTimeCapsules().size());
+
+        plan.updateTimeCapsuleStatus();
+        System.out.println("🟠 TimeCapsule 1개 -> PlanStatus: " + plan.getPlanStatus());
+        assertEquals(PlanStatus.NOT_TIME_CAPSULE, plan.getPlanStatus());
+
+        // Case 3: 타임캡슐이 2개일 때 (FINISHED로 변경)
+        plan.getTimeCapsules().add(new TimeCapsule());
+        assertEquals(2, plan.getTimeCapsules().size());
+
+        plan.updateTimeCapsuleStatus();
+        System.out.println("✅ TimeCapsule 2개 -> PlanStatus: " + plan.getPlanStatus());
+        assertEquals(PlanStatus.FINISHED, plan.getPlanStatus());
+    }
+
 }
