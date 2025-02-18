@@ -20,6 +20,7 @@ import ShopList from "./pages/shop/shopList";
 import ShopDetail from "./pages/shop/shopDetail";
 import Main from "./pages/Main";
 import VirginRoad2 from "./pages/virginRoadV2/NewVirginRoad";
+import WatchTimecapsule from "./pages/virginRoadV2/WatchTimecapsule";
 
 function App() {
   // 색상 설정 함수 호출
@@ -47,6 +48,7 @@ function App() {
         <Route path="/shop/detail" element={<ShopDetail />} />
         <Route path="/main" element={<Main />} />
         <Route path="/virginroad" element={<VirginRoad2 />} />
+        <Route path="/timecapsule" element={<WatchTimecapsule />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </>
