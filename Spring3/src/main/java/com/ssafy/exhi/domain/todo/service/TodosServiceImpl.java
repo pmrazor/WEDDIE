@@ -9,6 +9,7 @@ import com.ssafy.exhi.domain.todo.model.entity.Todo;
 import com.ssafy.exhi.domain.todo.model.entity.TodoType;
 import com.ssafy.exhi.domain.todo.repository.TodoRepository;
 import com.ssafy.exhi.domain.user.model.entity.Gender;
+import com.ssafy.exhi.domain.couple.repository.CoupleRepository;
 import com.ssafy.exhi.domain.user.repository.UserDetailRepository;
 import com.ssafy.exhi.domain.virginroad.model.entity.VirginRoad;
 import com.ssafy.exhi.domain.virginroad.repository.VirginRoadRepository;
@@ -31,12 +32,18 @@ public class TodosServiceImpl implements TodosService {
     private final UserDetailRepository userDetailRepository;
     private final VirginRoadRepository virginroadRepository;
     private final TodoRepository todoRepository;
+    private final CoupleRepository coupleRepository;
 
     /**
      * 투두 생성 로직
      */
     @Override
-    public TodoResponse.DetailResultDTO createTodo(Integer userId, Integer coupleId, TodoRequest.CreateTodosDTO createDTO) {
+    public TodoResponse.DetailResultDTO createTodo(Integer userId, TodoRequest.CreateTodosDTO createDTO) {
+        Integer coupleId = coupleRepository.findCoupleIdByUserId(userId);
+        if (coupleId == null) {
+            throw new ExceptionHandler(ErrorStatus.COUPLE_NOT_FOUND);
+        }
+
         // 유저가 속한 버진로드에서 해당 서비스 타입의 Plan 가져오기
         Plan plan = getPlanByServiceType(userId, coupleId, createDTO.getServiceType());
 
@@ -64,8 +71,13 @@ public class TodosServiceImpl implements TodosService {
      * - 사용자 성별(Gender)에 따라 MALE 혹은 FEMALE 투두 + COMMON 투두만 보여준다.
      */
     @Override
-    public TodoResponse.FindAllResultDTO readTodos(Integer userId, Integer coupleId,
-                                                   ServiceType serviceType) {
+    public TodoResponse.FindAllResultDTO readTodos(Integer userId, ServiceType serviceType) {
+        Integer coupleId = coupleRepository.findCoupleIdByUserId(userId);
+
+        if (coupleId == null) {
+            throw new ExceptionHandler(ErrorStatus.COUPLE_NOT_FOUND);
+        }
+
         // 특정 유저가 속한 버진로드에서 해당 서비스 타입의 Plan 조회
         List<Todo> todos = getTodos(userId, coupleId, serviceType);
 
