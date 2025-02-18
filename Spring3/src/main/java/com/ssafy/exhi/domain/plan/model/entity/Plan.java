@@ -5,37 +5,20 @@ import com.ssafy.exhi.base.status.ErrorStatus;
 import com.ssafy.exhi.domain.ServiceType;
 import com.ssafy.exhi.domain.TimeWrapper;
 import com.ssafy.exhi.domain.plan.model.dto.PlanRequest;
-import com.ssafy.exhi.domain.plan.repository.PlanRepository;
 import com.ssafy.exhi.domain.timecapsule.model.entity.TimeCapsule;
 import com.ssafy.exhi.domain.tip.model.entity.Tip;
 import com.ssafy.exhi.domain.todo.model.entity.DefaultTodo;
 import com.ssafy.exhi.domain.todo.model.entity.Todo;
 import com.ssafy.exhi.domain.virginroad.model.entity.VirginRoad;
 import com.ssafy.exhi.exception.ExceptionHandler;
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.OneToOne;
+import jakarta.persistence.*;
+import lombok.*;
+import lombok.extern.slf4j.Slf4j;
+
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
-import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Entity
@@ -95,7 +78,6 @@ public class Plan extends BaseEntity {
         }
     }
 
-
     private static final int DURATION = 30;
 
     // calculate start and end dates using planTime and duration
@@ -106,23 +88,20 @@ public class Plan extends BaseEntity {
         }
     }
 
-    // 플랜 Status를 업데이트하는 메서드, planTime 기준으로 계산
-    public void updatePlanStatus(LocalDateTime currentDateTime) {
-        if (planTime == null) {
-            log.warn("planTime is null for Plan ID: {}. Setting default value.", this.id);
-            planTime = currentDateTime;  // currentDateTime을 기본값으로 설정
+    // planStatus 를 변경
+    public void updatePlanStatus(LocalDateTime time) {
+        if (startTime == null || endTime == null) return;
+
+        // 진행된 일정이고 예약일이 지났다면 NOT_TIME_CAPSULE 로 업데이트 ( 이후 status 는 타임캡슐 작성 후 FINISHED 로 자동 변환 )
+        if (time.isAfter(planTime.plusDays(1))) {
+            planStatus = PlanStatus.NOT_TIME_CAPSULE;
+            return;
         }
 
-        // planTime을 기준으로 상태를 결정
-        if (planTime.isAfter(currentDateTime.plusDays(DURATION))) {
-            this.planStatus = PlanStatus.BEFORE_START;  // planTime이 30일 후면 BEFORE_START
-        } else if (planTime.isAfter(currentDateTime) && planTime.isBefore(currentDateTime.plusDays(DURATION))) {
-            this.planStatus = PlanStatus.IN_PROGRESS;  // planTime이 현재보다 크고 30일 이내면 IN_PROGRESS
-        } else {
-            this.planStatus = PlanStatus.NOT_TIME_CAPSULE;  // planTime이 현재보다 크고 30일 이내면 NOT_TIME_CAPSULE
+        // 예약일 - 30 을 지나가면 IN_PROGRESS 진입
+        if (time.isAfter(startTime) && time.isBefore(planTime)) {
+            planStatus = PlanStatus.IN_PROGRESS;
         }
-
-        log.info("Plan ID: {} - Updated Status: {}", this.id, this.planStatus);  // 상태 업데이트 후 로그 추가
     }
 
     public void updateVirginRoad(VirginRoad virginRoad) {

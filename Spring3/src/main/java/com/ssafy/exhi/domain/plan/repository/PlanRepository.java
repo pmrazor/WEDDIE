@@ -1,6 +1,7 @@
 package com.ssafy.exhi.domain.plan.repository;
 
 import com.ssafy.exhi.domain.plan.model.entity.Plan;
+import com.ssafy.exhi.domain.plan.model.entity.PlanStatus;
 import com.ssafy.exhi.domain.todo.model.entity.TodoType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -23,4 +24,6 @@ public interface PlanRepository extends JpaRepository<Plan, Long> {
 
     // 유저 ID에 해당하는 플랜을 가져오는 쿼리 메서드
     List<Plan> findByVirginRoadCoupleId(Integer coupleId);  // VirginRoad가 UserId를 가지고 있다고 가정
+
+    List<Plan> findByPlanStatusIsIn(List<PlanStatus> planStatuses);
 }

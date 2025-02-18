@@ -48,7 +48,7 @@ public class TodosController {
             ServiceType serviceType = planRepository.findPlanById(createDTO.getPlanId()).orElseThrow(() -> new ExceptionHandler(ErrorStatus.PLAN_NOT_FOUND)).getServiceType();
             createDTO.setServiceType(serviceType);
 
-            String gender = userDetailRepository.findByUser_Id(userId).orElseThrow(() -> new ExceptionHandler(ErrorStatus.USER_NOT_FOUND)).getGender().toString();
+            String gender = userDetailRepository.findByUserId(userId).orElseThrow(() -> new ExceptionHandler(ErrorStatus.USER_NOT_FOUND)).getGender().toString();
             TodoType todoType = createDTO.isTogether() ? TodoType.COMMON : TodoType.valueOf(gender);
             createDTO.setTodoType(todoType);
 

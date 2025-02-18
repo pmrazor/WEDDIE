@@ -272,6 +272,8 @@ public class RecommendationServiceImpl implements RecommendationService {
             LocalDate planDate = marriageDate.minusDays(daysBeforeWedding);
             cur.setPlanTime(planDate.atStartOfDay());
 
+            cur.calculateStartAndEndDates();
+
             updatedPlans.add(cur);
         }
 

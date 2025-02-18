@@ -52,7 +52,7 @@ public class AdviceServiceImpl implements AdviceService {
     // messageType true = 감성 조언 , false = 이성 조언
     public String getAdvice(Integer userId, ServiceType serviceType, boolean messageType) {
         try {
-            UserDetail user = userDetailRepository.findByUser_Id(userId)
+            UserDetail user = userDetailRepository.findByUserId(userId)
                 .orElseThrow(() -> new ExceptionHandler(ErrorStatus.USER_DETAIL_NOT_FOUND));
 
             Couple couple = coupleRepository.findCoupleByUserId(userId).orElseThrow(() -> new ExceptionHandler(ErrorStatus.COUPLE_NOT_FOUND));

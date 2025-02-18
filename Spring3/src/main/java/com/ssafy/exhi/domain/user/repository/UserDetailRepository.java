@@ -9,8 +9,7 @@ import java.util.Optional;
 
 @Repository  // ✅ 필수
 public interface UserDetailRepository extends JpaRepository<UserDetail, Integer> {
-    Optional<UserDetail> findByUser_Id(Integer userId);  // ✅ 올바른 쿼리 메서드
-
+    Optional<UserDetail> findByUserId(Integer userId);  // ✅ 올바른 쿼리 메서드
 
     boolean existsByUser(User user);
     // spring data jpa 메소드 명명법
