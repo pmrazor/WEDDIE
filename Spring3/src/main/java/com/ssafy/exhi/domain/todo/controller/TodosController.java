@@ -11,6 +11,7 @@ import com.ssafy.exhi.domain.todo.service.TodosService;
 import com.ssafy.exhi.domain.user.repository.UserDetailRepository;
 import com.ssafy.exhi.exception.ExceptionHandler;
 import com.ssafy.exhi.util.JWTUtil;
+import com.ssafy.exhi.base.ApiResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -43,7 +44,7 @@ public class TodosController {
             }
 
             Integer userId = jwtUtil.getUserId(accessToken);
-            Integer coupleId = jwtUtil.getCoupleId(accessToken);
+//            Integer coupleId = jwtUtil.getCoupleId(accessToken);
 
             ServiceType serviceType = planRepository.findPlanById(createDTO.getPlanId()).orElseThrow(() -> new ExceptionHandler(ErrorStatus.PLAN_NOT_FOUND)).getServiceType();
             createDTO.setServiceType(serviceType);
@@ -52,7 +53,7 @@ public class TodosController {
             TodoType todoType = createDTO.isTogether() ? TodoType.COMMON : TodoType.valueOf(gender);
             createDTO.setTodoType(todoType);
 
-            TodoResponse.DetailResultDTO response = todosService.createTodo(userId, coupleId, createDTO);
+            TodoResponse.DetailResultDTO response = todosService.createTodo(userId, createDTO);
             return ResponseEntity.ok(response);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(ErrorStatus._BAD_REQUEST.getReason());
@@ -70,9 +71,10 @@ public class TodosController {
             ServiceType serviceType = ServiceType.valueOf(serviceTypeStr.toUpperCase());
 
             Integer userId = jwtUtil.getUserId(accessToken);
-            Integer coupleId = jwtUtil.getCoupleId(accessToken);
-            TodoResponse.FindAllResultDTO response = todosService.readTodos(userId, coupleId, serviceType);
+
+            TodoResponse.FindAllResultDTO response = todosService.readTodos(userId, serviceType);
             return ResponseEntity.ok(response);
+
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body("Invalid serviceType provided");
         }
