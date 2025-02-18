@@ -33,10 +33,10 @@ const useCoupleStore = create(
         },
 
         async createCouple(couple) {
-            const response = await instance.post("/api/couple", couple);
-            console.log("커플 생성 api 호출", response);
-            return response.data;
-          },
+          const response = await instance.post("/api/couple", couple);
+          console.log("커플 생성 api 호출", response);
+          return response.data;
+        },
 
         async getCouple() {
           const response = await instance.get("/api/couple");
@@ -64,7 +64,10 @@ const useCoupleStore = create(
         createCoupleRequest: async (receiverId, message) => {
           try {
             set({ isLoading: true });
-            const data = await apiCalls.createCoupleRequest(receiverId, message);
+            const data = await apiCalls.createCoupleRequest(
+              receiverId,
+              message
+            );
             set({ isLoading: false });
             return data;
           } catch (error) {
@@ -109,7 +112,37 @@ const useCoupleStore = create(
         getCouple: async () => {
           try {
             set({ isLoading: true });
-            const data = await apiCalls.getCouple();
+            const response = await apiCalls.getCouple();
+
+            if (!response.isSuccess) {
+              throw new Error(
+                response.message || "커플 정보를 불러올 수 없습니다."
+              );
+            }
+
+            const data = response.result;
+            set({
+              couple: data,
+              male: data.male,
+              female: data.female,
+              coupleName: data.coupleName,
+              marriageDate: data.marriageDate,
+              loveAnniversary: data.loveAnniversary,
+              budget: data.budget,
+              isLoading: false,
+            });
+            return response; // isSuccess를 포함한 전체 응답 반환
+          } catch (error) {
+            set({ error: error.message, isLoading: false });
+            throw error;
+          }
+        },
+
+        // Get couple information
+        createCouple: async (couple) => {
+          try {
+            set({ isLoading: true });
+            const data = await apiCalls.createCouple(couple);
             set({
               couple: data,
               male: data.male,
@@ -123,26 +156,6 @@ const useCoupleStore = create(
             throw error;
           }
         },
-
-        // Get couple information
-        createCouple: async (couple) => {
-            try {
-                set({ isLoading: true });
-                const data = await apiCalls.createCouple(couple);
-                set({
-                couple: data,
-                male: data.male,
-                female: data.female,
-                coupleName: data.coupleName,
-                isLoading: false,
-                });
-                return data;
-            } catch (error) {
-                set({ error: error.message, isLoading: false });
-                throw error;
-            }
-        },
-          
 
         // Delete couple
         deleteCouple: async () => {

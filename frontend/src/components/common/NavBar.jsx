@@ -13,11 +13,11 @@ const BottomNav = () => {
             <Home className="h-6 w-6" />
           </Link>
         </Button>
-        <Button variant="ghost" size="icon" asChild>
-          <Link to="/afteronboarding">
+        {/* <Button variant="ghost" size="icon" asChild>
+          <Link to="/">
             <Bus className="h-6 w-6" />
           </Link>
-        </Button>
+        </Button> */}
         <Button variant="ghost" size="icon" asChild>
           <Link to="/shop/list">
             <Store className="h-6 w-6" />
