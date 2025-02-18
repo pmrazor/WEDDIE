@@ -1,7 +1,7 @@
 .AdvertisementCard {
   /* border: 5px solid; */
   width: 100%; /* 부모 요소에 맞춤 */
-  height: 30vh; /* 원하는 높이 설정 */
+  height: 40vh; /* 원하는 높이 설정 */
   background-size: cover; /* 가로/세로 비율을 유지하면서 크기를 맞춤 */
   background-position: center center; /* 이미지 중앙 정렬 */
   background-repeat: no-repeat; /* 반복 방지 */
@@ -13,6 +13,23 @@
 
 .AdvertisementCard .text-field {
   /* border: 5px solid; */
-  color: var(--WHITE);
+  color: white;
   padding: 5% 3%;
+  font-size: 18px;
+}
+
+.AdvertisementCard .text-field .head-text1 {
+  font-size: 45px;
+}
+
+.AdvertisementCard .text-field .head-text2 {
+  /* font-size: 30px; */
+}
+
+.AdvertisementCard .text-field .sub-text1 {
+  /* font-size: 30px; */
+}
+
+.AdvertisementCard .text-field .sub-text2 {
+  /* font-size: 20px; */
 }
