@@ -49,7 +49,7 @@ Authorization: Bearer {{femaleAccessToken}}
 %}
 
 ### 시간 설정 (추가)
-POST {{base_url}}/time/plus
+POST {{base_url}}/api/time/plus
 Content-Type: application/json
 
 200

@@ -14,12 +14,6 @@ import java.util.Optional;
 public interface TodoRepository extends JpaRepository<Todo, Integer> {
     Optional<Todo> findTodoById(Integer id);
 
-    @Query("""
-        SELECT t
-        FROM Todo t
-        JOIN FETCH t.plan
-        WHERE t.plan.id = :planId
-    """)
     List<Todo> findByPlanId(Integer planId);
 
     List<Todo> findByPlanIdAndTodoTypeIn(

@@ -1,7 +1,8 @@
 package com.ssafy.exhi.domain.plan.service;
 
-import static com.ssafy.exhi.domain.plan.model.dto.PlanResponse.*;
-
+import com.ssafy.exhi.domain.TimeWrapper;
+import com.ssafy.exhi.domain.couple.model.entity.Couple;
+import com.ssafy.exhi.domain.couple.repository.CoupleRepository;
 import com.ssafy.exhi.domain.plan.converter.PlanConverter;
 import com.ssafy.exhi.domain.plan.model.dto.PlanRequest;
 import com.ssafy.exhi.domain.plan.model.dto.PlanResponse;
@@ -9,21 +10,21 @@ import com.ssafy.exhi.domain.plan.model.entity.Plan;
 import com.ssafy.exhi.domain.plan.model.entity.PlanStatus;
 import com.ssafy.exhi.domain.plan.repository.PlanRepository;
 import com.ssafy.exhi.domain.timecapsule.model.entity.TimeCapsule;
+import com.ssafy.exhi.domain.user.model.entity.User;
+import com.ssafy.exhi.domain.virginroad.model.entity.VirginRoad;
+import com.ssafy.exhi.util.JWTUtil;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import com.ssafy.exhi.domain.ServiceType;
-
 import java.time.LocalDateTime;
-import java.util.ArrayList;
+import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.ssafy.exhi.domain.couple.repository.CoupleRepository;
@@ -162,7 +163,7 @@ class PlanServiceImplTest {
         when(timeWrapper.now()).thenReturn(LocalDateTime.now());
 
         // When: 서비스 메서드 호출
-        PlanResponse.AllResultDTO result = planService.getAllPlans(header);
+        PlanResponse.AllResultDTO result = planService.getAllPlans(userId);
 
         // Then: 결과 검증
         assertNotNull(result);
@@ -172,6 +173,7 @@ class PlanServiceImplTest {
         assertTrue(result.getGroupedPlans().containsKey(PlanStatus.BEFORE_START)); // BEFORE_START 상태 존재 확인
         assertTrue(result.getGroupedPlans().containsKey(PlanStatus.NOT_TIME_CAPSULE)); // NOT_TIME_CAPSULE 상태 존재 확인
         assertTrue(result.getGroupedPlans().containsKey(PlanStatus.IN_PROGRESS)); // IN_PROGRESS 상태 존재 확인
+        assertTrue(result.getGroupedPlans().containsKey(PlanStatus.FINISHED));  // FINISHED 상태 존재 확인
 
         assertEquals(1, result.getGroupedPlans().get(PlanStatus.BEFORE_START).size());  // BEFORE_START 상태의 플랜 수 확인
         assertEquals(1, result.getGroupedPlans().get(PlanStatus.NOT_TIME_CAPSULE).size()); // NOT_TIME_CAPSULE 상태의 플랜 수 확인

@@ -127,7 +127,7 @@ public class UserServiceImpl implements UserService {
 
     // 유저 상세 정보 수정
     private UserDetail updateUserDetailById(Integer userId) {
-        return userDetailRepository.findByUser_Id(userId)
+        return userDetailRepository.findByUserId(userId)
                 .orElseThrow(() -> new ExceptionHandler(ErrorStatus.USER_DETAIL_NOT_FOUND)
                 );
     }
@@ -147,7 +147,7 @@ public class UserServiceImpl implements UserService {
 
     // 유저 상세 정보 생성 (온보딩)
     private UserDetail setUserDetailById(Integer userId) {
-        return userDetailRepository.findByUser_Id(userId)
+        return userDetailRepository.findByUserId(userId)
                 .orElseThrow(() -> new ExceptionHandler(ErrorStatus.USER_NOT_FOUND));
     }
 
@@ -155,7 +155,7 @@ public class UserServiceImpl implements UserService {
                                                        UserRequest.CreateDetailDTO createDetailRequest) {
 
         // 기존 UserDetail을 가져와서 존재 여부 확인
-        UserDetail existingUserDetail = userDetailRepository.findByUser_Id(userId).orElse(null);
+        UserDetail existingUserDetail = userDetailRepository.findByUserId(userId).orElse(null);
 
         // 만약 기존 UserDetail이 있으면, 새로 생성하지 않음
         if (existingUserDetail != null) {
@@ -180,7 +180,7 @@ public class UserServiceImpl implements UserService {
 
     // 유저 상세 정보 조회 (온보딩)
     private UserDetail getUserDetailById(Integer userId) {
-        return userDetailRepository.findByUser_Id(userId)
+        return userDetailRepository.findByUserId(userId)
                 .orElseThrow(() -> new ExceptionHandler(ErrorStatus.USER_DETAIL_NOT_FOUND)
                 );
     }

@@ -101,7 +101,7 @@ public class TodoServiceImpl implements TodoService {
     }
 
     private Gender findGenderByUserId(Integer userId) {
-        Gender gender = userDetailRepository.findByUser_Id(userId)
+        Gender gender = userDetailRepository.findByUserId(userId)
                 .orElseThrow(() -> new ExceptionHandler(ErrorStatus.USER_DETAIL_NOT_FOUND))
                 .getGender();
         return gender;
@@ -142,7 +142,7 @@ public class TodoServiceImpl implements TodoService {
         if (isTogether) {
             todoType = TodoType.COMMON;
         } else {
-            todoType = TodoType.valueOf(userDetailRepository.findByUser_Id(userId).get().getGender().toString());
+            todoType = TodoType.valueOf(userDetailRepository.findByUserId(userId).get().getGender().toString());
         }
         return todoType;
     }

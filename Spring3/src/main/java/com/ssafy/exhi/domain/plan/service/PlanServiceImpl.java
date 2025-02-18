@@ -1,6 +1,8 @@
 package com.ssafy.exhi.domain.plan.service;
 
 import com.ssafy.exhi.base.status.ErrorStatus;
+import com.ssafy.exhi.domain.plan.model.dto.PlanResponse;
+import com.ssafy.exhi.util.Scheduler;
 import com.ssafy.exhi.domain.couple.model.entity.Couple;
 import com.ssafy.exhi.domain.couple.repository.CoupleRepository;
 import com.ssafy.exhi.domain.plan.converter.PlanConverter;
@@ -40,18 +42,16 @@ import static com.ssafy.exhi.domain.plan.model.dto.PlanResponse.AllResultDTO;
 @Transactional
 @RequiredArgsConstructor
 public class PlanServiceImpl implements PlanService {
-
     private final TipRepository tipRepository;
     private final PlanRepository planRepository;
     private final CoupleRepository coupleRepository;
     private final UserDetailRepository userDetailRepository;
     private final TimeWrapper timeWrapper;
-    private final VirginRoadRepository virginRoadRepository;
-    private final JWTUtil jwtUtil;
+    private final Scheduler timeConsoleScheduler;
 
     @Override
     public DetailResultDTO getPlan(Integer userId, Integer planId) {
-        Couple couple = getCoupleByUserId(userId);
+        Integer coupleId = coupleRepository.findCoupleIdByUserId(userId);
         Gender gender = findGenderByUserId(userId);
 
         TodoType type = gender.equals(Gender.FEMALE) ? TodoType.FEMALE : TodoType.MALE;
@@ -59,33 +59,26 @@ public class PlanServiceImpl implements PlanService {
 
         Plan plan = planRepository.findPlanByIdWithFilteredTodos(planId, list);
 
-        checkPlanOwnerShip(couple, plan);
+        checkPlanOwnerShip(coupleId, plan);
 
         return PlanConverter.toDetailDTO(plan);
     }
 
     @Override
-    public AllResultDTO getAllPlans(String header) {
-        Integer userId = jwtUtil.getUserId(header);
-
-        // userId를 기반으로 coupleId를 찾기
-        Couple couple = coupleRepository.findCoupleByUserId(userId)
-                .orElseThrow(() -> new ExceptionHandler(ErrorStatus.COUPLE_NOT_FOUND));
-        Integer coupleId = couple.getId();  // coupleId를 가져옴
-
-        List<Plan> plans = planRepository.findByVirginRoadCoupleId(coupleId);
+    public AllResultDTO getAllPlans(Integer userId) {
+        List<Plan> plans = planRepository.findByVirginRoadCoupleId(coupleRepository.findCoupleIdByUserId(userId));
         if (plans.isEmpty()) {
             throw new ExceptionHandler(ErrorStatus.PLAN_NOT_FOUND);
         }
 
-        // TimeWrapper로 currentDateTime을 얻어 플랜들에 대한 상태 및 날짜 계산
-        for (Plan plan : plans) {
-            plan.calculateStartAndEndDates();
-            plan.updatePlanStatus(timeWrapper.now());  // TimeWrapper를 통해 현재 시간 설정
+        for(Plan plan : plans) {
+            // TimeWrapper로 currentDateTime을 얻어 플랜들에 대한 상태 및 날짜 계산
+            plan.updatePlanStatus(timeWrapper.now()); // TimeWrapper를 통해 현재 시간 설정
 
             // assignTipToPlan 메서드 호출 - Plan과 Tip 연결
             assignTipToPlan(plan); // 여기에서 Plan에 Tip을 할당하는 메서드 호출
         }
+
 
         Map<PlanStatus, List<PlanResponse.PlanDTO>> groupedPlans = groupPlansByStatus(plans);
         return new AllResultDTO(groupedPlans);
@@ -155,28 +148,22 @@ public class PlanServiceImpl implements PlanService {
     }
 
     private Gender findGenderByUserId(Integer userId) {
-        Gender gender = userDetailRepository.findByUser_Id(userId)
+        Gender gender = userDetailRepository.findByUserId(userId)
                 .orElseThrow(() -> new ExceptionHandler(ErrorStatus.USER_DETAIL_NOT_FOUND))
                 .getGender();
         return gender;
     }
 
-    private void checkPlanOwnerShip(Couple couple, Plan plan) {
-        Integer coupleId = Optional.ofNullable(plan)
+    private void checkPlanOwnerShip(Integer coupleId, Plan plan) {
+        Integer planCoupleId = Optional.ofNullable(plan)
                 .map(Plan::getVirginRoad)
                 .map(VirginRoad::getCouple)
                 .map(Couple::getId)
                 .orElseThrow(() -> new ExceptionHandler(ErrorStatus._FORBIDDEN));
 
-        if (!Objects.equals(couple.getId(), coupleId)) {
+        if (!Objects.equals(coupleId, planCoupleId)) {
             throw new ExceptionHandler(ErrorStatus._FORBIDDEN);
         }
-    }
-
-    private Couple getCoupleByUserId(Integer userId) {
-        return coupleRepository.findCoupleByUserId(userId).orElseThrow(
-                () -> new ExceptionHandler(ErrorStatus.COUPLE_NOT_FOUND)
-        );
     }
 }
 
