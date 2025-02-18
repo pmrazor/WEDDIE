@@ -116,8 +116,6 @@ public class Plan extends BaseEntity {
         // planTime을 기준으로 상태를 결정
         if (planTime.isAfter(currentDateTime.plusDays(DURATION))) {
             this.planStatus = PlanStatus.BEFORE_START;  // planTime이 30일 후면 BEFORE_START
-        } else if (planTime.isBefore(currentDateTime.minusDays(DURATION))) {
-            this.planStatus = PlanStatus.FINISHED;  // planTime이 30일 전이면 FINISHED
         } else if (planTime.isAfter(currentDateTime) && planTime.isBefore(currentDateTime.plusDays(DURATION))) {
             this.planStatus = PlanStatus.IN_PROGRESS;  // planTime이 현재보다 크고 30일 이내면 IN_PROGRESS
         } else {
