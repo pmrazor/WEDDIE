@@ -2,7 +2,7 @@ import { colors } from "@/constants/colors"
 import "@/style/component/DDayCard.css"
 
 const gender = "" // ("", "M_" / "W-")  
-const DDayCard = ({ onClick, head_text, sub_text, style, headTextStyle }) => {
+const DDayCard = ({ onClick, headText, subText, style, headTextStyle }) => {
 
 
   return (
@@ -10,10 +10,10 @@ const DDayCard = ({ onClick, head_text, sub_text, style, headTextStyle }) => {
       onClick={onClick}
     >
       <h3 className="sub_text">
-        {sub_text}
+        {subText}
       </h3>
       <h1 className="head_text" style={headTextStyle}>
-        {head_text} 
+        {headText} 
       </h1>
     </div>
   )

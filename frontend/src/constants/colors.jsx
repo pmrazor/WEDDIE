@@ -59,9 +59,15 @@ export const colors = {
 export const injectColors = () => {
   const root = document.documentElement;
 
-  Object.entries(colors).forEach(([key, value]) => {
-    if (value) {
-      root.style.setProperty(`--${key}`, value);
-    }
-  });
+  const setColors = (prefix, obj) => {
+    Object.entries(obj).forEach(([key, value]) => {
+      if (typeof value === "object") {
+        setColors(`${prefix}-${key}`, value);
+      } else {
+        root.style.setProperty(`--${prefix}-${key}`, value);
+      }
+    });
+  };
+
+  setColors("", colors);
 };

@@ -18,6 +18,7 @@ import ApiTest from "./pages/apitest/ApiTest";
 import VirginRoadSplash from "./pages/virginRoad/splash";
 import ShopList from "./pages/shop/shopList";
 import ShopDetail from "./pages/shop/shopDetail";
+import Main from "./pages/Main";
 import VirginRoad2 from "./pages/virginRoadV2/NewVirginRoad";
 
 function App() {
@@ -44,8 +45,8 @@ function App() {
         <Route path="/api-test" element={<ApiTest />} />
         <Route path="/shop/list" element={<ShopList />} />
         <Route path="/shop/detail" element={<ShopDetail />} />
+        <Route path="/main" element={<Main />} />
         <Route path="/virginroad" element={<VirginRoad2 />} />
-
         <Route path="*" element={<NotFound />} />
       </Routes>
     </>
