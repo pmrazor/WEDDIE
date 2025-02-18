@@ -1,9 +1,6 @@
 package com.ssafy.exhi.domain.user.service;
 
-import static com.ssafy.exhi.domain.user.converter.UserConverter.toUserDetailDTO;
-
 import com.ssafy.exhi.base.status.ErrorStatus;
-import com.ssafy.exhi.domain.couple.model.entity.Couple;
 import com.ssafy.exhi.domain.couple.repository.CoupleRepository;
 import com.ssafy.exhi.domain.oauth.AuthProvider;
 import com.ssafy.exhi.domain.user.converter.UserConverter;
@@ -25,6 +22,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import static com.ssafy.exhi.domain.user.converter.UserConverter.toUserDetailDTO;
+
 @Slf4j
 @Service
 @Transactional
@@ -40,8 +39,7 @@ public class UserServiceImpl implements UserService {
     public UserResponse.TokenDTO login(UserRequest.LoginDTO memberDto) {
         // 로그인 아이디 확인
         User loginUser = getUserByLoginId(memberDto.getLoginId());
-        setUserCoupleId(loginUser);
-
+        log.info("after loginUser");
         validatePassword(isMatches(loginUser, memberDto));
 
         // 토큰 생성
@@ -51,10 +49,6 @@ public class UserServiceImpl implements UserService {
         loginUser.setToken(jwtToken.getRefreshToken());
 
         return UserConverter.toTokenDTO(jwtToken);
-    }
-
-    private void setUserCoupleId(User user) {
-        user.setCoupleId(coupleRepository.findCoupleByUserId(user.getId()).map(Couple::getId).orElse(null));
     }
 
     @Override
@@ -109,8 +103,8 @@ public class UserServiceImpl implements UserService {
     // 유저 기본 정보 수정
     private User getUserInfoById(Integer userId) {
         return userRepository.findUserById(userId)
-                .orElseThrow(() -> new ExceptionHandler(ErrorStatus.USER_INFO_NOT_FOUND)
-                );
+            .orElseThrow(() -> new ExceptionHandler(ErrorStatus.USER_INFO_NOT_FOUND)
+            );
     }
 
     public UserResponse.UserInfoDTO updateUserInfo(Integer userId, UserRequest.UpdateInfoDTO userInfoRequest) {
@@ -128,8 +122,8 @@ public class UserServiceImpl implements UserService {
     // 유저 상세 정보 수정
     private UserDetail updateUserDetailById(Integer userId) {
         return userDetailRepository.findByUserId(userId)
-                .orElseThrow(() -> new ExceptionHandler(ErrorStatus.USER_DETAIL_NOT_FOUND)
-                );
+            .orElseThrow(() -> new ExceptionHandler(ErrorStatus.USER_DETAIL_NOT_FOUND)
+            );
     }
 
     public UserResponse.UserDetailDTO updateUserDetail(Integer userId, UserRequest.UpdateDetailDTO userDetailRequest) {
@@ -148,7 +142,7 @@ public class UserServiceImpl implements UserService {
     // 유저 상세 정보 생성 (온보딩)
     private UserDetail setUserDetailById(Integer userId) {
         return userDetailRepository.findByUserId(userId)
-                .orElseThrow(() -> new ExceptionHandler(ErrorStatus.USER_NOT_FOUND));
+            .orElseThrow(() -> new ExceptionHandler(ErrorStatus.USER_NOT_FOUND));
     }
 
     public UserResponse.UserDetailDTO createUserDetail(Integer userId,
@@ -167,7 +161,7 @@ public class UserServiceImpl implements UserService {
 
         // `userId`를 사용하여 `User` 객체를 가져오기
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ExceptionHandler(ErrorStatus.USER_NOT_FOUND));
+            .orElseThrow(() -> new ExceptionHandler(ErrorStatus.USER_NOT_FOUND));
 
         // User 객체를 UserDetail 객체에 설정 (user_id 설정)
         newUserDetail.setUser(user); // user_id 설정
@@ -181,8 +175,8 @@ public class UserServiceImpl implements UserService {
     // 유저 상세 정보 조회 (온보딩)
     private UserDetail getUserDetailById(Integer userId) {
         return userDetailRepository.findByUserId(userId)
-                .orElseThrow(() -> new ExceptionHandler(ErrorStatus.USER_DETAIL_NOT_FOUND)
-                );
+            .orElseThrow(() -> new ExceptionHandler(ErrorStatus.USER_DETAIL_NOT_FOUND)
+            );
     }
 
     public UserResponse.UserDetailDTO getUserDetail(Integer userId) {
@@ -215,13 +209,13 @@ public class UserServiceImpl implements UserService {
 
     private User getUserByLoginId(String userId) {
         return userRepository.findUserByLoginId(userId).orElseThrow(
-                () -> new ExceptionHandler(ErrorStatus.USER_NOT_FOUND)
+            () -> new ExceptionHandler(ErrorStatus.USER_NOT_FOUND)
         );
     }
 
     private User getUserById(Integer userId) {
         return userRepository.findUserById(userId).orElseThrow(
-                () -> new ExceptionHandler(ErrorStatus.USER_NOT_FOUND)
+            () -> new ExceptionHandler(ErrorStatus.USER_NOT_FOUND)
         );
     }
 

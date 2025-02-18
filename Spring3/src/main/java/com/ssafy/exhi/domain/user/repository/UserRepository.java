@@ -1,18 +1,25 @@
 package com.ssafy.exhi.domain.user.repository;
 
 import com.ssafy.exhi.domain.user.model.entity.User;
-import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.Optional;
+
 public interface UserRepository extends JpaRepository<User, Integer> {
 
     Optional<User> findUserById(Integer userId);
 
-    Optional<User> findUserByLoginId(String loginId);
+    @Query("""
+            SELECT u FROM User u
+            LEFT JOIN FETCH u.userDetail d
+            LEFT JOIN FETCH u.userCluster c
+            WHERE u.loginId = :loginId
+        """)
+    Optional<User> findUserByLoginId(@Param("loginId") String loginId);
 
     boolean existsUserByLoginId(String loginId);
 
