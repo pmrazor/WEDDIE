@@ -67,9 +67,7 @@ public class Plan extends BaseEntity {
     @OneToMany(mappedBy = "plan", cascade = CascadeType.ALL)
     private List<TimeCapsule> timeCapsules = new ArrayList<>();
 
-    @OneToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "tip_id", referencedColumnName = "tip_id")
-    private Tip tip;
+    private String tip;
 
     /* 비즈니스 로직 */
     public void validateCreateTimeCapsule(TimeWrapper time) {
