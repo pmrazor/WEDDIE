@@ -90,15 +90,16 @@ public class Plan extends BaseEntity {
     public void updatePlanStatus(LocalDateTime time) {
         if (startTime == null || endTime == null) return;
 
-        // 진행된 일정이고 예약일이 지났다면 NOT_TIME_CAPSULE 로 업데이트 ( 이후 status 는 타임캡슐 작성 후 FINISHED 로 자동 변환 )
-        if (time.isAfter(planTime.plusDays(1))) {
-            planStatus = PlanStatus.NOT_TIME_CAPSULE;
-            return;
-        }
 
         // 예약일 - 30 을 지나가면 IN_PROGRESS 진입
         if (time.isAfter(startTime) && time.isBefore(planTime)) {
             planStatus = PlanStatus.IN_PROGRESS;
+            return;
+        }
+
+        // 진행된 일정이고 예약일이 지났다면 NOT_TIME_CAPSULE 로 업데이트 ( 이후 status 는 타임캡슐 작성 후 FINISHED 로 자동 변환 )
+        if (planTime.plusDays(1).isBefore(time) && !planStatus.equals(PlanStatus.FINISHED)) {
+            planStatus = PlanStatus.NOT_TIME_CAPSULE;
         }
     }
 

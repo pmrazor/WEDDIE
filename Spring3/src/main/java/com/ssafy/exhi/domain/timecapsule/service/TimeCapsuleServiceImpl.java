@@ -36,10 +36,11 @@ public class TimeCapsuleServiceImpl implements TimeCapsuleService {
     @Override
     public TimeCapsuleResponse.TimeCapsuleResponseDto createTimeCapsule(TimeCapsuleRequest.CreateDTO registTimeCapsule) {
         User user = findUserByUserId(registTimeCapsule.getUserId());
-        registTimeCapsule.setGoodImage(minioImageService.uploadImage(registTimeCapsule.getGoodImageFile()));
-        registTimeCapsule.setBadImage(minioImageService.uploadImage(registTimeCapsule.getBadImageFile()));
 
-        Plan plan = planRepository.findById(Long.valueOf(registTimeCapsule.getPlanId()))
+        if(!registTimeCapsule.getGoodImageFile().isEmpty()) registTimeCapsule.setGoodImage(minioImageService.uploadImage(registTimeCapsule.getGoodImageFile()));
+        if(!registTimeCapsule.getBadImageFile().isEmpty()) registTimeCapsule.setBadImage(minioImageService.uploadImage(registTimeCapsule.getBadImageFile()));
+
+        Plan plan = planRepository.findById(registTimeCapsule.getPlanId())
                 .orElseThrow(() -> new ExceptionHandler(ErrorStatus.PLAN_NOT_FOUND));
 
         plan.validateCreateTimeCapsule(timeWrapper);
@@ -66,14 +67,6 @@ public class TimeCapsuleServiceImpl implements TimeCapsuleService {
         planRepository.save(plan);
 
         return TimeCapsuleConverter.toResponse(savedTimeCapsule);
-    }
-
-    private static void canCreateTimeCapsule(Plan plan) {
-        // 타임캡슐을 작성할 단계가 아닌 경우
-
-        if (plan.getPlanStatus() != PlanStatus.NOT_TIME_CAPSULE) {
-            throw new ExceptionHandler(ErrorStatus.INVALID_PLAN_STATUS);
-        }
     }
 
     // 커플 당 하나의 버진로드 가지니까 커플 아이디로 조회한 모든 캡슐 가져오면 되겠지?
