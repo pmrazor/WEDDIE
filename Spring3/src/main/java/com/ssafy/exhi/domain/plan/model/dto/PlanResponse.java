@@ -8,6 +8,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
@@ -53,6 +54,8 @@ public class PlanResponse {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class AllResultDTO {
+        private LocalDate loveAnniversary;
+        private LocalDate marriageDate;
         private Map<PlanStatus, List<PlanDTO>> groupedPlans;
     }
 
