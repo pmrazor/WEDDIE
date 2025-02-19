@@ -1,19 +1,19 @@
-import DDayCard from "@/components/common/cards/DDayCard"
-import VirginRoadCard from "@/components/common/cards/VirginRoadCard"
-import "@/style/page/Main.css"
-import { useEffect, useRef, useState } from "react"
-import { useNavigate } from "react-router-dom"
-import AdvertisementCard from "@/components/common/cards/AdvertisementCard"
-import lv1 from "@/assets/main-cy-image/lv1.png"
-import lv11 from "@/assets/main-cy-image/lv11.png"
-import page1 from "@/assets/main-cy-image/1.png"
-import { colors } from "@/constants/colors"
-import MiniHome from "./MiniHome"
-import before from "@/assets/main-cy-image/before.png"
-import after from "@/assets/main-cy-image/after.png"
-import backmale from "@/assets/main/back_male.png"
-import backfemale from "@/assets/main/back_female.png"
-import axios from "axios"
+import DDayCard from "@/components/common/cards/DDayCard";
+import VirginRoadCard from "@/components/common/cards/VirginRoadCard";
+import "@/style/page/Main.css";
+import { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import AdvertisementCard from "@/components/common/cards/AdvertisementCard";
+import lv1 from "@/assets/main-cy-image/lv1.png";
+import lv11 from "@/assets/main-cy-image/lv11.png";
+import page1 from "@/assets/main-cy-image/1.png";
+import { colors } from "@/constants/colors";
+import MiniHome from "./MiniHome";
+import before from "@/assets/main-cy-image/before.png";
+import after from "@/assets/main-cy-image/after.png";
+import backmale from "@/assets/main/back_male.png";
+import backfemale from "@/assets/main/back_female.png";
+import axios from "axios";
 import instance from "@/lib/axios";
 
 const getStepName = (serviceType) => {
@@ -54,54 +54,50 @@ const getRandomMessage = () => {
     "신부와 신랑으로서의 우리의 새로운 이야기가 시작돼요!",
     "평생 함께할 우리의 첫걸음, 설렘과 행복으로 가득 채워가요!",
     "사랑이 깊어지는 이 시간, 더 소중하게 기억할 거예요!",
-    "우리의 약속이 현실이 되어가는 순간, 기대되지 않나요?"
+    "우리의 약속이 현실이 되어가는 순간, 기대되지 않나요?",
   ];
   return messages[Math.floor(Math.random() * messages.length)];
 };
 
-
-const weddingDay = new Date("2025-06-13")
-const startDay = new Date("2023-11-01")
+const weddingDay = new Date("2025-06-13");
+const startDay = new Date("2023-11-01");
 
 const fromTodayDDay = (targetDate) => {
-  const today = new Date() // 오늘 기준으로 targetDate가 얼마나 남았는지 
-  today.setHours(0, 0, 0, 0)
-  const diffTime = targetDate.getTime() - today.getTime()
-  return Math.ceil(diffTime / (1000 * 60 * 60 * 24))
-}
+  if (!targetDate) return null;
 
-const gender = "Female"
+  const target = new Date(targetDate); // 문자열을 Date 객체로 변환
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const diffTime = target.getTime() - today.getTime();
+  return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+};
+
+const gender = "Female";
 
 const Main = () => {
-
   const nav = useNavigate();
-  const [untilWedding, setUntilWedding] = useState(fromTodayDDay(weddingDay));
+  const [untilWedding, setUntilWedding] = useState(null);
+  const [marriageDate, setMarriageDate] = useState(null);
   const [randomMessage, setRandomMessage] = useState(getRandomMessage());
   const [isLoading, setIsLoading] = useState(true);
-  const [groupedPlans, setGroupedPlans ] = useState(null);
+  const [groupedPlans, setGroupedPlans] = useState(null);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    setTimeout(() => setIsLoaded(true), 500)
-  }, [])
-
+    setTimeout(() => setIsLoaded(true), 500);
+  }, []);
 
   useEffect(() => {
-    const updateDDay = () => {
-      setUntilWedding(fromTodayDDay(weddingDay));
-      setRandomMessage(getRandomMessage());
-    };
-
-    updateDDay();
-
     const fetchPlans = async () => {
-      try { 
+      try {
         const response = await instance.get("/api/plan/main");
-        console.log(response)
-        if(response.data.isSuccess) {
+        console.log(response);
+        if (response.data.isSuccess) {
           setGroupedPlans(response.data.result.groupedPlans);
-        }
-        else {
+          setMarriageDate(response.data.result.marriageDate);
+          // marriageDate가 설정되면 바로 D-day 계산
+          setUntilWedding(fromTodayDDay(response.data.result.marriageDate));
+        } else {
           throw new Error("플랜 데이터를 불러오는 데 실패했습니다.");
         }
       } catch (err) {
@@ -109,24 +105,31 @@ const Main = () => {
       } finally {
         setIsLoading(false);
       }
-    }
+    };
 
     fetchPlans();
 
+    const updateDDay = () => {
+      if (marriageDate) {
+        setUntilWedding(fromTodayDDay(marriageDate));
+        setRandomMessage(getRandomMessage());
+      }
+    };
+
     const interval = setInterval(updateDDay, 24 * 60 * 60 * 1000);
     return () => clearInterval(interval);
-  }, []);
+  }, [marriageDate]); // marriageDate를 의존성 배열에 추가
 
   const level = 11;
 
-  const todoRef = useRef(null) 
+  const todoRef = useRef(null);
   const scrollToTodo = () => {
     if (todoRef.current) {
-      todoRef.current.scrollIntoView({ behavior: "smooth" }) // 부드러운 스크롤
+      todoRef.current.scrollIntoView({ behavior: "smooth" }); // 부드러운 스크롤
     }
-  }
+  };
 
-  const [isLoaded, setIsLoaded] = useState(false)
+  const [isLoaded, setIsLoaded] = useState(false);
 
   if (isLoading) return <div>로딩 중...</div>;
   if (error) return <div>오류 발생: {error}</div>;
@@ -135,43 +138,53 @@ const Main = () => {
   const furtherTodo = groupedPlans?.["IN_PROGRESS"] || [];
   const incomplete = groupedPlans?.["NOT_TIME_CAPSULE"] || [];
 
- 
   return (
-    <div className="Main" >
+    <div className="Main">
       <div className="first">
         <div className="d-day">
-          <AdvertisementCard 
+          <AdvertisementCard
             headText1={`D-${untilWedding}`}
             subText1={`우리의 사랑이 결실을 맺을 날, 얼마 남지 않았어요`}
             subText3={randomMessage}
-            style={gender === "Male" ? {backgroundImage : `url(${backmale})`} : {backgroundImage : `url(${backfemale})`}}
-            />
+            style={
+              gender === "Male"
+                ? { backgroundImage: `url(${backmale})` }
+                : { backgroundImage: `url(${backfemale})` }
+            }
+          />
           {/* <DDayCard 
             headText={D-${untilWedding}}
             subText={"결혼식까지"}
             /> */}
         </div>
         <div className="cy-image">
-          {level === 1 ? <img src={before} alt="" /> : <img src={after} alt="" /> }
+          {level === 1 ? (
+            <img src={before} alt="" />
+          ) : (
+            <img src={after} alt="" />
+          )}
           {/* <MiniHome /> */}
         </div>
-          
+
         <div className="scroll-down-btn" onClick={scrollToTodo}>
           <button>
-            <svg 
-              xmlns="http://www.w3.org/2000/svg" 
-              viewBox="0 0 600 600" 
-              width="50" 
-              height="50" 
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 600 600"
+              width="50"
+              height="50"
               fill="grey"
             >
-              <path d="M283.46 274.37C273.34 274.37 263.22 272.17 253.79 267.77L16.75 157.16C4.23 151.32 -1.17 136.44 4.66 123.93C10.50 111.42 25.38 106.01 37.89 111.85L274.94 222.46C280.35 224.99 286.57 224.99 291.98 222.46L529.03 111.85C541.54 106.01 556.42 111.42 562.26 123.93C568.09 136.44 562.68 151.32 550.17 157.16L313.13 267.77C303.70 272.17 293.58 274.37 283.46 274.37Z"/>
+              <path d="M283.46 274.37C273.34 274.37 263.22 272.17 253.79 267.77L16.75 157.16C4.23 151.32 -1.17 136.44 4.66 123.93C10.50 111.42 25.38 106.01 37.89 111.85L274.94 222.46C280.35 224.99 286.57 224.99 291.98 222.46L529.03 111.85C541.54 106.01 556.42 111.42 562.26 123.93C568.09 136.44 562.68 151.32 550.17 157.16L313.13 267.77C303.70 272.17 293.58 274.37 283.46 274.37Z" />
             </svg>
           </button>
         </div>
       </div>
 
-      <div className="second" style={{background : colors.genderColors[gender].PRIMARY}}>
+      <div
+        className="second"
+        style={{ background: colors.genderColors[gender].PRIMARY }}
+      >
         <div className="todo" ref={todoRef}>
           <div className="now-todo">
             <div className="text-field">
@@ -183,11 +196,11 @@ const Main = () => {
               </div>
             </div>
             {nowTodo.map((plan) => (
-              <VirginRoadCard 
-              key={plan.planId}
-              step={getStepName(plan.serviceType)}
-              serviceType={plan.serviceType}
-              ment={plan.tip.tipContent}
+              <VirginRoadCard
+                key={plan.planId}
+                step={getStepName(plan.serviceType)}
+                serviceType={plan.serviceType}
+                ment={plan.tip.tipContent}
               />
             ))}
           </div>
@@ -201,13 +214,13 @@ const Main = () => {
               </div>
             </div>
             {furtherTodo.map((plan) => (
-              <VirginRoadCard 
-              key={plan.planId}
-              step={getStepName(plan.serviceType)}
-              serviceType={plan.serviceType}
-              ment={plan.tip.tipContent}
+              <VirginRoadCard
+                key={plan.planId}
+                step={getStepName(plan.serviceType)}
+                serviceType={plan.serviceType}
+                ment={plan.tip.tipContent}
               />
-            ))}        
+            ))}
           </div>
 
           <div className="incomplete">
@@ -219,19 +232,19 @@ const Main = () => {
               </div>
             </div>
             {incomplete.map((plan) => (
-              <VirginRoadCard 
-              // icon={() => iconForPlans(plan)}
-              key={plan.planId}
-              step={getStepName(plan.serviceType)}
-              serviceType={plan.serviceType}
-              ment={plan.tip.tipContent}
+              <VirginRoadCard
+                // icon={() => iconForPlans(plan)}
+                key={plan.planId}
+                step={getStepName(plan.serviceType)}
+                serviceType={plan.serviceType}
+                ment={plan.tip.tipContent}
               />
             ))}
           </div>
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default Main 
+export default Main;

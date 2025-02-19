@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useEffect, useState, useMemo } from "react";
 import { colors } from "@/constants/colors";
 import useVirginRoadStore from "@/store/virginroad";
@@ -64,6 +64,7 @@ const LoadingAnimation = () => {
 
 const VirginRoad = () => {
   const nav = useNavigate();
+  const location = useLocation();
   const { createTimeCapsule } = useTimeCapsuleStore();
   const {
     plans = [],
@@ -310,15 +311,30 @@ const VirginRoad = () => {
   };
 
   useEffect(() => {
-    const fetchVirginRoad = async () => {
-      try {
-        await getVirginRoad();
-      } catch (error) {
-        console.error("버진로드 데이터 조회 실패:", error);
+    getVirginRoad();
+  }, [getVirginRoad]);
+
+  useEffect(() => {
+    const initializeSelectedPlan = async () => {
+      const targetServiceType =
+        location.state?.serviceType ||
+        new URLSearchParams(location.search).get("serviceType");
+
+      if (targetServiceType && Array.isArray(plans)) {
+        const targetPlan = plans.find(
+          (plan) => plan.serviceType === targetServiceType
+        );
+        if (targetPlan && targetPlan.planId !== selectedPlan) {
+          setSelectedPlan(targetPlan.planId);
+          if (!todos[targetServiceType]) {
+            await getTodos(targetServiceType);
+          }
+        }
       }
     };
-    fetchVirginRoad();
-  }, [getVirginRoad]);
+
+    initializeSelectedPlan();
+  }, [location, getVirginRoad]);
 
   useEffect(() => {
     if (Array.isArray(plans)) {
