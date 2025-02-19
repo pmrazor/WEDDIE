@@ -67,16 +67,6 @@ public class PlanResponse {
         private Integer planId;
         private String shopName;
         private ServiceType serviceType;
-        private TipDTO tip; // TipDTO 포함
+        private String tip;
     }
-
-    @Data
-    @Builder
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class TipDTO {
-        private Integer tipId;
-        private String tipContent;
-    }
-
 }

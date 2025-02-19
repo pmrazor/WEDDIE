@@ -88,7 +88,7 @@ public class PlanServiceImpl implements PlanService {
             .orElse(null);  // Tip이 없으면 null로 설정
 
         // Plan에 Tip 설정
-        plan.setTip(tip);
+        plan.setTip(tip == null ? null : tip.getTipContent());
 
         // Plan 저장
         planRepository.save(plan);
@@ -100,35 +100,12 @@ public class PlanServiceImpl implements PlanService {
         for (Plan plan : plans) {
             PlanStatus status = plan.getPlanStatus();
 
-// TipDTO 생성 (null 체크 추가)
-            PlanResponse.TipDTO tipDTO;
-
-            if (plan.getTip() != null) {
-                tipDTO = new PlanResponse.TipDTO(
-                    plan.getTip().getId(),
-                    plan.getTip().getTipContent()  // Tip이 있을 경우 getTip() 사용
-                );
-            } else {
-                // Tip이 없을 경우에도 TipDTO 객체 생성
-                tipDTO = new PlanResponse.TipDTO(
-                    null,            // tipId가 없으면 null
-                    "정보가 없습니다"  // tipContent가 없으면 기본 메시지
-                );
-            }
-
-            if (plan.getTip() != null) {
-                tipDTO = new PlanResponse.TipDTO(
-                    plan.getTip().getId(),
-                    plan.getTip().getTipContent()  // Tip이 있을 경우 getTip() 사용
-                );
-            }
-
             // PlanDTO 생성
             PlanResponse.PlanDTO planDTO = new PlanResponse.PlanDTO(
                 plan.getId(),
                 plan.getShopName(),
                 plan.getServiceType(),
-                tipDTO  // TipDTO 변환 (null일 수 있음)
+                plan.getTip()
             );
 
             groupedPlans.computeIfAbsent(status, k -> new ArrayList<>()).add(planDTO);
