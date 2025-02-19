@@ -21,10 +21,10 @@ public interface RecommendationControllerDocs {
     )
     @ApiResponses({
             @ApiResponse(responseCode = "204", description = "클러스터 할당 성공"),
-            @ApiResponse(responseCode = "400", description = "필수 프로필 정보 누락 (나이, MBTI 등)"),
-            @ApiResponse(responseCode = "401", description = "유효하지 않은 토큰"),
-            @ApiResponse(responseCode = "404", description = "사용자 정보 없음"),
-            @ApiResponse(responseCode = "500", description = "클러스터 할당 중 서버 오류 발생")
+            @ApiResponse(responseCode = "400", description = "CLUSTERING_USER_DETAIL_NOT_FOUND - 사용자 상세정보가 없어 클러스터링이 불가능합니다"),
+            @ApiResponse(responseCode = "401", description = "TOKEN_ERROR - 토큰 관련 오류"),
+            @ApiResponse(responseCode = "404", description = "USER_NOT_FOUND - 존재하지 않는 계정입니다\nRECOMMENDATION_NO_CLUSTER_CENTERS - 클러스터 중심점을 찾을 수 없습니다"),
+            @ApiResponse(responseCode = "500", description = "CLUSTERING_CLUSTER_ERROR - 클러스터링 처리 중 오류가 발생했습니다")
     })
     ResponseEntity<?> addUser(
             @Parameter(description = "Bearer {JWT 토큰}", required = true, example = "Bearer eyJhbGciOiJ...")
@@ -41,9 +41,10 @@ public interface RecommendationControllerDocs {
                 description = "추천 플랜 조회 성공",
                 content = @Content(schema = @Schema(implementation = RecommendationResponse.RecommendedPlansDTO.class))
             ),
-            @ApiResponse(responseCode = "401", description = "유효하지 않은 토큰"),
-            @ApiResponse(responseCode = "404", description = "클러스터 정보 또는 버진로드 없음"),
-            @ApiResponse(responseCode = "500", description = "추천 시스템 서버 오류")
+            @ApiResponse(responseCode = "400", description = "RECOMMENDATION_DATA_NOT_READY - 추천을 위한 데이터가 준비되지 않았습니다"),
+            @ApiResponse(responseCode = "401", description = "TOKEN_ERROR - 토큰 관련 오류"),
+            @ApiResponse(responseCode = "404", description = "USER_NOT_FOUND - 존재하지 않는 계정입니다\nCOUPLE_NOT_FOUND - 커플 정보를 찾을 수 없습니다\nRECOMMENDATION_CLUSTER_NOT_FOUND - 사용자의 클러스터 정보를 찾을 수 없습니다"),
+            @ApiResponse(responseCode = "500", description = "RECOMMENDATION_CLUSTER_ERROR - 추천 처리 중 오류가 발생했습니다")
     })
     ResponseEntity<?> recommendPlans(
             @Parameter(description = "Bearer {JWT 토큰}", required = true, example = "Bearer eyJhbGciOiJ...")
@@ -57,7 +58,8 @@ public interface RecommendationControllerDocs {
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "클러스터링 수행 완료"),
-            @ApiResponse(responseCode = "500", description = "스크립트 실행 오류 또는 30분 초과")
+            @ApiResponse(responseCode = "500", description = "CLUSTERING_SCRIPT_ERROR - 클러스터링 스크립트 실행 오류가 발생했습니다"),
+            @ApiResponse(responseCode = "408", description = "CLUSTERING_SCRIPT_TIMEOUT - 클러스터링 스크립트 실행 시간이 초과되었습니다")
     })
     ResponseEntity<?> runPython();
 
@@ -67,7 +69,8 @@ public interface RecommendationControllerDocs {
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "input_data.json 생성 완료"),
-            @ApiResponse(responseCode = "500", description = "JSON 파일 생성 중 오류 발생")
+            @ApiResponse(responseCode = "404", description = "CLUSTERING_NO_DATA - 클러스터링에 필요한 데이터가 존재하지 않습니다\nCLUSTERING_USER_DETAIL_NOT_FOUND - 사용자 상세정보가 없어 클러스터링이 불가능합니다"),
+            @ApiResponse(responseCode = "500", description = "CLUSTERING_FILE_IO_ERROR - 클러스터링 중 파일 입출력 오류가 발생했습니다")
     })
     ResponseEntity<?> setJson();
 
@@ -77,7 +80,8 @@ public interface RecommendationControllerDocs {
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "클러스터링 결과 DB 저장 완료"),
-            @ApiResponse(responseCode = "500", description = "JSON 파싱 오류 또는 DB 저장 실패")
+            @ApiResponse(responseCode = "404", description = "USER_NOT_FOUND - 존재하지 않는 계정입니다\nCOUPLE_NOT_FOUND - 커플 정보를 찾을 수 없습니다\nCLUSTERING_FILE_IO_ERROR - 클러스터링 파일을 찾을 수 없습니다"),
+            @ApiResponse(responseCode = "500", description = "CLUSTERING_CLUSTER_ERROR - 클러스터링 처리 중 오류가 발생했습니다")
     })
     ResponseEntity<?> getJson();
 }
