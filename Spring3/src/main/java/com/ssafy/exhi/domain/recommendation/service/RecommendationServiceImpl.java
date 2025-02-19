@@ -14,7 +14,6 @@ import com.ssafy.exhi.domain.recommendation.model.dto.RoadPlanCapsuleDTO;
 import com.ssafy.exhi.domain.recommendation.model.entity.*;
 import com.ssafy.exhi.domain.recommendation.repository.*;
 import com.ssafy.exhi.domain.todo.config.TodoInitializer;
-import com.ssafy.exhi.domain.todo.repository.DefaultTodoRepository;
 import com.ssafy.exhi.domain.user.model.entity.User;
 import com.ssafy.exhi.domain.user.model.entity.UserDetail;
 import com.ssafy.exhi.domain.user.repository.UserRepository;

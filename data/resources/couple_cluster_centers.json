@@ -1,0 +1,90 @@
+{
+  "cluster_0": {
+    "male_age": -0.18352764224813561,
+    "female_age": 0.4044515164710895,
+    "budget": 5.429821664524022,
+    "marriage_month_sin": 0.5852744174543592,
+    "marriage_month_cos": 0.21420091895375323,
+    "marriage_day_sin": 0.37693459614717195,
+    "marriage_day_cos": 0.05324583131057361,
+    "age_diff": 0.11333333333333327,
+    "user_cluster_distance": 5.575543998232137
+  },
+  "cluster_1": {
+    "male_age": 1.327419507688892,
+    "female_age": -0.28009471674775216,
+    "budget": 14.809474800205841,
+    "marriage_month_sin": 1.0058657048910156,
+    "marriage_month_cos": 0.4558657048910084,
+    "marriage_day_sin": 0.4204987949878667,
+    "marriage_day_cos": 0.01590842960133879,
+    "age_diff": 0.532820512820513,
+    "user_cluster_distance": 2.460628953695368
+  },
+  "cluster_2": {
+    "male_age": -1.0471109747314247,
+    "female_age": -0.7778138330113448,
+    "budget": 1.4022924700472155,
+    "marriage_month_sin": 5.372812153034742,
+    "marriage_month_cos": 0.32629038734370286,
+    "marriage_day_sin": 0.38047015757691327,
+    "marriage_day_cos": 0.054444084668399055,
+    "age_diff": 0.14999999999999997,
+    "user_cluster_distance": 0.5390050682347582
+  },
+  "cluster_3": {
+    "male_age": 0.333716047897402,
+    "female_age": 0.9620136936344104,
+    "budget": 10.49985400827481,
+    "marriage_month_sin": 2.3250000000000006,
+    "marriage_month_cos": 0.01615427318801027,
+    "marriage_day_sin": 0.027000267031192626,
+    "marriage_day_cos": 0.03308285907316172,
+    "age_diff": 0.11782051282051287,
+    "user_cluster_distance": 0.3840179620962947
+  },
+  "cluster_4": {
+    "male_age": 0.34277914134175447,
+    "female_age": -0.05604813508657461,
+    "budget": 7.483212763669996,
+    "marriage_month_sin": 5.815115057222532,
+    "marriage_month_cos": 0.32957750669028096,
+    "marriage_day_sin": 0.025439813629782843,
+    "marriage_day_cos": 0.03403176144386032,
+    "age_diff": 0.29846153846153844,
+    "user_cluster_distance": 1.2248171328750805
+  },
+  "cluster_5": {
+    "male_age": 0.30846885901670645,
+    "female_age": -0.7602987907967902,
+    "budget": 8.81062339685147,
+    "marriage_month_sin": 4.944720865598101,
+    "marriage_month_cos": 0.07561925046033763,
+    "marriage_day_sin": 0.02681177487770353,
+    "marriage_day_cos": 0.03274294484753418,
+    "age_diff": 0.41538461538461524,
+    "user_cluster_distance": 6.011285029390226
+  },
+  "cluster_6": {
+    "male_age": -0.8308914597018746,
+    "female_age": -0.30198851951594524,
+    "budget": 3.4680381396954445,
+    "marriage_month_sin": 3.8025000000000015,
+    "marriage_month_cos": 0.019205635901300977,
+    "marriage_day_sin": 0.48719872064071856,
+    "marriage_day_cos": 0.056413539472196336,
+    "age_diff": 0.10923076923076933,
+    "user_cluster_distance": 5.576493389535754
+  },
+  "cluster_7": {
+    "male_age": 0.9797851377162334,
+    "female_age": 1.1831411015931619,
+    "budget": 12.48418920800761,
+    "marriage_month_sin": 0.21703884586921607,
+    "marriage_month_cos": 0.1956029104747195,
+    "marriage_day_sin": 0.03174573522376173,
+    "marriage_day_cos": 0.031058675210908715,
+    "age_diff": 0.20692307692307693,
+    "user_cluster_distance": 5.670480415667573
+  }
+}
