@@ -13,33 +13,25 @@ import before from "@/assets/main-cy-image/before.png"
 import after from "@/assets/main-cy-image/after.png"
 import backmale from "@/assets/main/back_male.png"
 import backfemale from "@/assets/main/back_female.png"
+import axios from "axios"
+import instance from "@/lib/axios";
 
-const mockData = {
-  "isSuccess":true,
-  "code":"COMMON200",
-  "message":"성공입니다.",
-  "result":{
-    "groupedPlans":{
-      "BEFORE_START":[
-        {"planId":1, "shopName":"웨딩홀", "serviceType":"WEDDING_HALL", "tip":{"tipId":1, "tipContent":"결혼 준비는 일찍 시작하세요!"}},
-        {"planId":2, "shopName":"드레스샵", "serviceType":"DRESS_SHOP", "tip":{"tipId":2, "tipContent":"드레스 선택은 충분히 시간을 두고 하세요."}},
-        {"planId":3, "shopName":"스튜디오", "serviceType":"STUDIO", "tip":{"tipId":3, "tipContent":"스튜디오 예약은 미리 하세요!"}}
-      ],
-      "IN_PROGRESS":[
-        {"planId":4, "shopName":"메이크업 스튜디오", "serviceType":"MAKEUP_STUDIO", "tip":{"tipId":4, "tipContent":"메이크업 예약은 서두르세요!"}},
-        {"planId":5, "shopName":"한복", "serviceType":"HANBOK", "tip":{"tipId":5, "tipContent":"한복은 결혼 2주 전에 준비하세요!"}}
-      ],
-      "NOT_TIME_CAPSULE":[
-        {"planId":6, "shopName":"스냅 촬영", "serviceType":"SNAP", "tip":{"tipId":6, "tipContent":"스냅 촬영 예약은 여유 있게 하세요!"}},
-        {"planId":7, "shopName":"청첩장", "serviceType":"INVITATION", "tip":{"tipId":7, "tipContent":"청첩장 디자인을 고를 때 충분한 시간을 두세요."}}
-      ],
-      "FINISHED":[
-        {"planId":8, "shopName":"신혼여행", "serviceType":"HONEYMOON", "tip":{"tipId":8, "tipContent":"신혼여행지는 미리 계획하세요!"}},
-        {"planId":9, "shopName":"남성 예복", "serviceType":"TAILOR_SHOP", "tip":{"tipId":9, "tipContent":"남성 예복을 미리 맞추세요!"}}
-      ]
-    }
-  }
-}
+const getStepName = (serviceType) => {
+  const stepNames = {
+    DRESS_SHOP: "드레스샵",
+    STUDIO: "스튜디오",
+    WEDDING_HALL: "웨딩홀",
+    MAKEUP_STUDIO: "메이크업",
+    SNAP: "스냅사진",
+    HANBOK: "한복",
+    TAILOR_SHOP: "맞춤복",
+    INVITATION: "청첩장",
+    FACIAL_CARE: "피부관리",
+    HONEYMOON: "신혼여행",
+    WEDDING_DAY: "웨딩데이",
+  };
+  return stepNames[serviceType] || serviceType;
+};
 
 const getRandomMessage = () => {
   const messages = [
@@ -85,6 +77,14 @@ const Main = () => {
   const nav = useNavigate();
   const [untilWedding, setUntilWedding] = useState(fromTodayDDay(weddingDay));
   const [randomMessage, setRandomMessage] = useState(getRandomMessage());
+  const [isLoading, setIsLoading] = useState(true);
+  const [groupedPlans, setGroupedPlans ] = useState(null);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    setTimeout(() => setIsLoaded(true), 500)
+  }, [])
+
 
   useEffect(() => {
     const updateDDay = () => {
@@ -93,16 +93,31 @@ const Main = () => {
     };
 
     updateDDay();
+
+    const fetchPlans = async () => {
+      try { 
+        const response = await instance.get("/api/plan/main");
+        console.log(response)
+        if(response.data.isSuccess) {
+          setGroupedPlans(response.data.result.groupedPlans);
+        }
+        else {
+          throw new Error("플랜 데이터를 불러오는 데 실패했습니다.");
+        }
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    fetchPlans();
+
     const interval = setInterval(updateDDay, 24 * 60 * 60 * 1000);
     return () => clearInterval(interval);
   }, []);
 
   const level = 11;
-
-  const { groupedPlans } = mockData.result 
-  const nowTodo = groupedPlans["BEFORE_START"] || []
-  const furtherTodo = groupedPlans["IN_PROGRESS"] || []
-  const incomplete = groupedPlans["NOT_TIME_CAPSULE"] || []
 
   const todoRef = useRef(null) 
   const scrollToTodo = () => {
@@ -113,10 +128,14 @@ const Main = () => {
 
   const [isLoaded, setIsLoaded] = useState(false)
 
-  useEffect(() => {
-    setTimeout(() => setIsLoaded(true), 500)
-  }, [])
+  if (isLoading) return <div>로딩 중...</div>;
+  if (error) return <div>오류 발생: {error}</div>;
 
+  const nowTodo = groupedPlans?.["BEFORE_START"] || [];
+  const furtherTodo = groupedPlans?.["IN_PROGRESS"] || [];
+  const incomplete = groupedPlans?.["NOT_TIME_CAPSULE"] || [];
+
+ 
   return (
     <div className="Main" >
       <div className="first">
@@ -166,7 +185,7 @@ const Main = () => {
             {nowTodo.map((plan) => (
               <VirginRoadCard 
               key={plan.planId}
-              step={plan.shopName}
+              step={getStepName(plan.serviceType)}
               serviceType={plan.serviceType}
               ment={plan.tip.tipContent}
               />
@@ -184,7 +203,7 @@ const Main = () => {
             {furtherTodo.map((plan) => (
               <VirginRoadCard 
               key={plan.planId}
-              step={plan.shopName}
+              step={getStepName(plan.serviceType)}
               serviceType={plan.serviceType}
               ment={plan.tip.tipContent}
               />
@@ -203,7 +222,7 @@ const Main = () => {
               <VirginRoadCard 
               // icon={() => iconForPlans(plan)}
               key={plan.planId}
-              step={plan.shopName}
+              step={getStepName(plan.serviceType)}
               serviceType={plan.serviceType}
               ment={plan.tip.tipContent}
               />
