@@ -1,41 +1,31 @@
 package com.ssafy.exhi.domain.plan.service;
 
 import com.ssafy.exhi.base.status.ErrorStatus;
-import com.ssafy.exhi.domain.plan.model.dto.PlanResponse;
-import com.ssafy.exhi.util.Scheduler;
+import com.ssafy.exhi.domain.TimeWrapper;
 import com.ssafy.exhi.domain.couple.model.entity.Couple;
 import com.ssafy.exhi.domain.couple.repository.CoupleRepository;
 import com.ssafy.exhi.domain.plan.converter.PlanConverter;
+import com.ssafy.exhi.domain.plan.model.dto.PlanResponse;
 import com.ssafy.exhi.domain.plan.model.entity.Plan;
+import com.ssafy.exhi.domain.plan.model.entity.PlanStatus;
+import com.ssafy.exhi.domain.plan.repository.PlanRepository;
 import com.ssafy.exhi.domain.tip.model.entity.Tip;
 import com.ssafy.exhi.domain.tip.repository.TipRepository;
-import com.ssafy.exhi.domain.plan.model.entity.PlanStatus; // enum 임포트
-import com.ssafy.exhi.domain.plan.repository.PlanRepository;
-import com.ssafy.exhi.domain.plan.model.dto.PlanResponse;
-import com.ssafy.exhi.domain.virginroad.repository.VirginRoadRepository; // 버진로드에서 커플ID 찾기
 import com.ssafy.exhi.domain.todo.model.entity.TodoType;
 import com.ssafy.exhi.domain.user.model.entity.Gender;
 import com.ssafy.exhi.domain.user.repository.UserDetailRepository;
 import com.ssafy.exhi.domain.virginroad.model.entity.VirginRoad;
-import com.ssafy.exhi.domain.TimeWrapper;
 import com.ssafy.exhi.exception.ExceptionHandler;
+import com.ssafy.exhi.util.Scheduler;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import com.ssafy.exhi.util.JWTUtil;
 
+import java.util.*;
 
-import java.util.Arrays;
-import java.util.Map;
-import java.util.List;
-import java.util.HashMap;
-import java.util.ArrayList;
-import java.util.Objects;
-import java.util.Optional;
-
-import static com.ssafy.exhi.domain.plan.model.dto.PlanResponse.DetailResultDTO;
 import static com.ssafy.exhi.domain.plan.model.dto.PlanResponse.AllResultDTO;
+import static com.ssafy.exhi.domain.plan.model.dto.PlanResponse.DetailResultDTO;
 
 @Slf4j
 @Service
@@ -66,32 +56,36 @@ public class PlanServiceImpl implements PlanService {
 
     @Override
     public AllResultDTO getAllPlans(Integer userId) {
-        List<Plan> plans = planRepository.findByVirginRoadCoupleId(coupleRepository.findCoupleIdByUserId(userId));
+
+        Couple couple = coupleRepository.findCoupleByUserId(userId)
+            .orElseThrow(() -> new ExceptionHandler(ErrorStatus.COUPLE_NOT_FOUND));
+
+        List<Plan> plans = planRepository.findByVirginRoadCoupleId(couple.getId());
         if (plans.isEmpty()) {
             throw new ExceptionHandler(ErrorStatus.PLAN_NOT_FOUND);
         }
 
-        for(Plan plan : plans) {
+        for (Plan plan : plans) {
             // TimeWrapper로 currentDateTime을 얻어 플랜들에 대한 상태 및 날짜 계산
             plan.updatePlanStatus(timeWrapper.now()); // TimeWrapper를 통해 현재 시간 설정
 
             // assignTipToPlan 메서드 호출 - Plan과 Tip 연결
             assignTipToPlan(plan); // 여기에서 Plan에 Tip을 할당하는 메서드 호출
         }
-
-
         Map<PlanStatus, List<PlanResponse.PlanDTO>> groupedPlans = groupPlansByStatus(plans);
-        return new AllResultDTO(groupedPlans);
-    }
 
+        AllResultDTO result = PlanConverter.toResultDTO(couple.getLoveAnniversary(), couple.getMarriageDate(), groupedPlans);
+
+        return result;
+    }
 
     // Tip을 할당하는 메서드
     public void assignTipToPlan(Plan plan) {
         // Tip을 찾기
         Tip tip = tipRepository.findTipsByServiceType(plan.getServiceType())
-                .stream()
-                .findFirst()
-                .orElse(null);  // Tip이 없으면 null로 설정
+            .stream()
+            .findFirst()
+            .orElse(null);  // Tip이 없으면 null로 설정
 
         // Plan에 Tip 설정
         plan.setTip(tip);
@@ -111,30 +105,30 @@ public class PlanServiceImpl implements PlanService {
 
             if (plan.getTip() != null) {
                 tipDTO = new PlanResponse.TipDTO(
-                        plan.getTip().getId(),
-                        plan.getTip().getTipContent()  // Tip이 있을 경우 getTip() 사용
+                    plan.getTip().getId(),
+                    plan.getTip().getTipContent()  // Tip이 있을 경우 getTip() 사용
                 );
             } else {
                 // Tip이 없을 경우에도 TipDTO 객체 생성
                 tipDTO = new PlanResponse.TipDTO(
-                        null,            // tipId가 없으면 null
-                        "정보가 없습니다"  // tipContent가 없으면 기본 메시지
+                    null,            // tipId가 없으면 null
+                    "정보가 없습니다"  // tipContent가 없으면 기본 메시지
                 );
             }
 
             if (plan.getTip() != null) {
                 tipDTO = new PlanResponse.TipDTO(
-                        plan.getTip().getId(),
-                        plan.getTip().getTipContent()  // Tip이 있을 경우 getTip() 사용
+                    plan.getTip().getId(),
+                    plan.getTip().getTipContent()  // Tip이 있을 경우 getTip() 사용
                 );
             }
 
             // PlanDTO 생성
             PlanResponse.PlanDTO planDTO = new PlanResponse.PlanDTO(
-                    plan.getId(),
-                    plan.getShopName(),
-                    plan.getServiceType(),
-                    tipDTO  // TipDTO 변환 (null일 수 있음)
+                plan.getId(),
+                plan.getShopName(),
+                plan.getServiceType(),
+                tipDTO  // TipDTO 변환 (null일 수 있음)
             );
 
             groupedPlans.computeIfAbsent(status, k -> new ArrayList<>()).add(planDTO);
@@ -149,17 +143,17 @@ public class PlanServiceImpl implements PlanService {
 
     private Gender findGenderByUserId(Integer userId) {
         Gender gender = userDetailRepository.findByUserId(userId)
-                .orElseThrow(() -> new ExceptionHandler(ErrorStatus.USER_DETAIL_NOT_FOUND))
-                .getGender();
+            .orElseThrow(() -> new ExceptionHandler(ErrorStatus.USER_DETAIL_NOT_FOUND))
+            .getGender();
         return gender;
     }
 
     private void checkPlanOwnerShip(Integer coupleId, Plan plan) {
         Integer planCoupleId = Optional.ofNullable(plan)
-                .map(Plan::getVirginRoad)
-                .map(VirginRoad::getCouple)
-                .map(Couple::getId)
-                .orElseThrow(() -> new ExceptionHandler(ErrorStatus._FORBIDDEN));
+            .map(Plan::getVirginRoad)
+            .map(VirginRoad::getCouple)
+            .map(Couple::getId)
+            .orElseThrow(() -> new ExceptionHandler(ErrorStatus._FORBIDDEN));
 
         if (!Objects.equals(coupleId, planCoupleId)) {
             throw new ExceptionHandler(ErrorStatus._FORBIDDEN);
