@@ -95,6 +95,22 @@ const VirginRoad = () => {
   const [showTimeCapsule, setShowTimeCapsule] = useState(false);
   const [selectedServiceType, setSelectedServiceType] = useState(null);
 
+  const getGenderFromLocalStorage = () => {
+    const authStorage = localStorage.getItem("auth-storage");
+    if (authStorage) {
+      const { state } = JSON.parse(authStorage);
+      return state.gender;
+    }
+    return null;
+  };
+
+  const getColorByGender = () => {
+    const gender = getGenderFromLocalStorage();
+    return gender === "Female" ? "#FFC0CC" : "#B3D8FF";
+  };
+
+  const [themeColor, setThemeColor] = useState(getColorByGender());
+
   const handleSaveTimeCapsule = async (data) => {
     try {
       await createTimeCapsule({
@@ -288,6 +304,7 @@ const VirginRoad = () => {
                     setNewTodoIsTogether(false);
                   }
                 }}
+                style={{ backgroundColor: themeColor }}
               >
                 저장
               </Button>
@@ -313,6 +330,10 @@ const VirginRoad = () => {
   useEffect(() => {
     getVirginRoad();
   }, [getVirginRoad]);
+
+  useEffect(() => {
+    setThemeColor(getColorByGender());
+  }, []);
 
   useEffect(() => {
     const initializeSelectedPlan = async () => {
@@ -545,7 +566,12 @@ const VirginRoad = () => {
             >
               취소
             </Button>
-            <Button variant="default" onClick={handleSave} disabled={isSaving}>
+            <Button
+              variant="default"
+              onClick={handleSave}
+              disabled={isSaving}
+              style={{ backgroundColor: themeColor }}
+            >
               저장
             </Button>
           </div>
@@ -577,6 +603,15 @@ const VirginRoad = () => {
                     isEditing && "cursor-pointer"
                   )}
                   onClick={() => handlePlanClick(plan.planId)}
+                  style={
+                    isEditing
+                      ? {
+                          borderColor: themeColor,
+                          borderWidth: "2px",
+                          borderStyle: "solid",
+                        }
+                      : {}
+                  }
                 >
                   <div className="text-center">
                     <h3
@@ -596,6 +631,7 @@ const VirginRoad = () => {
                       animate={{ scale: 1, opacity: 1 }}
                       exit={{ scale: 0, opacity: 0 }}
                       className="absolute top-2 right-2 w-6 h-6 bg-primary rounded-full flex items-center justify-center"
+                      style={{ backgroundColor: themeColor }}
                     >
                       <Check className="w-4 h-4 text-white" />
                     </motion.div>
@@ -652,6 +688,7 @@ const VirginRoad = () => {
                 setIsAddingNew(true);
               }
             }}
+            style={{ backgroundColor: themeColor }}
           >
             <Plus className="w-6 h-6" />
           </Button>
