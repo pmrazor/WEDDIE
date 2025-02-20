@@ -1,4 +1,5 @@
 import "@/style/component/VirginRoadCard.css";
+import { useEffect, useState } from "react";
 import Button from "../Button";
 import { useNavigate } from "react-router-dom";
 // import status1 from "@/assets/VirginRoadCard/status1.svg"
@@ -28,7 +29,7 @@ import tailorShop from "@/assets/IconforPlans/TAILORSHOP.png";
 import weddingDay from "@/assets/IconforPlans/WEDDINGDAY.png";
 import WeddingHall from "@/assets/IconforPlans/WeddingHall.png";
 
-const gender = "Female";
+// const gender = "Female";
 
 const VirginRoadCard = ({
   step,
@@ -67,6 +68,17 @@ const VirginRoadCard = ({
         return weddingDay; // 기본값 설정
     }
   };
+
+  const getGenderFromLocalStorage = () => {
+    const authStorage = localStorage.getItem("auth-storage");
+    if (authStorage) {
+      const { state } = JSON.parse(authStorage);
+      return state.gender;
+    }
+    return "Female"; // 기본값 설정
+  };
+
+  const [gender, setGender] = useState(getGenderFromLocalStorage()); // 초기값을 바로 설정
 
   const iconForStatus = () => {
     switch (planStatus) {

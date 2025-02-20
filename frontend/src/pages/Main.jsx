@@ -72,7 +72,7 @@ const fromTodayDDay = (targetDate) => {
   return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 };
 
-const gender = "Female";
+// const gender = "Female";
 
 const Main = () => {
   const nav = useNavigate();
@@ -82,6 +82,22 @@ const Main = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [groupedPlans, setGroupedPlans] = useState(null);
   const [error, setError] = useState(null);
+
+  const getGenderFromLocalStorage = () => {
+    const authStorage = localStorage.getItem("auth-storage");
+    if (authStorage) {
+      const { state } = JSON.parse(authStorage);
+      return state.gender;
+    }
+    return "Female";
+  };
+
+  const [gender, setGender] = useState(null);
+
+  useEffect(() => {
+    const currentGender = getGenderFromLocalStorage();
+    setGender(currentGender);
+  }, []);
 
   useEffect(() => {
     setTimeout(() => setIsLoaded(true), 500);
