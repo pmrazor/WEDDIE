@@ -3,6 +3,7 @@ package com.ssafy.exhi.domain.shop.model.entity;
 import com.ssafy.exhi.base.BaseEntity;
 import com.ssafy.exhi.base.status.ErrorStatus;
 import com.ssafy.exhi.domain.ServiceType;
+import com.ssafy.exhi.domain.reservation.model.entity.Reservation;
 import com.ssafy.exhi.exception.ExceptionHandler;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -68,6 +69,10 @@ public class Shop extends BaseEntity {
     @Getter
     @Enumerated(EnumType.STRING)
     private ServiceType serviceType; // 숍은 서비스 타입을 가진다. (웨딩홀, 스튜디오, 드레스 등)
+
+    // 숍1 : 예약N 숍은 예약할 수 있다.
+    @OneToMany(mappedBy = "shop", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Reservation> reservations = new ArrayList<>();
 
     // 숍1: 아이템N 숍은 여러 개의 예약을 가진다.
     @OneToMany(mappedBy = "shop", cascade = CascadeType.ALL, orphanRemoval = true)

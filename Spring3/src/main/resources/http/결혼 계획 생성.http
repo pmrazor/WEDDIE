@@ -24,7 +24,7 @@ Authorization: Bearer {{maleAccessToken}}
 Content-Type: application/json
 
 {
-  "marriageDate": "2026-01-14",
+  "marriageDate": "2026-07-14",
   "budget": 3000000,
   "loveAnniversary": "2024-03-14"
 }
