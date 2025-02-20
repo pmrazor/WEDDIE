@@ -4,7 +4,22 @@ import { useNavigate } from "react-router-dom";
 import { Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import useTimeCapsuleStore from "@/store/timecapsule"; // 스토어 import 추가
+import useVirginRoadStore from "@/store/virginroad";
 import { useToast } from "@/hooks/use-toast"; // toast import 추가
+
+const serviceTypeMap = {
+  DRESS_SHOP: "드레스샵",
+  STUDIO: "스튜디오",
+  WEDDING_HALL: "웨딩홀",
+  MAKEUP_STUDIO: "메이크업",
+  SNAP: "스냅사진",
+  HANBOK: "한복",
+  TAILOR_SHOP: "맞춤복",
+  INVITATION: "청첩장",
+  FACIAL_CARE: "피부관리",
+  HONEYMOON: "신혼여행",
+  WEDDING_DAY: "웨딩데이",
+};
 
 const TimeCapsuleView = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -13,11 +28,35 @@ const TimeCapsuleView = () => {
   const { toast } = useToast();
   const { timeCapsules, isLoading, error, getTimeCapsule } =
     useTimeCapsuleStore();
+  const { plans, getVirginRoad } = useVirginRoadStore(); // Virgin Road 스토어에서 plans 가져오기
+
+  const getGenderFromLocalStorage = () => {
+    const authStorage = localStorage.getItem("auth-storage");
+    if (authStorage) {
+      const { state } = JSON.parse(authStorage);
+      return state.gender;
+    }
+    return null;
+  };
+
+  const getColorByGender = () => {
+    const gender = getGenderFromLocalStorage();
+    return gender === "Female" ? "#FFC0CC" : "#B3D8FF";
+  };
+
+  // 색상 상태 추가
+  const [themeColor, setThemeColor] = useState(getColorByGender());
 
   useEffect(() => {
-    const fetchTimeCapsules = async () => {
+    // 컴포넌트 마운트 시 색상 설정
+    setThemeColor(getColorByGender());
+  }, []);
+
+  useEffect(() => {
+    const fetchData = async () => {
       try {
         await getTimeCapsule();
+        await getVirginRoad(); // Virgin Road 데이터도 함께 가져오기
       } catch (error) {
         toast({
           title: "데이터 로드 실패",
@@ -26,9 +65,8 @@ const TimeCapsuleView = () => {
         });
       }
     };
-
-    fetchTimeCapsules();
-  }, [getTimeCapsule, toast]);
+    fetchData();
+  }, [getTimeCapsule, getVirginRoad, toast]);
 
   const variants = {
     enter: (direction) => ({
@@ -112,10 +150,17 @@ const TimeCapsuleView = () => {
   };
 
   const renderTimeCapsule = (timeCapsule) => {
+    const matchingPlan = plans.find(
+      (plan) => plan.planId === timeCapsule.planId
+    );
+    const serviceType = matchingPlan
+      ? serviceTypeMap[matchingPlan.serviceType]
+      : "웨딩";
+
     return (
       <div className="h-full flex flex-col px-4">
         <div className="text-2xl font-bold text-center mb-6">
-          나의 웨딩 타임캡슐
+          나의 {serviceType} 타임캡슐
         </div>
 
         <div className="flex-1 overflow-y-auto space-y-6">
@@ -173,7 +218,7 @@ const TimeCapsuleView = () => {
       </Button>
 
       {/* 메인 컨텐츠 영역 */}
-      <div className="flex-1 relative overflow-hidden mt-16">
+      <div className="flex-1 relative overflow-hidden mt-16 mb-16">
         <AnimatePresence initial={false} mode="wait" custom={direction}>
           <motion.div
             key={currentIndex}
@@ -194,26 +239,12 @@ const TimeCapsuleView = () => {
         </AnimatePresence>
       </div>
 
-      {/* 프로그레스 바 */}
-      <div className="px-4 mb-4">
-        <div className="flex justify-between">
-          {timeCapsules.map((_, index) => (
-            <div
-              key={index}
-              className={`h-2 flex-1 mx-1 rounded-full ${
-                index <= currentIndex ? "bg-primary" : "bg-gray-200"
-              }`}
-            />
-          ))}
-        </div>
-      </div>
-
       {/* 네비게이션 버튼 */}
       <div className="flex mt-auto pb-12 mb-1">
         {currentIndex > 0 && (
           <button
             onClick={handleBack}
-            className="w-full h-12 bg-gray-200 text-gray-800 transition-all duration-300 hover:bg-gray-300 active:scale-[0.98]"
+            className={`w-full h-12 bg-gray-200 text-gray-800 transition-all duration-300 hover:bg-gray-300 active:scale-[0.98]`}
           >
             이전
           </button>
@@ -221,7 +252,8 @@ const TimeCapsuleView = () => {
         {currentIndex < timeCapsules.length - 1 && (
           <button
             onClick={handleNext}
-            className="w-full h-12 bg-primary text-white transition-all duration-300 hover:bg-primary/90 active:scale-[0.98]"
+            className={`w-full h-12 text-white transition-all duration-300 hover:opacity-90 active:scale-[0.98]`}
+            style={{ backgroundColor: themeColor }} // 여기에 동적 색상 적용
           >
             다음
           </button>

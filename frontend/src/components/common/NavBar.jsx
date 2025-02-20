@@ -13,11 +13,11 @@ const BottomNav = () => {
             <Home className="h-6 w-6" />
           </Link>
         </Button>
-        {/* <Button variant="ghost" size="icon" asChild>
-          <Link to="/">
+        <Button variant="ghost" size="icon" asChild>
+          <Link to="/virginroad">
             <Bus className="h-6 w-6" />
           </Link>
-        </Button> */}
+        </Button>
         <Button variant="ghost" size="icon" asChild>
           <Link to="/shop/list">
             <Store className="h-6 w-6" />
@@ -28,11 +28,11 @@ const BottomNav = () => {
             <Heart className="h-6 w-6" />
           </Link>
         </Button>
-        <Button variant="ghost" size="icon" asChild>
+        {/* <Button variant="ghost" size="icon" asChild>
           <Link to="/mypage">
             <User className="h-6 w-6" />
           </Link>
-        </Button>
+        </Button> */}
       </div>
     </nav>
   );
