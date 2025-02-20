@@ -79,11 +79,11 @@ public class TimeCapsuleServiceImpl implements TimeCapsuleService {
         List<TimeCapsule> timeCapsules = timeCapsuleRepository.findAllByCoupleId(couple.getId());
 
         timeCapsules.forEach(timeCapsule -> {
-            if (timeCapsule.getBadImagePath() != null) {
-                timeCapsule.setBadImagePath(minioImageService.getImageUrl(timeCapsule.getBadImagePath()));
+            if (timeCapsule.getBadImage() != null) {
+                timeCapsule.setBadImagePath(minioImageService.getImageUrl(timeCapsule.getBadImage()));
             }
-            if (timeCapsule.getGoodImagePath() != null) {
-                timeCapsule.setGoodImagePath(minioImageService.getImageUrl(timeCapsule.getGoodImagePath()));
+            if (timeCapsule.getGoodImage() != null) {
+                timeCapsule.setGoodImagePath(minioImageService.getImageUrl(timeCapsule.getGoodImage()));
             }
         });
 
