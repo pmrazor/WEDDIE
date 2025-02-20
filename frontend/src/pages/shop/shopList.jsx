@@ -1,4 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom"; // 추가
+import useShopStore from "@/store/shop";
 import { ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -8,55 +10,74 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-const shopData = {
-  // 목업 데이터
-  type: "studio",
-  shops: [
-    {
-      id: 1,
-      name: "A 스토어",
-      description: "데이터1",
-      price: "₩100,000",
-      image: "https://via.placeholder.com/150",
-    },
-    {
-      id: 2,
-      name: "B 스토어",
-      description: "데이터2",
-      price: "₩110,000",
-      image: "https://via.placeholder.com/150",
-    },
-    {
-      id: 3,
-      name: "C 스토어",
-      description: "데이터3",
-      price: "₩112,000",
-      image: "https://via.placeholder.com/150",
-    },
-    {
-      id: 4,
-      name: "D 스토어",
-      description: "데이터4",
-      price: "₩130,000",
-      image: "https://via.placeholder.com/150",
-    },
-    {
-      id: 5,
-      name: "E 스토어",
-      description: "데이터5",
-      price: "₩150,000",
-      image: "https://via.placeholder.com/150",
-    },
-  ],
+// 서비스 타입 한글 매핑
+const serviceTypeMap = {
+  DRESS_SHOP: "드레스샵",
+  STUDIO: "스튜디오",
+  WEDDING_HALL: "웨딩홀",
+  MAKEUP_STUDIO: "메이크업",
+  SNAP: "스냅사진",
+  HANBOK: "한복",
+  TAILOR_SHOP: "맞춤복",
+  INVITATION: "청첩장",
+  FACIAL_CARE: "피부관리",
+  HONEYMOON: "신혼여행",
+  WEDDING_DAY: "웨딩데이",
+};
+
+// 가격 포맷 유틸리티 함수
+const formatPrice = (amount, currency = "KRW") => {
+  // currency 기본값 설정
+  if (!amount) {
+    return "가격 정보 없음";
+  }
+
+  try {
+    return new Intl.NumberFormat("ko-KR", {
+      style: "currency",
+      currency: currency,
+      maximumFractionDigits: 0,
+    }).format(amount);
+  } catch (error) {
+    console.error("Price formatting error:", error);
+    return "가격 정보 오류";
+  }
 };
 
 const ShopList = () => {
+  const navigate = useNavigate();
+  const { shops, isLoading, error, getShops, currentPage } = useShopStore();
   const [location, setLocation] = useState("지역별");
   const [sort, setSort] = useState("가격 낮은순");
 
+  useEffect(() => {
+    console.log("Component mounted, fetching shops...");
+    getShops({ page: 0, size: 10 });
+  }, []);
+
+  useEffect(() => {
+    console.log("Current shops data:", shops);
+  }, [shops]);
+
+  if (isLoading) {
+    console.log("Loading state...");
+    return <div>Loading...</div>;
+  }
+
+  if (error) {
+    console.log("Error state:", error);
+    return <div>Error: {error}</div>;
+  }
+
+  console.log("Rendering shops:", shops.contents);
+
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-2xl font-bold mb-6">{`${shopData.type} 예약하기`}</h1>
+      <h1 className="text-2xl font-bold mb-6">
+        {shops?.contents?.[0]?.serviceType
+          ? `${serviceTypeMap[shops.contents[0].serviceType]} 예약하기`
+          : "예약하기"}
+      </h1>
       <div className="flex justify-between mb-6">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -99,24 +120,41 @@ const ShopList = () => {
         </DropdownMenu>
       </div>
       <div className="space-y-4">
-        {shopData.shops.map((shop) => (
+        {shops?.contents?.map((shop) => (
           <div
             key={shop.id}
-            className="flex items-center border rounded-lg p-4 shadow-sm"
+            className="flex items-center border rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow cursor-pointer" // 스타일 추가
+            onClick={() => navigate(`/shop/${shop.id}`)} // 클릭 이벤트 추가
           >
             <div className="flex-1">
               <h2 className="text-xl font-semibold">{shop.name}</h2>
-              <p className="text-gray-600 mt-1">{shop.description}</p>
-              <p className="text-primary font-bold mt-2">{shop.price}</p>
+              <p className="text-gray-600 mt-1">
+                {shop.address.city} {shop.address.district}
+              </p>
+              <p className="text-primary font-bold mt-2">
+                {shop.minPrice
+                  ? formatPrice(shop.minPrice.amount)
+                  : "가격 정보 없음"}
+              </p>
             </div>
             <img
-              src={shop.image}
+              src={shop.mainImageUrl}
               alt={shop.name}
               className="w-24 h-24 object-cover rounded-md ml-4"
             />
           </div>
         ))}
       </div>
+      {shops && !shops.isLastPage && (
+        <div className="mt-4 text-center">
+          <Button
+            variant="outline"
+            onClick={() => getShops({ page: currentPage + 1, size: 10 })}
+          >
+            더 보기
+          </Button>
+        </div>
+      )}
     </div>
   );
 };
