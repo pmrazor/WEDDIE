@@ -3,7 +3,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Star, X } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import useTimeCapsuleStore from "@/store/timecapsule";
 
 const StarRating = ({ rating, onRatingChange }) => {
@@ -35,6 +35,28 @@ const TimeCapsuleModal = ({ isOpen, onClose, planId, planName, onSave }) => {
   });
   const [goodImagePreview, setGoodImagePreview] = useState(null);
   const [badImagePreview, setBadImagePreview] = useState(null);
+
+  const getGenderFromLocalStorage = () => {
+    const authStorage = localStorage.getItem("auth-storage");
+    if (authStorage) {
+      const { state } = JSON.parse(authStorage);
+      return state.gender;
+    }
+    return null;
+  };
+
+  const getColorByGender = () => {
+    const gender = getGenderFromLocalStorage();
+    return gender === "Female" ? "#FFC0CC" : "#B3D8FF";
+  };
+
+  // 색상 상태 추가
+  const [themeColor, setThemeColor] = useState(getColorByGender());
+
+  useEffect(() => {
+    // 컴포넌트 마운트 시 색상 설정
+    setThemeColor(getColorByGender());
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -215,6 +237,7 @@ const TimeCapsuleModal = ({ isOpen, onClose, planId, planName, onSave }) => {
             <Button
               onClick={() => onSave(timeCapsuleData)}
               className="px-4 py-2"
+              style={{ backgroundColor: themeColor }}
             >
               저장
             </Button>
