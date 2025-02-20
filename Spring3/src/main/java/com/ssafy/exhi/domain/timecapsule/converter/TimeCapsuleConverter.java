@@ -32,9 +32,9 @@ public class TimeCapsuleConverter {
                 .planId(timeCapsule.getPlan().getId())
                 .userId(timeCapsule.getUserId())
                 .goodContent(timeCapsule.getGoodContent())
-                .goodImage(timeCapsule.getGoodImage())
+                .goodImage(timeCapsule.getGoodImagePath())
                 .badContent(timeCapsule.getBadContent())
-                .badImage(timeCapsule.getBadImage())
+                .badImage(timeCapsule.getGoodImagePath())
                 .planGrade(timeCapsule.getPlanGrade())
                 .build();
     }
