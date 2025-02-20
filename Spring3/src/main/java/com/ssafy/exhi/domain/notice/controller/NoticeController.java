@@ -81,6 +81,39 @@ public class NoticeController {
         NoticeResponse.DetailResultDTO response = noticeService.getNotice(noticeId);
         return ResponseEntity.ok(ApiResponse.onSuccess(response));
     }
+    /**
+     * {
+     *     "isSuccess": true,
+     *     "code": "COMMON200",
+     *     "message": "성공입니다.",
+     *     "result": {
+     *         "contents": [
+     *
+     *             {
+     *                 "id": 5,
+     *                 "name": "국풍 한복",
+     *                 "mainImageUrl": "https://example.com/images/hanbok-main.jpg",
+     *                 "serviceType": "HANBOK",
+     *                 "address": {
+     *                     "city": "서울특별시",
+     *                     "district": "종로구",
+     *                     "latitude": 37.5725,
+     *                     "longitude": 126.9873
+     *                 },
+     *                 "minPrice": {
+     *                     "amount": 350000,
+     *                     "currency": "KRW"
+     *                 }
+     *             }
+     *         ],
+     *         "listSize": 5,
+     *         "isFirstPage": true,
+     *         "isLastPage": false,
+     *         "totalPages": 2,
+     *         "totalElements": 10
+     *     }
+     * }
+     */
 
     /**
      * 최신 공지를 카테고리별로 보여주는 API

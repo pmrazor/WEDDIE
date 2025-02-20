@@ -61,6 +61,9 @@ public enum ErrorStatus implements BaseErrorCode {
     // 투두 관련 에러
     TODO_NOT_FOUND(HttpStatus.NOT_FOUND, "TODO4001", "존재하지 않는 투두 계획입니다."),
 
+    // 숍 관련 에러
+    SHOP_NOT_FOUND(HttpStatus.NOT_FOUND, "TODO4001", "존재하지 않는 숍ID입니다."),
+
     // 알림 관련 에러
     NOTIFICATION_NOT_FOUND(HttpStatus.NOT_FOUND, "NOTIFICATION4001", "존재하지 않는 알람입니다."),
     NOTIFICATION_STATUS_ERROR(HttpStatus.NOT_FOUND, "NOTIFICATION4002", "종료된 알림입니다. 수정이 불가능 합니다."),
@@ -122,7 +125,9 @@ public enum ErrorStatus implements BaseErrorCode {
     ADVICE_API_ERROR(HttpStatus.BAD_REQUEST, "ADVICE4001", "조언 서비스 실행 중 오류가 발생했습니다"),
     INVALID_FILE_TYPE(HttpStatus.BAD_REQUEST, "FILE4001", "파일의 형식이 잘못되었습니다."),
     MAIL_NOT_FOUND(HttpStatus.BAD_REQUEST, "MAIL4001", "메일을 찾을 수 없습니다."),
-    TEMPLATE_NOT_FOUND(HttpStatus.BAD_REQUEST, "TEMPLATE4001", "템플릿을 찾을 수 없습니다.");
+    TEMPLATE_NOT_FOUND(HttpStatus.BAD_REQUEST, "TEMPLATE4001", "템플릿을 찾을 수 없습니다."),
+    SHOP_NOT_FOUND_ERROR(HttpStatus.BAD_REQUEST, "SHOP4001", "숍을 찾을 수 없습니다."),
+    ITEM_NOT_FOUND_ERROR(HttpStatus.BAD_REQUEST, "ITEM4001", "아이템을 찾을 수 없습니다.");
 
     private final HttpStatus httpStatus;
     private final String code;
