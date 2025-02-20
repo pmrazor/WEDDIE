@@ -14,7 +14,7 @@ const Splash = ({ onFinish }) => {
         if (response.isSuccess) {
           // 1초 후에 원하는 페이지로 라우팅
           setTimeout(() => {
-            navigate("/afteronboarding"); // 여기에 실제 이동하고 싶은 경로를 입력하세요
+            navigate("/main"); // 여기에 실제 이동하고 싶은 경로를 입력하세요
           }, 1000);
         }
       } catch (error) {
