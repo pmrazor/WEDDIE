@@ -200,7 +200,7 @@ const Main = () => {
                 key={plan.planId}
                 step={getStepName(plan.serviceType)}
                 serviceType={plan.serviceType}
-                ment={plan.tip.tipContent}
+                ment={plan.tip}
               />
             ))}
           </div>
@@ -218,7 +218,7 @@ const Main = () => {
                 key={plan.planId}
                 step={getStepName(plan.serviceType)}
                 serviceType={plan.serviceType}
-                ment={plan.tip.tipContent}
+                ment={plan.tip}
               />
             ))}
           </div>
@@ -237,7 +237,7 @@ const Main = () => {
                 key={plan.planId}
                 step={getStepName(plan.serviceType)}
                 serviceType={plan.serviceType}
-                ment={plan.tip.tipContent}
+                ment={plan.tip}
               />
             ))}
           </div>
