@@ -59,7 +59,7 @@ CONFIG = {
     'USER_K_RANGE': range(2, 31),
     'COUPLE_K_RANGE': range(2, 31),
 
-    'OPTIMIZE_WEIGHTS': True,
+    'OPTIMIZE_WEIGHTS': False,
     'PLOT_ELBOW_GRAPHS': True,
 
     # Elbow가 없으면 고정 K 사용
@@ -695,6 +695,12 @@ def get_cluster_centers(model, mtype, X):
     return None
 
 def save_cluster_centers(ctype, best_info, feat_names, wX):
+    """
+    ctype: 'user' or 'couple'
+    best_info: {'model':..., 'labels':..., 'scores':...}
+    feat_names: 해당 데이터의 특성명 (예: ['age','budget','mbti_ie',...])
+    wX: 가중치 적용된 최종 벡터
+    """
     model= best_info['model']
     if isinstance(model,KMeans):
         mtype='kmeans'
@@ -713,11 +719,20 @@ def save_cluster_centers(ctype, best_info, feat_names, wX):
         for fn,val in zip(feat_names,cvec):
             dd[fn]= float(val)
         out[f"cluster_{i}"]= dd
+
+    # user_cluster_centers.json, couple_cluster_centers.json 형식으로 저장
     fp= CONFIG['RESOURCE_DIR']/f"{ctype}_cluster_centers.json"
     with open(fp,'w',encoding='utf-8') as ff:
         json.dump(out,ff,indent=2,ensure_ascii=False)
 
 def save_assignments(ctype, ids, labels, wX, idname='userid'):
+    """
+    ctype: 'user' or 'couple'
+    ids: 사용자(또는 커플) id 배열
+    labels: 할당된 군집 라벨
+    wX: 가중치 적용된 feature 벡터
+    idname: 키 이름('userid' 또는 'coupleid')
+    """
     arr=[]
     for i, ident in enumerate(ids):
         arr.append({
@@ -742,7 +757,6 @@ def plot_3d_user_custom(user_wX, labels, title, outpath):
     x축: user_wX[:,0]  => 나이(스케일)
     y축: user_wX[:,1]  => 예산(스케일)
     z축: MBTI 4차원을 TSNE(1차원) => (N, )
-         (곱셈 미적용, 노이즈 크기 줄임)
     """
     if not CONFIG['VISUALIZATION']['ENABLED']:
         return
@@ -763,7 +777,7 @@ def plot_3d_user_custom(user_wX, labels, title, outpath):
     z_emb = tsn.fit_transform(mbti_part)  # shape (N,1)
     z_vals = z_emb[:,0]  # (N,)
 
-    # 노이즈
+    # 노이즈 (시각적 구분 위한 미세조정)
     np.random.seed(999)
     noise = np.random.normal(loc=0, scale=1.0, size=z_vals.shape)
     z_vals += noise
@@ -819,7 +833,7 @@ def plot_3d_couple_custom(cpl_wX, labels, title, outpath):
     z_emb= tsn_z.fit_transform(dd_part)
     z_vals= z_emb[:,0]
 
-    # 노이즈
+    # 노이즈 (시각적 구분 위한 미세조정)
     np.random.seed(777)
     noise2= np.random.normal(loc=0, scale=1.0, size=z_vals.shape)
     z_vals += noise2
@@ -843,7 +857,7 @@ def plot_3d_couple_custom(cpl_wX, labels, title, outpath):
     ax.set_ylabel("Budget (scaled)")
     ax.set_zlabel("Date+Dist TSNE(1D)")
     
-    # y축(budget) 범위를 0~14로 제한
+    # 예시로 y축 범위를 0~14 정도로 제한
     ax.set_ylim(0, 14)
     
     ax.view_init(elev=25, azim=45)
@@ -942,21 +956,30 @@ def main():
 
     # 10) 결과 저장
     def _save_scaler_params(ctype, scdict):
+        """
+        수정된 부분:
+        스케일러가 None이 아닐 때만 tmp 딕셔너리를 생성하고,
+        최종적으로 dct[k] = tmp 를 통해 결과를 저장하도록 수정.
+        """
         dct={}
-        for k,sc in scdict.items():
+        for k, sc in scdict.items():
             if sc is None:
-                dct[k]=None
+                dct[k] = None
             else:
                 tmp={}
                 if hasattr(sc,'mean_'):
-                    tmp['mean_']= sc.mean_.tolist()
+                    tmp['mean_'] = sc.mean_.tolist()
                 if hasattr(sc,'var_'):
-                    tmp['var_']= sc.var_.tolist()
+                    tmp['var_']  = sc.var_.tolist()
                 if hasattr(sc,'scale_'):
                     tmp['scale_']= sc.scale_.tolist()
                 if hasattr(sc,'min_'):
-                    tmp['min_']= sc.min_.tolist()
-                dct[k]= tmp
+                    tmp['min_']  = sc.min_.tolist()
+                if hasattr(sc,'data_min_'):
+                    tmp['data_min_'] = sc.data_min_.tolist()
+                if hasattr(sc,'data_max_'):
+                    tmp['data_max_'] = sc.data_max_.tolist()
+                dct[k] = tmp
         fp= CONFIG['RESOURCE_DIR']/f"{ctype}_scaler_params.json"
         with open(fp,'w',encoding='utf-8') as ff:
             json.dump(dct,ff,indent=2,ensure_ascii=False)
@@ -993,7 +1016,7 @@ def main():
 
     # 12) 맞춤 3D 시각화
     if CONFIG['VISUALIZATION']['ENABLED']:
-        # 사용자 x=나이, y=예산, z=MBTI(TSNE(1D))
+        # 사용자 x=나이, y=예산, z=MBTI(TSNE)
         u3d_path= CONFIG['RESOURCE_DIR']/ CONFIG['VISUALIZATION']['USER_FEATURES']['filename']
         plot_3d_user_custom(user_wX, user_labels, CONFIG['VISUALIZATION']['USER_FEATURES']['title'], u3d_path)
 

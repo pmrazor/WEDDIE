@@ -38,14 +38,13 @@ public class ShopController {
         return ResponseEntity.ok().body(ApiResponse.onSuccess(response));
     }
 
-    // 개인 추천용 샵 (2개)
     @GetMapping("/recommend")
     public ResponseEntity<?> getRecommendShop(
             @RequestHeader(name = "Authorization") String accessToken,
             Pageable pageable
     ) {
         Integer userId = jwtUtil.getUserId(accessToken);
-//        Page<Shop> response = shopService.getRecommendShop(userId, pageable);
-        return ResponseEntity.ok().body(ApiResponse.onSuccess(null));
+        ShopResponse.PageDTO response = shopService.getRecommendShop(userId, pageable);
+        return ResponseEntity.ok().body(ApiResponse.onSuccess(response));
     }
 }
