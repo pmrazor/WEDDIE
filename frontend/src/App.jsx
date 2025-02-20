@@ -38,14 +38,14 @@ function App() {
         <Route path="/beforeonboarding" element={<BeforeOnBoarding />} />
         <Route path="/afteronboarding" element={<AfterOnBoarding />} />
         <Route path="/onboarding" element={<Onboarding />} />
-        {/* <Route path="/virginroad" element={<VirginRoad />} />
+        {/* <Route path="/virginroad" element={<VirginRoad />} /> */}
         <Route path="/virginroad/splash" element={<VirginRoadSplash />} />
-        <Route path="/virginroad/:planId" element={<VirginRoadDetail />} />
-        <Route path="/timecapsule/:nodeId" element={<TimeCapsule />} /> */}
+        {/* <Route path="/virginroad/:planId" element={<VirginRoadDetail />} /> */}
+        {/* <Route path="/timecapsule/:nodeId" element={<TimeCapsule />} /> */}
         <Route path="/couple" element={<CouplePage />} />
         <Route path="/api-test" element={<ApiTest />} />
         <Route path="/shop/list" element={<ShopList />} />
-        <Route path="/shop/detail" element={<ShopDetail />} />
+        <Route path="/shop/:shopId" element={<ShopDetail />} />
         <Route path="/main" element={<Main />} />
         <Route path="/virginroad" element={<VirginRoad2 />} />
         <Route path="/timecapsule" element={<WatchTimecapsule />} />
