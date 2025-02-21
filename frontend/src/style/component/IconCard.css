@@ -1,0 +1,71 @@
+body * {
+  /* border: 1px solid black; */
+}
+
+.IconCard {
+  /* border-radius: 5px; */
+  /* border: 5px solid; */
+  /* padding: 30px ; */
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.IconCard .OnBoarding {
+  /* border: 5px solid black; */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100vw;
+  /* padding-block-start: 3vh; */
+}
+
+
+.IconCard .icon-area {
+  /* border: 5px solid; */
+  border-radius: 5px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  padding: 5%;
+}
+
+.IconCard .icon-area img {
+  max-width: 100%; /* 이미지 크기를 부모 크기에 맞게 설정 */
+  height: auto;    /* 비율에 맞게 자동 조정 */
+  max-height: 150px; /* 이미지의 최대 높이 제한 */
+}
+
+.IconCard .text-field {
+  display: flex;
+  flex-direction: column;
+  border-radius: 5px;
+  /* border: 5px solid; */
+  width: 100%; /* 📌 div 내에서 80% 차지 */
+  align-self: flex-start; /* 📌 왼쪽 정렬 */
+  padding: 5px;
+}
+
+.IconCard .head-text {
+  border-radius: 5px;
+  padding-block: 5px;
+  font-size: large;
+  font-weight: bold;
+}
+
+/* 반응형: 태블릿 및 데스크탑 대응 */
+@media (min-width: 768px) {
+  .cheatframe {
+    width: 70%; /* 화면 크기 커질 때 너비 조정 */
+    max-width: 500px; /* 최대 너비 제한 */
+    flex-direction: row; /* 화면 크기가 커지면 가로로 배치 */
+    justify-content: flex-start; /* 가로 배치 시 텍스트와 아이콘 왼쪽 정렬 */
+    align-items: center; /* 세로 중앙 정렬 */
+    gap: 20px; /* 카드 내의 간격 증가 */
+  }
+
+  .card-container {
+    justify-content: flex-start; /* 카드들을 왼쪽 정렬 */
+  }
+}

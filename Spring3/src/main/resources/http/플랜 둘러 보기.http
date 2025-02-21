@@ -1,0 +1,107 @@
+### 환경 변수
+@base_url = {{base_url}}
+@maleAccessToken = {{maleAccessToken}}
+@femaleAccessToken = {{femaleAccessToken}}
+@maleLoginId = {{maleLoginId}}
+@femaleLoginId = {{femaleLoginId}}
+@weddingPlanId = {{weddingPlanId}}
+
+### 남자 로그인
+POST {{base_url}}/api/auth/login
+Content-Type: application/json
+
+{
+  "loginId": "{{maleLoginId}}",
+  "password": "q!w2e3r4t5"
+}
+
+> {%
+    client.global.set("maleAccessToken", response.body.result.accessToken);
+    client.test("Validate", function () {
+        client.assert(response.status === 201, "Response status is not 200");
+    });
+%}
+
+### 여성 로그인
+POST {{base_url}}/api/auth/login
+Content-Type: application/json
+
+{
+    "loginId": "{{femaleLoginId}}",
+    "password": "q!w2e3r4t5"
+}
+
+> {%
+    client.global.set("femaleAccessToken", response.body.result.accessToken);
+    client.test("Validate", function () {
+        client.assert(response.status === 201, "Response status is not 200");
+    });
+%}
+
+### 시간에 따른 플랜과 팁 조회
+GET {{base_url}}/api/plan/main
+Authorization: Bearer {{femaleAccessToken}}
+
+> {%
+    client.test("Validate", function () {
+        client.assert(response.status === 200, "Response status is not 200");
+    });
+%}
+
+### 시간 설정 (추가)
+POST {{base_url}}/api/time/plus
+Content-Type: application/json
+
+500
+
+> {%
+    client.test("Validate", function () {
+        client.assert(response.status === 200, "Response status is not 200");
+    });
+%}
+
+
+
+### 타임캡슐 작성
+POST {{base_url}}/api/timeCapsule
+Authorization: Bearer {{maleAccessToken}}
+Content-Type: multipart/form-data; boundary=boundary
+
+--boundary
+Content-Disposition: form-data; name="planId"
+
+{{weddingPlanId}}
+
+--boundary
+Content-Disposition: form-data; name="goodContent"
+
+분위기가 좋았어요
+--boundary
+Content-Disposition: form-data; name="goodImageFile"; filename="cat.png"
+Content-Type: image/png
+
+< cat.jpg
+--boundary
+Content-Disposition: form-data; name="badContent"
+
+남친이 너무 귀여워서 짜증났음
+--boundary
+Content-Disposition: form-data; name="badImageFile"; filename="cat.png"
+Content-Type: image/png
+
+< cat.jpg
+--boundary
+Content-Disposition: form-data; name="planGrade"
+
+5
+--boundary--
+
+### 타임캡슐 조회
+
+< {%
+    console.log(client.global.get("weddingPlanId"))
+
+%}
+
+GET {{base_url}}/api/timeCapsule
+Authorization: Bearer {{maleAccessToken}}

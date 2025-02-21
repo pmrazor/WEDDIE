@@ -1,0 +1,44 @@
+@femaleId = {{femaleId}}
+@maleId = {{maleId}}
+@maleAccessToken = {{maleAccessToken}}
+
+### 커플 바로 맺기 v2(테스트용)
+POST {{base_url}}/api/couple
+Authorization: Bearer {{maleAccessToken}}
+Content-Type: application/json
+
+{
+    "oppositeId": {{femaleId}},
+    "coupleName": "coupleName"
+}
+
+> {%
+    client.test("Validate", function () {
+        client.assert(response.status === 200, "Response status is not 200");
+    });
+%}
+
+### 커플 업데이트 (결혼 예정일 & 예산)
+PATCH {{base_url}}/api/couple
+Authorization: Bearer {{maleAccessToken}}
+Content-Type: application/json
+
+{
+  "marriageDate": "2026-07-14",
+  "budget": 3000000,
+  "loveAnniversary": "2024-03-14"
+}
+
+> {%
+    client.test("Validate", function () {
+        client.assert(response.status === 200, "Response status is not 200");
+    });
+%}
+
+###
+GET {{base_url}}/api/recommendation/addUser
+Authorization: Bearer {{maleAccessToken}}
+
+###
+GET {{base_url}}/api/recommendation/recommendPlans
+Authorization: Bearer {{maleAccessToken}}

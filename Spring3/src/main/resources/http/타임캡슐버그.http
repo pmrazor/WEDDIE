@@ -1,0 +1,273 @@
+
+### 남자 회원가입
+< {%
+    client.global.set("maleLoginId", $random.name.firstName);
+%}
+POST {{base_url}}/api/users
+Content-Type: application/json
+
+{
+  "loginId": "{{maleLoginId}}",
+  "password": "q!w2e3r4t5",
+  "name": "박준호",
+  "provider": "LOCAL",
+  "profileImg": ""
+}
+
+> {%
+    client.global.set("maleId", response.body.result.id);
+    client.test("Validate", function () {
+        client.assert(response.status === 201, "Response status is not 200");
+    });
+%}
+
+### 남자 로그인
+POST {{base_url}}/api/auth/login
+Content-Type: application/json
+
+{
+  "loginId": "{{maleLoginId}}",
+  "password": "q!w2e3r4t5"
+}
+
+> {%
+    client.global.set("maleAccessToken", response.body.result.accessToken);
+    client.test("Validate", function () {
+        client.assert(response.status === 201, "Response status is not 200");
+    });
+%}
+
+### 남자 온보딩
+POST {{base_url}}/api/users/detail
+Content-Type: application/json
+Authorization: Bearer {{maleAccessToken}}
+
+{
+  "age": 11,
+  "gender": "MALE",
+  "phone": "010-1231-1232",
+  "mbti": "INFJ"
+}
+
+> {%
+    client.test("Validate", function () {
+        client.assert(response.status === 201, "Response status is not 200");
+    });
+%}
+
+### 여자 회원가입
+< {%
+    client.global.set("femaleLoginId", $random.name.firstName);
+%}
+
+POST {{base_url}}/api/users
+Content-Type: application/json
+
+{
+  "loginId": "{{femaleLoginId}}",
+  "password": "q!w2e3r4t5",
+  "name": "박준순",
+  "provider": "LOCAL",
+  "profileImg": ""
+}
+
+> {%
+    client.global.set("femaleId", response.body.result.id);
+    client.test("Validate", function () {
+        client.assert(response.status === 201, "Response status is not 200");
+    });
+%}
+
+### 여자 로그인
+POST {{base_url}}/api/auth/login
+Content-Type: application/json
+
+{
+  "loginId": "{{femaleLoginId}}",
+  "password": "q!w2e3r4t5"
+}
+
+> {%
+    client.global.set("femaleAccessToken", response.body.result.accessToken);
+    client.test("Validate", function () {
+        client.assert(response.status === 201, "Response status is not 200");
+    });
+%}
+
+### 여자 온보딩
+POST {{base_url}}/api/users/detail
+Content-Type: application/json
+Authorization: Bearer {{femaleAccessToken}}
+
+{
+  "age": 11,
+  "gender": "FEMALE",
+  "phone": "010-1231-1232",
+  "mbti": "INFJ"
+}
+
+> {%
+    client.test("Validate", function () {
+        client.assert(response.status === 201, "Response status is not 200");
+    });
+%}
+
+### 커플 바로 맺기 v2(테스트용)
+POST {{base_url}}/api/couple
+Authorization: Bearer {{maleAccessToken}}
+Content-Type: application/json
+
+{
+    "oppositeId": {{femaleId}},
+    "coupleName": "coupleName"
+}
+
+> {%
+    client.test("Validate", function () {
+        client.assert(response.status === 200, "Response status is not 200");
+    });
+%}
+
+### 커플 업데이트 (결혼 예정일 & 예산)
+PATCH {{base_url}}/api/couple
+Authorization: Bearer {{maleAccessToken}}
+Content-Type: application/json
+
+{
+  "marriageDate": "2026-07-14",
+  "budget": 3000000,
+  "loveAnniversary": "2024-03-14"
+}
+
+> {%
+    client.test("Validate", function () {
+        client.assert(response.status === 200, "Response status is not 200");
+    });
+%}
+
+###
+GET {{base_url}}/api/recommendation/addUser
+Authorization: Bearer {{maleAccessToken}}
+
+### AI 버진로드 생성
+GET {{base_url}}/api/recommendation/recommendPlans
+Authorization: Bearer {{maleAccessToken}}
+
+> {%
+    client.test("Validate", function () {
+        client.assert(response.status === 200, "Response status is not 200");
+    });
+    if (response.body) {
+        let weddingPlan = response.body.result.plans.find(plan => plan.serviceType === "WEDDING_DAY");
+        console.log(`Honeymoon planId ${weddingPlan.planId} has been saved to environment`);
+        if (weddingPlan) {
+            client.global.set("weddingPlanId", weddingPlan.planId);
+            console.log(`Honeymoon planId ${weddingPlan.planId} has been saved to environment`);
+        }
+    }
+
+%}
+
+### 시간 이동
+POST {{base_url}}/api/time/set
+Content-Type: application/json
+
+"2026-07-14T14:30:00"
+
+> {%
+    client.test("Validate", function () {
+        client.assert(response.status === 200, "Response status is not 200");
+    });
+%}
+
+### 타임캡슐 작성
+POST {{base_url}}/api/timeCapsule
+Authorization: Bearer {{maleAccessToken}}
+Content-Type: multipart/form-data; boundary=boundary
+
+--boundary
+Content-Disposition: form-data; name="planId"
+
+{{weddingPlanId}}
+
+--boundary
+Content-Disposition: form-data; name="goodContent"
+
+분위기가 좋았어요
+--boundary
+Content-Disposition: form-data; name="goodImageFile"; filename="cat.png"
+Content-Type: image/png
+
+< cat.jpg
+--boundary
+Content-Disposition: form-data; name="badContent"
+
+남친이 너무 귀여워서 짜증났음
+--boundary
+Content-Disposition: form-data; name="badImageFile"; filename="cat.png"
+Content-Type: image/png
+
+< cat.jpg
+--boundary
+Content-Disposition: form-data; name="planGrade"
+
+5
+--boundary--
+
+### 여자 타임캡슐 작성
+POST {{base_url}}/api/timeCapsule
+Authorization: Bearer {{femaleAccessToken}}
+Content-Type: multipart/form-data; boundary=boundary
+
+--boundary
+Content-Disposition: form-data; name="planId"
+
+{{weddingPlanId}}
+
+--boundary
+Content-Disposition: form-data; name="goodContent"
+
+분위기가 좋았어요
+--boundary
+Content-Disposition: form-data; name="goodImageFile"; filename="cat.png"
+Content-Type: image/png
+
+< cat.jpg
+--boundary
+Content-Disposition: form-data; name="badContent"
+
+남친이 너무 귀여워서 짜증났음
+--boundary
+Content-Disposition: form-data; name="badImageFile"; filename="cat.png"
+Content-Type: image/png
+
+< cat.jpg
+--boundary
+Content-Disposition: form-data; name="planGrade"
+
+5
+--boundary--
+
+### 메인 화면 이동
+GET {{base_url}}/api/plan/main
+Authorization: Bearer {{femaleAccessToken}}
+
+### d
+POST {{base_url}}/api/time/set
+Content-Type: application/json
+
+"2026-07-14T00:00"
+
+### 메인 화면 이동
+GET {{base_url}}/api/plan/main
+Authorization: Bearer {{femaleAccessToken}}
+
+### d
+POST {{base_url}}/api/time/set
+Content-Type: application/json
+
+"2026-04-05T00:00"
+
+### ㅇ
+POST {{base_url}}/api/plan/advice/true
+Authorization: Bearer {{femaleAccessToken}}

@@ -1,0 +1,26 @@
+.AfterOnBoarding {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 5%;
+}
+
+.Advertisement {
+
+}
+
+.D-Day {
+  margin-block: 5%;
+  display: flex;
+  justify-content: space-evenly;
+}
+
+.to-virgin-road {
+  padding: 0% 2%;
+  display: flex;
+  flex-direction: column;
+}
+
+.Button {
+  padding-block: 20px;
+  border-radius: 0px;
+}

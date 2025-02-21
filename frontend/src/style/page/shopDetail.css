@@ -1,0 +1,28 @@
+.custom-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+}
+
+.pill-container {
+  display: flex;
+  background-color: #f0f0f0;
+  overflow: hidden;
+}
+
+.pill-container button {
+  border: none;
+  background-color: transparent;
+  padding: 4px 8px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.pill-container button:hover {
+  background-color: #e0e0e0;
+}
+
+.rbc-toolbar-label {
+  font-weight: bold;
+}

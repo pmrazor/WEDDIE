@@ -1,0 +1,24 @@
+{
+  "user_results": {
+    "best_model_type": "kmeans",
+    "scores": {
+      "composite": 0.7574995886968503,
+      "silhouette": 0.7464280454843326,
+      "davies_bouldin": 0.40721465100768295,
+      "calinski_harabasz": 11589.24295934296,
+      "dunn_index": 0.33044625626628815
+    },
+    "optimal_k": 10
+  },
+  "couple_results": {
+    "best_model_type": "kmeans",
+    "scores": {
+      "composite": 0.5825429285396342,
+      "silhouette": 0.6108941272594023,
+      "davies_bouldin": 0.5683548902405473,
+      "calinski_harabasz": 4318.365948163538,
+      "dunn_index": 0.2323731309837093
+    },
+    "optimal_k": 8
+  }
+}

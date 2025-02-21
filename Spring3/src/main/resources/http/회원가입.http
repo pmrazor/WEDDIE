@@ -1,0 +1,113 @@
+
+### 남자 회원가입
+< {%
+    client.global.set("maleLoginId", $random.name.firstName);
+%}
+POST {{base_url}}/api/users
+Content-Type: application/json
+
+{
+  "loginId": "{{maleLoginId}}",
+  "password": "q!w2e3r4t5",
+  "name": "박준호",
+  "provider": "LOCAL",
+  "profileImg": ""
+}
+
+> {%
+    client.global.set("maleId", response.body.result.id);
+    client.test("Validate", function () {
+        client.assert(response.status === 201, "Response status is not 200");
+    });
+%}
+
+### 남자 로그인
+POST {{base_url}}/api/auth/login
+Content-Type: application/json
+
+{
+  "loginId": "{{maleLoginId}}",
+  "password": "q!w2e3r4t5"
+}
+
+> {%
+    client.global.set("maleAccessToken", response.body.result.accessToken);
+    client.test("Validate", function () {
+        client.assert(response.status === 201, "Response status is not 200");
+    });
+%}
+
+### 남자 온보딩
+POST {{base_url}}/api/users/detail
+Content-Type: application/json
+Authorization: Bearer {{maleAccessToken}}
+
+{
+  "age": 11,
+  "gender": "MALE",
+  "phone": "010-1231-1232",
+  "mbti": "INFJ"
+}
+
+> {%
+    client.test("Validate", function () {
+        client.assert(response.status === 201, "Response status is not 200");
+    });
+%}
+
+### 여자 회원가입
+< {%
+    client.global.set("femaleLoginId", $random.name.firstName);
+%}
+
+POST {{base_url}}/api/users
+Content-Type: application/json
+
+{
+  "loginId": "{{femaleLoginId}}",
+  "password": "q!w2e3r4t5",
+  "name": "박준순",
+  "provider": "LOCAL",
+  "profileImg": ""
+}
+
+> {%
+    client.global.set("femaleId", response.body.result.id);
+    client.test("Validate", function () {
+        client.assert(response.status === 201, "Response status is not 200");
+    });
+%}
+
+### 여자 로그인
+POST {{base_url}}/api/auth/login
+Content-Type: application/json
+
+{
+  "loginId": "{{femaleLoginId}}",
+  "password": "q!w2e3r4t5"
+}
+
+> {%
+    client.global.set("femaleAccessToken", response.body.result.accessToken);
+    client.test("Validate", function () {
+        client.assert(response.status === 201, "Response status is not 200");
+    });
+%}
+
+### 여자 온보딩
+POST {{base_url}}/api/users/detail
+Content-Type: application/json
+Authorization: Bearer {{femaleAccessToken}}
+
+{
+  "age": 11,
+  "gender": "FEMALE",
+  "phone": "010-1231-1232",
+  "mbti": "INFJ"
+}
+
+> {%
+    client.test("Validate", function () {
+        client.assert(response.status === 201, "Response status is not 200");
+    });
+%}
