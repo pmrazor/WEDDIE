@@ -74,6 +74,8 @@ com.ssafy.weddie/
 │   └── ...
 ├── exception/             # 예외 처리
 └── util/                  # 유틸리티 클래스
+```
+
 
 ## 📌 패키지별 역할
 - controller/ - API 엔드포인트 정의 및 요청/응답 처리
