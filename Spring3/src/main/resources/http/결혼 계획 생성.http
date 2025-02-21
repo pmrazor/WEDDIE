@@ -1,0 +1,80 @@
+@femaleId = {{femaleId}}
+@maleId = {{maleId}}
+@maleAccessToken = {{maleAccessToken}}
+
+### 커플 바로 맺기 v2(테스트용)
+POST {{base_url}}/api/couple
+Authorization: Bearer {{maleAccessToken}}
+Content-Type: application/json
+
+{
+    "oppositeId": {{femaleId}},
+    "coupleName": "coupleName"
+}
+
+> {%
+    client.test("Validate", function () {
+        client.assert(response.status === 200, "Response status is not 200");
+    });
+%}
+
+### 커플 업데이트 (결혼 예정일 & 예산)
+PATCH {{base_url}}/api/couple
+Authorization: Bearer {{maleAccessToken}}
+Content-Type: application/json
+
+{
+  "marriageDate": "2025-07-14",
+  "budget": 3000000,
+  "loveAnniversary": "2024-03-14"
+}
+
+> {%
+    client.test("Validate", function () {
+        client.assert(response.status === 200, "Response status is not 200");
+    });
+%}
+
+### 결혼 계획 생성
+POST {{base_url}}/api/virginRoad
+Authorization: Bearer {{maleAccessToken}}
+Content-Type: application/json
+
+{
+    "userId": {{maleId}},
+    "plans": [
+        {
+            "shopName": "asdasd",
+            "serviceType": "WEDDING_HALL",
+            "visible": true
+        },
+        {
+            "shopName": "asdasd",
+            "serviceType": "HONEYMOON",
+            "visible": true
+        },
+        {
+            "shopName": "asdasd",
+            "serviceType": "WEDDING_DAY",
+            "visible": true
+        }
+    ]
+}
+
+> {%
+    client.test("Validate", function () {
+        client.assert(response.status === 201, "Response status is not 200");
+    });
+    if (response.body.body) {
+        let weddingPlan = response.body.body.result.plans.find(plan => plan.serviceType === "WEDDING_DAY");
+        if (weddingPlan) {
+            client.global.set("weddingPlanId", weddingPlan.planId);
+            console.log(`Honeymoon planId ${weddingPlan.planId} has been saved to environment`);
+        }
+    }
+
+%}
+
+###
+GET http://localhost:8080/api/plan/main
+Authorization: Bearer {{maleAccessToken}}
