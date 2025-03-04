@@ -20,4 +20,5 @@ public class BaseEntity {
 
     @LastModifiedDate
     private LocalDateTime updatedAt;
+    // 임시
 }
