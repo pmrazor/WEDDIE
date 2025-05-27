@@ -1,0 +1,148 @@
+.VirginRoadDetail {
+  /* border: 1px solid; */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.VirginRoadDetail .header {
+  /* border: 1px solid; */
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding: 0 10px;
+  font-weight: bold;
+}
+
+.VirginRoadDetail .header .text {
+  /* border: 1px solid; */
+  display: flex;
+  flex: 1;
+  justify-content: center;
+  align-items: center;
+}
+
+.VirginRoadDetail .header .hamburger {
+  display: flex;
+  padding: 3%;
+}
+
+.VirginRoadDetail .budget {
+  /* border: 1px solid; */
+  border-radius: 15px;
+  width: 95vw;
+  height: 30vh;
+  background-size: cover; /* 가로/세로 비율을 유지하면서 크기를 맞춤 */
+  background-position: center center; /* 이미지 중앙 정렬 */
+  background-repeat: no-repeat; /* 반복 방지 */
+  display: flex;
+  justify-content: center;
+}
+
+.VirginRoadDetail .budget.default {
+  background-image: url("@/assets/VirginRoadDetail/d_budget_background.svg");
+}
+
+.VirginRoadDetail .budget.female {
+  background-image: url("@/assets/VirginRoadDetail/w_budget_background.svg");
+}
+
+.VirginRoadDetail .budget.male{
+  background-image: url("@/assets/VirginRoadDetail/m_budget_background.svg");
+}
+
+.VirginRoadDetail .budget .text-area {
+  /* border: 1px solid; */
+  width: 90%;
+  font-weight: bold;
+  font-size: 150%;
+  display: flex;
+  flex-direction: column; 
+  justify-content: flex-start; /* 구역 내 가장 위 */ 
+  align-items: flex-start; /* 구역 내 가장 왼쪽*/
+}
+
+.VirginRoadDetail .tips {
+  width : 95%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.VirginRoadDetail .checklist-area {
+  /* border: 1px solid; */
+  width: 95%;
+  display: flex;
+  flex-direction: column;
+  padding: 10px;
+  background-color: var(--W_PRIMARY_EXTRALIGHT);
+  border-radius: 15px;
+}
+
+.VirginRoadDetail .checklist-area .checklist {
+  /* border: 1px solid; */
+  border-radius: 10px;
+  background-color: white;
+  padding: 3% 2%;
+}
+
+.VirginRoadDetail .checklist-header {
+  /* border: 1px solid; */
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  justify-content: space-between;
+  /* padding-block: 2%; */
+  padding-inline: 5%;
+}
+
+.VirginRoadDetail .checklist-header button {
+  /* border: 1px solid; */
+  border-radius: 50px;
+  /* width: 10%; */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 5px 10px;
+}
+
+.VirginRoadDetail .add-todo-form {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  gap: 5px;
+  padding-bottom: 2%;
+}
+
+.VirginRoadDetail .add-todo-form input {
+  width: 95%;
+  display: flex;
+  flex: 1;
+  padding-block: 2%;
+  padding-left: 3%;
+  border-radius: 5px;
+}
+
+.VirginRoadDetail .add-todo-form .check-box {
+  /* border: 1px solid black; */
+  display: flex;
+  justify-content: space-between;
+  width: 90%;
+}
+
+.VirginRoadDetail .add-todo-form .check-box .check-box-container {
+  display: flex;
+  flex-direction: row;
+  gap: 5px;
+}
+
+.VirginRoadDetail .add-todo-form .check-box .Button {
+  padding: 0px;
+}

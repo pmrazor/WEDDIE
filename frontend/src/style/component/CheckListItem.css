@@ -1,0 +1,33 @@
+.CheckListItem {
+  /* border: 1px solid; */
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  /* justify-content: space-between; */
+}
+
+.CheckListItem .text-area {
+  flex: 1;
+}
+
+.CheckListItem .isFinished {
+  width: 10%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  /* padding: 10px 20px; */
+}
+
+.CheckListItem .content {
+  /* border: 1px solid; */
+  display: flex;
+  align-items: center;
+  flex: 1;
+  padding-left: 5%;
+  /* justify-content: center; */
+}
+
+.CheckListItem button {
+  width: 15%;
+}
